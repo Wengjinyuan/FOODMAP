@@ -162,3 +162,22 @@
 /* ── Empty State ── */
 .empty-state { text-align: center; padding: 60rpx 0; color: #9E8A83; font-size: 26rpx; }
 .empty-hint { display: block; margin-top: 8rpx; font-size: 22rpx; }
+
+/* ── Search History Dropdown ── */
+.history-drop {
+  position: absolute; top: 158rpx; left: 20rpx; right: 88rpx;
+  background: #FFFFFF; border: 3rpx solid #4A3A35;
+  border-radius: 14rpx; box-shadow: 4rpx 4rpx 0rpx #4A3A35;
+  z-index: 12; padding: 12rpx 0; max-height: 400rpx; overflow-y: auto;
+}
+.history-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8rpx 24rpx 12rpx;
+}
+.history-header text:first-child { font-size: 24rpx; font-weight: 600; color: #4A3A35; }
+.history-clear { font-size: 22rpx; color: #FF6B6B; }
+.history-item {
+  padding: 14rpx 24rpx; font-size: 26rpx; color: #4A3A35;
+  border-bottom: 1rpx solid #F0EBE5;
+}
+.history-item:active { background: #FFF9E6; }

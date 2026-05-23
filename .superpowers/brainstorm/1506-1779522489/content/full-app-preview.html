@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>个人传送网 — 全页面预览</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ═══ 元气手绘探店风 ═══ */
+  :root {
+    --cream: #FFFDF7;
+    --brown: #4A3A35;
+    --yellow: #FFD23F;
+    --sub: #9E8A83;
+    --hint: #C4B5AF;
+    --red: #FF6B6B;
+    --border: 3px solid #4A3A35;
+    --shadow: 4px 4px 0px #4A3A35;
+    --radius: 14px;
+    --dash: #E8D5C8;
+  }
+
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #E8E8ED;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+  }
+
+  .phone {
+    width: 390px; height: 844px;
+    background: var(--cream);
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    border: var(--border);
+    box-shadow: 0 24px 80px rgba(0,0,0,0.15);
+  }
+
+  .page { position: absolute; inset: 0; display: none; flex-direction: column; }
+  .page.active { display: flex; }
+
+  /* ═══ STATUS BAR ═══ */
+  .status-bar {
+    height: 48px; display: flex; justify-content: space-between;
+    align-items: center; padding: 14px 24px 0; font-size: 12px;
+    font-weight: 700; color: var(--brown); flex-shrink: 0;
+  }
+
+  /* ═══ HOME PAGE ═══ */
+  #homePage { display: flex; }
+  .map-area {
+    position: absolute; inset: 0;
+    background: #F5F0E8;
+    background-image:
+      linear-gradient(rgba(180,170,160,0.12) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(180,170,160,0.12) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  .road { position: absolute; background: rgba(170,160,148,0.25); }
+  .road.rh1 { top: 170px; left: 0; right: 0; height: 5px; }
+  .road.rh2 { top: 390px; left: 0; right: 0; height: 3px; }
+  .road.rv1 { left: 180px; top: 0; bottom: 0; width: 5px; }
+  .road.rv2 { left: 290px; top: 0; bottom: 200px; width: 3px; }
+  .park1 { position: absolute; top: 440px; left: 30px; width: 90px; height: 60px; background: rgba(150,190,140,0.2); border-radius: 8px; }
+  .park2 { position: absolute; top: 110px; right: 60px; width: 60px; height: 60px; background: rgba(150,190,140,0.2); border-radius: 50%; }
+
+  /* Marker pins */
+  .pin {
+    position: absolute; transform: translate(-50%, -100%);
+    width: 28px; height: 34px; cursor: pointer; z-index: 2;
+    transition: transform 0.15s;
+  }
+  .pin:hover { transform: translate(-50%, -100%) scale(1.2); z-index: 3; }
+  .pin-dot { width: 26px; height: 26px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto; border: 2px solid var(--brown); box-shadow: 1px 1px 0px var(--brown); }
+  .pin-dot span { font-size: 13px; }
+  .pin-point { width: 0; height: 0; border-left: 6px solid transparent; border-right: 6px solid transparent; border-top: 8px solid var(--brown); margin: 0 auto; }
+  .pin:nth-child(1) { top: 170px; left: 120px; } .pin:nth-child(1) .pin-dot { background: #FF6B35; }
+  .pin:nth-child(2) { top: 310px; left: 260px; } .pin:nth-child(2) .pin-dot { background: #8B5E3C; }
+  .pin:nth-child(3) { top: 460px; left: 140px; } .pin:nth-child(3) .pin-dot { background: #10B981; }
+  .pin:nth-child(4) { top: 230px; left: 310px; } .pin:nth-child(4) .pin-dot { background: #6366F1; }
+  .pin:nth-child(5) { top: 540px; left: 280px; } .pin:nth-child(5) .pin-dot { background: #F59E0B; }
+  .pin:nth-child(6) { top: 370px; left: 60px; } .pin:nth-child(6) .pin-dot { background: #FF6B35; }
+
+  .my-loc {
+    position: absolute; top: 390px; left: 195px;
+    width: 14px; height: 14px; background: #007AFF;
+    border-radius: 50%; border: 2.5px solid white;
+    box-shadow: 0 0 0 4px rgba(0,122,255,0.25); z-index: 4;
+  }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute; top: 56px; left: 16px; right: 16px;
+    height: 44px; display: flex; align-items: center; gap: 10px; z-index: 10;
+  }
+  .search-box {
+    flex: 1; height: 44px; background: white;
+    border: var(--border); border-radius: 14px;
+    display: flex; align-items: center; padding: 0 16px;
+  }
+  .search-box input {
+    flex: 1; border: none; background: transparent;
+    font-size: 13px; color: var(--brown); outline: none; font-family: inherit;
+  }
+  .search-box input::placeholder { color: var(--hint); }
+  .top-btn {
+    width: 44px; height: 44px; background: white;
+    border: var(--border); border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer; flex-shrink: 0;
+  }
+
+  /* FAB */
+  .fab-btn {
+    position: absolute; bottom: 260px; right: 20px;
+    width: 52px; height: 52px; background: var(--yellow);
+    border: var(--border); border-radius: 18px;
+    box-shadow: var(--shadow); z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 28px; font-weight: 700; color: var(--brown);
+    cursor: pointer; transition: all 0.12s;
+  }
+  .fab-btn:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--brown); }
+
+  /* Bottom drawer */
+  .drawer {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 310px;
+    background: var(--cream); border-top: var(--border); border-left: var(--border); border-right: var(--border);
+    border-radius: 24px 24px 0 0; display: flex; flex-direction: column;
+  }
+  .drawer-handle { display: flex; justify-content: center; padding: 10px 0 6px; flex-shrink: 0; }
+  .drawer-bar { width: 40px; height: 5px; background: var(--brown); border-radius: 4px; }
+
+  .cat-row {
+    display: flex; gap: 6px; padding: 2px 16px 10px; overflow-x: auto;
+    flex-shrink: 0; scrollbar-width: none; align-items: center;
+  }
+  .cat-row::-webkit-scrollbar { display: none; }
+  .cat-chip {
+    padding: 5px 14px; background: #FFF9E6; color: var(--sub);
+    border: 2px solid var(--brown); border-radius: 12px;
+    font-size: 11px; cursor: pointer; white-space: nowrap;
+    flex-shrink: 0; font-family: inherit; transition: all 0.12s;
+  }
+  .cat-chip:hover, .cat-chip.active { background: var(--yellow); color: var(--brown); font-weight: 700; }
+
+  .card-list {
+    flex: 1; padding: 0 16px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+    scrollbar-width: none; padding-bottom: 8px;
+  }
+  .card-list::-webkit-scrollbar { display: none; }
+
+  .wp-card {
+    display: flex; align-items: center; padding: 12px;
+    background: white; border: var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); cursor: pointer; flex-shrink: 0;
+    transition: all 0.12s;
+  }
+  .wp-card:hover { transform: translate(2px, 2px); box-shadow: 2px 2px 0px var(--brown); }
+  .card-thumb { width: 52px; height: 52px; border-radius: 10px; flex-shrink: 0; background: #FFF9E6; border: 2px solid var(--brown); display: flex; align-items: center; justify-content: center; font-size: 24px; }
+  .card-body { flex: 1; margin-left: 12px; min-width: 0; }
+  .card-name { font-size: 14px; font-weight: 700; color: var(--brown); }
+  .card-meta { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+  .card-cat { font-size: 10px; padding: 2px 8px; background: var(--yellow); color: var(--brown); border: 1.5px solid var(--brown); border-radius: 5px; font-weight: 700; }
+  .card-star { font-size: 11px; }
+  .card-addr { font-size: 10px; color: var(--sub); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-arrow { color: var(--hint); font-size: 12px; margin-left: 4px; flex-shrink: 0; }
+  .result-count { font-size: 10px; color: var(--hint); padding: 0 16px 4px; flex-shrink: 0; }
+
+  /* ═══ DETAIL PAGE ═══ */
+  .detail-nav {
+    display: flex; align-items: center; padding: 56px 16px 0;
+    height: 44px; flex-shrink: 0; gap: 8px;
+  }
+  .back-btn {
+    width: 36px; height: 36px; background: white;
+    border: 2px solid var(--brown); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 16px; cursor: pointer; flex-shrink: 0;
+  }
+  .detail-title { font-size: 16px; font-weight: 700; color: var(--brown); }
+
+  .img-swiper {
+    width: 100%; height: 280px; flex-shrink: 0;
+    background: #FFF9E6; display: flex; align-items: center;
+    justify-content: center; font-size: 80px;
+    border-bottom: var(--border);
+  }
+  .detail-header { padding: 20px 20px 12px; }
+  .detail-name { font-size: 24px; font-weight: 700; color: var(--brown); }
+  .detail-meta { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+  .detail-cat { font-size: 13px; padding: 4px 14px; background: var(--yellow); color: var(--brown); border: 2px solid var(--brown); border-radius: 6px; font-weight: 700; }
+
+  .info-card {
+    margin: 12px 20px; background: white; border: var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+  }
+  .info-row { display: flex; padding: 12px 0; border-bottom: 2px dashed var(--dash); }
+  .info-row:last-child { border-bottom: none; }
+  .info-label { width: 80px; font-size: 13px; color: var(--sub); flex-shrink: 0; }
+  .info-value { flex: 1; font-size: 13px; color: var(--brown); }
+
+  .action-bar { display: flex; margin: 16px 20px; gap: 12px; }
+  .nav-btn {
+    flex: 1; height: 52px; background: var(--yellow); color: var(--brown);
+    border: var(--border); border-radius: var(--radius); box-shadow: var(--shadow);
+    font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .nav-btn:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0px var(--brown); }
+  .edit-btn-det {
+    width: 52px; height: 52px; background: white; color: var(--brown);
+    border: var(--border); border-radius: var(--radius);
+    font-size: 22px; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* Form elements */
+  .form-scroll { flex: 1; overflow-y: auto; scrollbar-width: none; padding: 0 20px; }
+  .form-scroll::-webkit-scrollbar { display: none; }
+  .form-section { padding: 16px 0; }
+  .form-title { font-size: 20px; font-weight: 700; color: var(--brown); margin-bottom: 20px; }
+  .field { margin-bottom: 22px; }
+  .field-label { font-size: 13px; color: var(--brown); font-weight: 600; display: block; margin-bottom: 8px; }
+  .field-label.req::after { content: ' *'; color: var(--red); }
+  .field-input {
+    width: 100%; height: 44px; background: white; border: var(--border);
+    border-radius: 10px; padding: 0 14px; font-size: 13px; color: var(--brown);
+    font-family: inherit; outline: none;
+  }
+  .field-textarea {
+    width: 100%; height: 100px; background: white; border: var(--border);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px; color: var(--brown);
+    font-family: inherit; outline: none; resize: vertical;
+  }
+  .chip-grid { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip {
+    padding: 6px 16px; background: #FFF9E6; color: var(--sub);
+    border: 2px solid var(--brown); border-radius: 10px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    transition: all 0.12s;
+  }
+  .chip.selected, .chip:hover { background: var(--yellow); color: var(--brown); font-weight: 700; }
+  .loc-picker {
+    min-height: 44px; background: white; border: 3px dashed var(--brown);
+    border-radius: 10px; padding: 12px 14px; font-size: 13px;
+    color: var(--brown); cursor: pointer; display: flex; align-items: center;
+  }
+  .star-row { display: flex; gap: 4px; }
+  .star-btn { font-size: 32px; color: var(--dash); cursor: pointer; transition: color 0.1s; background: none; border: none; font-family: inherit; padding: 0; }
+  .star-btn.on { color: var(--yellow); }
+  .custom-row { display: flex; gap: 8px; margin-top: 8px; }
+  .custom-input {
+    flex: 1; height: 38px; background: white; border: 2px solid var(--brown);
+    border-radius: 10px; padding: 0 12px; font-size: 12px; color: var(--brown);
+    font-family: inherit; outline: none;
+  }
+  .custom-btn {
+    width: 38px; height: 38px; background: var(--yellow);
+    border: 2px solid var(--brown); border-radius: 10px;
+    color: var(--brown); font-size: 20px; font-weight: 700;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .img-grid { display: flex; flex-wrap: wrap; gap: 10px; }
+  .img-item { position: relative; width: 100px; height: 100px; }
+  .img-preview { width: 100%; height: 100%; border-radius: 8px; background: #FFF9E6; border: 2px solid var(--brown); display: flex; align-items: center; justify-content: center; font-size: 36px; }
+  .img-remove {
+    position: absolute; top: -6px; right: -6px;
+    width: 24px; height: 24px; background: var(--red); color: white;
+    border: 2px solid var(--brown); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; cursor: pointer;
+  }
+  .img-add {
+    width: 100px; height: 100px; background: #FFF9E6;
+    border: 3px dashed var(--brown); border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 40px; color: var(--hint); cursor: pointer;
+  }
+  .form-actions {
+    display: flex; gap: 8px; padding: 12px 16px 28px;
+    border-top: var(--border); flex-shrink: 0; background: var(--cream);
+  }
+  .cancel-btn-det {
+    padding: 0 20px; height: 48px; background: white; color: var(--brown);
+    border: var(--border); border-radius: var(--radius);
+    font-size: 14px; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center;
+  }
+  .submit-btn-det {
+    flex: 1; height: 48px; background: var(--yellow); color: var(--brown);
+    border: var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); font-size: 14px; font-weight: 700;
+    cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+  }
+  .submit-btn-det:hover { transform: translate(2px,2px); box-shadow: 2px 2px 0px var(--brown); }
+  .del-btn-det {
+    width: 48px; height: 48px; background: white; color: var(--red);
+    border: 3px solid var(--red); border-radius: var(--radius);
+    font-size: 20px; cursor: pointer; font-family: inherit;
+    display: flex; align-items: center; justify-content: center;
+  }
+
+  /* ═══ MINE PAGE ═══ */
+  .stats-box {
+    margin: 16px 20px; background: white; border: var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow);
+    padding: 24px; display: flex; align-items: center; gap: 28px;
+  }
+  .stats-total { flex-shrink: 0; text-align: center; }
+  .stats-num { font-size: 60px; font-weight: 800; color: var(--yellow); display: block; line-height: 1; -webkit-text-stroke: 2px var(--brown); }
+  .stats-label { font-size: 12px; color: var(--sub); margin-top: 4px; display: block; }
+  .stats-bd { display: flex; flex-wrap: wrap; gap: 12px; }
+  .stats-item { text-align: center; }
+  .stats-count { font-size: 28px; font-weight: 700; color: var(--brown); display: block; }
+  .stats-cat { font-size: 10px; color: var(--sub); display: block; }
+
+  .section-card {
+    margin: 0 20px 16px; background: white; border: var(--border);
+    border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px;
+  }
+  .section-title { font-size: 15px; font-weight: 700; color: var(--brown); margin-bottom: 12px; display: block; }
+  .style-row { display: flex; gap: 8px; }
+  .style-opt {
+    flex: 1; text-align: center; padding: 12px 0;
+    background: #FFF9E6; color: var(--sub);
+    border: 2px solid var(--brown); border-radius: 10px;
+    font-size: 12px; cursor: pointer; font-family: inherit;
+    transition: all 0.12s;
+  }
+  .style-opt.active { background: var(--yellow); color: var(--brown); font-weight: 700; }
+  .style-icon { display: block; font-size: 22px; margin-bottom: 2px; }
+
+  .filter-row {
+    display: flex; gap: 6px; padding: 4px 20px 10px;
+    overflow-x: auto; scrollbar-width: none;
+  }
+  .filter-row::-webkit-scrollbar { display: none; }
+  .filter-chip {
+    padding: 5px 14px; background: #FFF9E6; color: var(--sub);
+    border: 2px solid var(--brown); border-radius: 12px;
+    font-size: 11px; cursor: pointer; white-space: nowrap;
+    flex-shrink: 0; font-family: inherit; transition: all 0.12s;
+  }
+  .filter-chip.active, .filter-chip:hover { background: var(--yellow); color: var(--brown); font-weight: 700; }
+
+  .wp-list { flex:1; padding: 0 20px; overflow-y: auto; scrollbar-width: none; }
+  .wp-list::-webkit-scrollbar { display: none; }
+  .empty-mine { text-align: center; padding: 60px 0; color: var(--sub); font-size: 13px; }
+
+  /* ═══ TAB BAR ═══ */
+  .tab-bar {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 70px;
+    background: white; border-top: var(--border);
+    display: flex; z-index: 20;
+  }
+  .tab-item {
+    flex: 1; display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    font-size: 11px; color: var(--sub); cursor: pointer;
+    font-family: inherit; background: none; border: none;
+    transition: color 0.15s;
+  }
+  .tab-item.active { color: var(--brown); font-weight: 700; }
+  .tab-icon { font-size: 22px; margin-bottom: 2px; }
+
+  /* Toast */
+  .toast {
+    position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: var(--brown); color: white; padding: 12px 24px;
+    border-radius: 10px; font-size: 13px; z-index: 100;
+    pointer-events: none; opacity: 0; transition: opacity 0.2s;
+  }
+  .toast.show { opacity: 1; }
+
+  /* Modal */
+  .modal-mask {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+    z-index: 90; display: none; align-items: center; justify-content: center;
+  }
+  .modal-mask.show { display: flex; }
+  .modal-box {
+    background: white; border: var(--border); border-radius: var(--radius);
+    box-shadow: var(--shadow); padding: 24px; width: 280px; text-align: center;
+  }
+  .modal-msg { font-size: 14px; color: var(--brown); margin-bottom: 20px; }
+  .modal-btns { display: flex; gap: 10px; }
+  .modal-btn {
+    flex: 1; padding: 10px; border: var(--border); border-radius: 10px;
+    font-size: 14px; cursor: pointer; font-family: inherit; font-weight: 600;
+  }
+  .modal-btn.cancel { background: white; color: var(--sub); }
+  .modal-btn.confirm { background: var(--red); color: white; border-color: var(--red); }
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+  <!-- ═══ HOME PAGE ═══ -->
+  <div class="page active" id="homePage">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="map-area">
+      <div class="road rh1"></div><div class="road rh2"></div>
+      <div class="road rv1"></div><div class="road rv2"></div>
+      <div class="park1"></div><div class="park2"></div>
+      <div class="pin" onclick="goDetail('张记烧烤大排档','美食','4.5','朝阳区建国路88号','10:00-02:00','好吃,回头客,深夜档','🍜')"><div class="pin-dot"><span>🍜</span></div><div class="pin-point"></div></div>
+      <div class="pin" onclick="goDetail('星巴克(望京店)','咖啡','4.2','望京街10号','07:00-22:00','环境好,外卖可','☕')"><div class="pin-dot"><span>☕</span></div><div class="pin-point"></div></div>
+      <div class="pin" onclick="goDetail('西山观景台','风景','4.8','海淀区香山路','06:00-18:00','风景好,推荐','🏔️')"><div class="pin-dot"><span>🏔️</span></div><div class="pin-point"></div></div>
+      <div class="pin" onclick="goDetail('秘密基地','根据地','5.0','西城区鼓楼大街55号','全天','老字号,难找','🏠')"><div class="pin-dot"><span>🏠</span></div><div class="pin-point"></div></div>
+      <div class="pin" onclick="goDetail('朝阳大悦城','购物','4.0','朝阳区朝阳北路101号','10:00-22:00','品牌全,好逛','🛍️')"><div class="pin-dot"><span>🛍️</span></div><div class="pin-point"></div></div>
+      <div class="pin" onclick="goDetail('深夜食堂','美食','4.3','东城区东直门内大街','18:00-04:00','深夜档,好吃','🍜')"><div class="pin-dot"><span>🍜</span></div><div class="pin-point"></div></div>
+      <div class="my-loc"></div>
+    </div>
+    <div class="top-bar">
+      <div class="search-box"><input placeholder="🔍 搜索美食地点..." id="homeSearch" oninput="filterHomeCards()"></div>
+      <div class="top-btn" onclick="switchPage('minePage')" style="font-size:14px;">👤</div>
+    </div>
+    <div class="fab-btn" onclick="goAdd()">+</div>
+    <div class="drawer">
+      <div class="drawer-handle"><div class="drawer-bar"></div></div>
+      <div class="cat-row" id="homeCatRow">
+        <span class="cat-chip active" onclick="filterHome('',this)">全部</span>
+        <span class="cat-chip" onclick="filterHome('美食',this)">🍜 美食</span>
+        <span class="cat-chip" onclick="filterHome('咖啡',this)">☕ 咖啡</span>
+        <span class="cat-chip" onclick="filterHome('风景',this)">🏔️ 风景</span>
+        <span class="cat-chip" onclick="filterHome('根据地',this)">🏠 根据地</span>
+        <span class="cat-chip" onclick="filterHome('购物',this)">🛍️ 购物</span>
+        <span class="cat-chip" onclick="filterHome('娱乐',this)">🎮 娱乐</span>
+        <span class="cat-chip" onclick="filterHome('其他',this)">📍 其他</span>
+      </div>
+      <div class="result-count" id="homeCount">共 6 个传送点</div>
+      <div class="card-list" id="homeCardList"></div>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-item active"><span class="tab-icon">🗺️</span>地图</button>
+      <button class="tab-item" onclick="switchPage('minePage')"><span class="tab-icon">👤</span>我的</button>
+    </div>
+  </div>
+
+  <!-- ═══ DETAIL PAGE ═══ -->
+  <div class="page" id="detailPage">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="detail-nav">
+      <button class="back-btn" onclick="switchPage('homePage')">◀</button>
+      <span class="detail-title" id="detailPageTitle">传送点</span>
+    </div>
+    <div class="img-swiper" id="detailEmoji">📍</div>
+    <div class="detail-header">
+      <div class="detail-name" id="detailName">张记烧烤大排档</div>
+      <div class="detail-meta">
+        <span class="detail-cat" id="detailCat">美食</span>
+        <span style="font-size:15px;" id="detailStars">⭐ 4.5</span>
+      </div>
+    </div>
+    <div class="info-card">
+      <div class="info-row"><span class="info-label">📍 地址</span><span class="info-value" id="detailAddr">朝阳区建国路88号</span></div>
+      <div class="info-row"><span class="info-label">🕐 时间</span><span class="info-value" id="detailTime">10:00-02:00</span></div>
+      <div class="info-row"><span class="info-label">🏷️ 标签</span><span class="info-value" id="detailTags">#好吃 #回头客 #深夜档</span></div>
+    </div>
+    <div class="action-bar">
+      <button class="nav-btn" onclick="showToast('⚡ 开始传送！实际调用 wx.openLocation 导航')">⚡ 开始传送</button>
+      <button class="edit-btn-det" onclick="goEdit()">✏️</button>
+    </div>
+    <div class="tab-bar">
+      <button class="tab-item active" onclick="switchPage('homePage')"><span class="tab-icon">🗺️</span>地图</button>
+      <button class="tab-item" onclick="switchPage('minePage')"><span class="tab-icon">👤</span>我的</button>
+    </div>
+  </div>
+
+  <!-- ═══ EDIT PAGE ═══ -->
+  <div class="page" id="editPage">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="detail-nav">
+      <button class="back-btn" onclick="switchPage('detailPage')">◀</button>
+      <span class="detail-title" id="editModeTitle">✏️ 编辑传送点</span>
+    </div>
+    <div class="form-scroll">
+      <div class="form-section">
+        <div class="field"><span class="field-label req">传送点名称</span><input class="field-input" id="editName" placeholder="比如：张记烧烤大排档" value="张记烧烤大排档"></div>
+        <div class="field"><span class="field-label req">分类</span>
+          <div class="chip-grid" id="editCats">
+            <span class="chip" onclick="selectChip(this,'editCats')">美食</span>
+            <span class="chip selected" onclick="selectChip(this,'editCats')">咖啡</span>
+            <span class="chip" onclick="selectChip(this,'editCats')">风景</span>
+            <span class="chip" onclick="selectChip(this,'editCats')">根据地</span>
+            <span class="chip" onclick="selectChip(this,'editCats')">购物</span>
+            <span class="chip" onclick="selectChip(this,'editCats')">娱乐</span>
+            <span class="chip" onclick="selectChip(this,'editCats')">其他</span>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">位置</span>
+          <div class="loc-picker" onclick="showToast('📍 实际调用 wx.chooseLocation 打开地图选点')">📍 点击在地图上选择位置</div>
+        </div>
+        <div class="field"><span class="field-label">评分</span>
+          <div class="star-row" id="editStars">
+            <button class="star-btn" onclick="rateStar(1)">★</button>
+            <button class="star-btn on" onclick="rateStar(2)">★</button>
+            <button class="star-btn on" onclick="rateStar(3)">★</button>
+            <button class="star-btn on" onclick="rateStar(4)">★</button>
+            <button class="star-btn" onclick="rateStar(5)">★</button>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">标签</span>
+          <div class="chip-grid" id="editTags">
+            <span class="chip" onclick="this.classList.toggle('selected')">好吃</span>
+            <span class="chip selected" onclick="this.classList.toggle('selected')">推荐</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">回头客</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">环境好</span>
+            <span class="chip selected" onclick="this.classList.toggle('selected')">深夜档</span>
+          </div>
+          <div class="custom-row">
+            <input class="custom-input" placeholder="自定义标签...">
+            <span class="custom-btn">+</span>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">图片 (2/6)</span>
+          <div class="img-grid">
+            <div class="img-item"><div class="img-preview">🍜</div><span class="img-remove">✕</span></div>
+            <div class="img-item"><div class="img-preview">📸</div><span class="img-remove">✕</span></div>
+            <div class="img-add" onclick="showToast('📸 实际调用 wx.chooseMedia + wx.cloud.uploadFile')">+</div>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">备注</span><textarea class="field-textarea" placeholder="好吃的菜品、避坑指南...">必点烤串和冰啤酒，周五晚上人超多要早点去！</textarea></div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="cancel-btn-det" onclick="switchPage('detailPage')">取消</button>
+      <button class="submit-btn-det" onclick="showToast('✅ 已保存！实际调用 waypointFunctions.updateWaypoint');switchPage('detailPage')">💾 保存</button>
+      <button class="del-btn-det" onclick="showDeleteModal()">🗑️</button>
+    </div>
+  </div>
+
+  <!-- ═══ ADD PAGE ═══ -->
+  <div class="page" id="addPage">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="detail-nav">
+      <button class="back-btn" onclick="switchPage('homePage')">◀</button>
+      <span class="detail-title">⚡ 激活新传送点</span>
+    </div>
+    <div class="form-scroll">
+      <div class="form-section">
+        <div class="field"><span class="field-label req">传送点名称</span><input class="field-input" placeholder="比如：张记烧烤大排档"></div>
+        <div class="field"><span class="field-label req">分类</span>
+          <div class="chip-grid">
+            <span class="chip selected" onclick="selectChip(this,'addCats')">美食</span>
+            <span class="chip" onclick="selectChip(this,'addCats')">咖啡</span>
+            <span class="chip" onclick="selectChip(this,'addCats')">风景</span>
+            <span class="chip" onclick="selectChip(this,'addCats')">根据地</span>
+            <span class="chip" onclick="selectChip(this,'addCats')">购物</span>
+            <span class="chip" onclick="selectChip(this,'addCats')">娱乐</span>
+            <span class="chip" onclick="selectChip(this,'addCats')">其他</span>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">位置 *</span>
+          <div class="loc-picker" onclick="showToast('📍 实际调用 wx.chooseLocation 打开地图选点')">📍 点击在地图上选择位置</div>
+        </div>
+        <div class="field"><span class="field-label">评分</span>
+          <div class="star-row">
+            <button class="star-btn on" onclick="rateStarIn(1,'addStars')">★</button>
+            <button class="star-btn on" onclick="rateStarIn(2,'addStars')">★</button>
+            <button class="star-btn on" onclick="rateStarIn(3,'addStars')">★</button>
+            <button class="star-btn on" onclick="rateStarIn(4,'addStars')">★</button>
+            <button class="star-btn" onclick="rateStarIn(5,'addStars')">★</button>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">标签</span>
+          <div class="chip-grid">
+            <span class="chip" onclick="this.classList.toggle('selected')">好吃</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">推荐</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">回头客</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">环境好</span>
+            <span class="chip" onclick="this.classList.toggle('selected')">深夜档</span>
+          </div>
+          <div class="custom-row">
+            <input class="custom-input" placeholder="自定义标签...">
+            <span class="custom-btn">+</span>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">图片 (0/6)</span>
+          <div class="img-grid">
+            <div class="img-add" onclick="showToast('📸 实际调用 wx.chooseMedia + wx.cloud.uploadFile')">+</div>
+          </div>
+        </div>
+        <div class="field"><span class="field-label">备注</span><textarea class="field-textarea" placeholder="好吃的菜品、避坑指南..."></textarea></div>
+      </div>
+    </div>
+    <div class="form-actions">
+      <button class="cancel-btn-det" onclick="switchPage('homePage')">取消</button>
+      <button class="submit-btn-det" onclick="showToast('⚡ 传送点已激活！实际调用 waypointFunctions.addWaypoint');switchPage('homePage')">⚡ 激活</button>
+    </div>
+  </div>
+
+  <!-- ═══ MINE PAGE ═══ -->
+  <div class="page" id="minePage">
+    <div class="status-bar"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="stats-box">
+      <div class="stats-total"><span class="stats-num">6</span><span class="stats-label">传送点</span></div>
+      <div class="stats-bd">
+        <div class="stats-item"><span class="stats-count">2</span><span class="stats-cat">美食</span></div>
+        <div class="stats-item"><span class="stats-count">1</span><span class="stats-cat">咖啡</span></div>
+        <div class="stats-item"><span class="stats-count">1</span><span class="stats-cat">风景</span></div>
+        <div class="stats-item"><span class="stats-count">1</span><span class="stats-cat">根据地</span></div>
+        <div class="stats-item"><span class="stats-count">1</span><span class="stats-cat">购物</span></div>
+      </div>
+    </div>
+    <div class="section-card">
+      <span class="section-title">Marker 风格</span>
+      <div class="style-row" id="markerStyles">
+        <div class="style-opt active" onclick="selectStyle('game',this)"><span class="style-icon">💎</span>游戏风</div>
+        <div class="style-opt" onclick="selectStyle('minimal',this)"><span class="style-icon">📌</span>简约</div>
+        <div class="style-opt" onclick="selectStyle('numbered',this)"><span class="style-icon">🔢</span>编号</div>
+      </div>
+    </div>
+    <div class="filter-row">
+      <span class="filter-chip active" onclick="filterMine('',this)">全部</span>
+      <span class="filter-chip" onclick="filterMine('美食',this)">美食 (2)</span>
+      <span class="filter-chip" onclick="filterMine('咖啡',this)">咖啡 (1)</span>
+      <span class="filter-chip" onclick="filterMine('风景',this)">风景 (1)</span>
+      <span class="filter-chip" onclick="filterMine('根据地',this)">根据地 (1)</span>
+      <span class="filter-chip" onclick="filterMine('购物',this)">购物 (1)</span>
+    </div>
+    <div class="wp-list" id="mineCardList"></div>
+    <div class="tab-bar">
+      <button class="tab-item" onclick="switchPage('homePage')"><span class="tab-icon">🗺️</span>地图</button>
+      <button class="tab-item active"><span class="tab-icon">👤</span>我的</button>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <!-- Delete Modal -->
+  <div class="modal-mask" id="deleteModal">
+    <div class="modal-box">
+      <div class="modal-msg">删除后无法恢复<br>确定要移除这个传送点吗？</div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" onclick="hideDeleteModal()">取消</button>
+        <button class="modal-btn confirm" onclick="hideDeleteModal();showToast('🗑️ 已删除！');switchPage('homePage')">确认删除</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const waypoints = [
+    {id:'1',name:'张记烧烤大排档',cat:'美食',stars:'4.5',addr:'朝阳区建国路88号 · 1.2km',emoji:'🍜',time:'10:00-02:00',tags:'好吃,回头客,深夜档'},
+    {id:'2',name:'星巴克(望京店)',cat:'咖啡',stars:'4.2',addr:'望京街10号 · 0.8km',emoji:'☕',time:'07:00-22:00',tags:'环境好,外卖可'},
+    {id:'3',name:'西山观景台',cat:'风景',stars:'4.8',addr:'海淀区香山路 · 8.5km',emoji:'🏔️',time:'06:00-18:00',tags:'风景好,推荐'},
+    {id:'4',name:'秘密基地',cat:'根据地',stars:'5.0',addr:'西城区鼓楼大街55号 · 3.2km',emoji:'🏠',time:'全天',tags:'老字号,难找'},
+    {id:'5',name:'朝阳大悦城',cat:'购物',stars:'4.0',addr:'朝阳区朝阳北路101号 · 2.0km',emoji:'🛍️',time:'10:00-22:00',tags:'品牌全,好逛'},
+    {id:'6',name:'深夜食堂',cat:'美食',stars:'4.3',addr:'东城区东直门内大街 · 4.1km',emoji:'🍜',time:'18:00-04:00',tags:'深夜档,好吃'},
+  ];
+  let homeCat = '', mineCat = '';
+
+  function switchPage(id) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    const page = document.getElementById(id);
+    if (page) page.classList.add('active');
+    if (id === 'minePage') renderMineCards();
+  }
+
+  // ═══ HOME ═══
+  function filterHome(cat, el) {
+    homeCat = cat;
+    if (el) { document.querySelectorAll('#homeCatRow .cat-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
+    renderHomeCards();
+  }
+  function filterHomeCards() { renderHomeCards(); }
+
+  function renderHomeCards() {
+    const search = (document.getElementById('homeSearch')?.value || '').toLowerCase();
+    let filtered = waypoints;
+    if (homeCat) filtered = filtered.filter(w => w.cat === homeCat);
+    if (search) filtered = filtered.filter(w => w.name.toLowerCase().includes(search) || w.cat.includes(search));
+    document.getElementById('homeCount').textContent = '共 ' + filtered.length + ' 个传送点';
+    const list = document.getElementById('homeCardList');
+    list.innerHTML = filtered.map(w => `
+      <div class="wp-card" onclick="goDetail('${w.name}','${w.cat}','${w.stars}','${w.addr}','${w.time}','${w.tags}','${w.emoji}')">
+        <div class="card-thumb">${w.emoji}</div>
+        <div class="card-body">
+          <div class="card-name">${w.name}</div>
+          <div class="card-meta"><span class="card-cat">${w.cat}</span><span class="card-star">⭐ ${w.stars}</span></div>
+          <div class="card-addr">${w.addr}</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>`).join('');
+  }
+
+  // ═══ DETAIL ═══
+  function goDetail(name, cat, stars, addr, time, tags, emoji) {
+    document.getElementById('detailName').textContent = name;
+    document.getElementById('detailCat').textContent = cat;
+    document.getElementById('detailStars').textContent = '⭐'.repeat(Math.round(parseFloat(stars))) + ' ' + stars;
+    document.getElementById('detailAddr').textContent = addr.replace(/ · .*/,'');
+    document.getElementById('detailTime').textContent = time || '';
+    document.getElementById('detailTags').textContent = (tags||'').split(',').map(t => '#'+t.trim()).join(' ');
+    document.getElementById('detailEmoji').textContent = emoji || '📍';
+    document.getElementById('detailPageTitle').textContent = name;
+    document.getElementById('editName').value = name;
+    switchPage('detailPage');
+  }
+
+  function goEdit() {
+    document.getElementById('editModeTitle').textContent = '✏️ 编辑传送点';
+    document.getElementById('editName').value = document.getElementById('detailName').textContent;
+    switchPage('editPage');
+  }
+
+  function goAdd() {
+    switchPage('addPage');
+  }
+
+  // ═══ MINE ═══
+  function filterMine(cat, el) {
+    mineCat = cat;
+    if (el) { document.querySelectorAll('#minePage .filter-chip').forEach(c => c.classList.remove('active')); el.classList.add('active'); }
+    renderMineCards();
+  }
+
+  function renderMineCards() {
+    let filtered = waypoints;
+    if (mineCat) filtered = filtered.filter(w => w.cat === mineCat);
+    const list = document.getElementById('mineCardList');
+    list.innerHTML = filtered.map(w => `
+      <div class="wp-card" onclick="goDetail('${w.name}','${w.cat}','${w.stars}','${w.addr}','${w.time}','${w.tags}','${w.emoji}')" style="margin-bottom:10px;">
+        <div class="card-thumb">${w.emoji}</div>
+        <div class="card-body">
+          <div class="card-name">${w.name}</div>
+          <div class="card-meta"><span class="card-cat">${w.cat}</span><span class="card-star">⭐ ${w.stars}</span></div>
+          <div class="card-addr">${w.addr}</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>`).join('');
+  }
+
+  function selectStyle(s, el) {
+    document.querySelectorAll('#markerStyles .style-opt').forEach(o => o.classList.remove('active'));
+    el.classList.add('active');
+    showToast('Marker 风格已切换为: ' + (s==='game'?'游戏风':s==='minimal'?'简约':'编号'));
+  }
+
+  function selectChip(el, groupId) {
+    document.querySelectorAll('#'+groupId+' .chip').forEach(c => c.classList.remove('selected'));
+    el.classList.add('selected');
+  }
+
+  function rateStar(n) {
+    const stars = document.querySelectorAll('#editStars .star-btn');
+    stars.forEach((s,i) => s.classList.toggle('on', i < n));
+  }
+  function rateStarIn(n, groupId) {
+    const stars = document.querySelectorAll('#'+groupId+' .star-btn');
+    stars.forEach((s,i) => s.classList.toggle('on', i < n));
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg; t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 1800);
+  }
+  function showDeleteModal() { document.getElementById('deleteModal').classList.add('show'); }
+  function hideDeleteModal() { document.getElementById('deleteModal').classList.remove('show'); }
+
+  // Init
+  renderHomeCards();
+  renderMineCards();
+</script>
+</body>
+</html>

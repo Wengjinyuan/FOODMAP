@@ -19,9 +19,13 @@ Page({
 
     // UI state
     drawerHeight: 320,
+    drawerStartY: 0,
+    drawerStartH: 0,
     selectedWaypoint: null,
     loading: true,
     refreshing: false,
+    searchHistory: [],
+    showHistory: false,
   },
 
   onLoad() {
@@ -30,9 +34,15 @@ Page({
     this.applyTheme(theme);
     this.loadCategories();
     this.getCurrentLocation();
+    this.loadSearchHistory();
   },
 
   onShow() {
+    // 每次显示时重读 markerStyle，确保"我的"页切换后生效
+    if (this.data.waypoints.length > 0) {
+      const markers = this.buildMarkers(this.data.waypoints);
+      this.setData({ markers });
+    }
     this.loadWaypoints();
   },
 
@@ -46,8 +56,6 @@ Page({
   },
 
   applyTheme(theme) {
-    // 元气手绘风: 奶油底 #FFFDF7, 暖咖字 #4A3A35
-    // 暖色生活风: 灰白底 #F7F8FA, 深灰字 #2C2C2C
     const isCute = theme === 'cute';
     wx.setNavigationBarColor({
       frontColor: '#000000',
@@ -123,8 +131,7 @@ Page({
 
   // ── Markers ──
   buildMarkers(waypoints) {
-    const markerStyle = app.globalData.markerStyle || 'game';
-    const isCute = this.data.theme === 'cute';
+    const markerStyle = app.globalData.markerStyle || wx.getStorageSync('markerStyle') || 'game';
     const calloutBgColor = '#FFFDF7';
     const calloutTextColor = '#4A3A35';
     const colors = {
@@ -202,17 +209,43 @@ Page({
   },
 
   // ── Events ──
+  // ── Search ──
+  loadSearchHistory() {
+    const history = wx.getStorageSync('searchHistory') || [];
+    this.setData({ searchHistory: history.slice(0, 10) });
+  },
+  onSearchFocus() {
+    this.setData({ showHistory: true });
+    this.loadSearchHistory();
+  },
+  onSearchBlur() {
+    setTimeout(() => this.setData({ showHistory: false }), 200);
+  },
   onSearchInput(e) {
-    this.setData({ searchKeyword: e.detail.value });
-    // Debounced real-time search
+    this.setData({ searchKeyword: e.detail.value, showHistory: false });
     if (this._searchTimer) clearTimeout(this._searchTimer);
-    this._searchTimer = setTimeout(() => {
-      this.loadWaypoints();
-    }, 400);
+    this._searchTimer = setTimeout(() => { this.loadWaypoints(); }, 300);
   },
   onSearchConfirm() {
     if (this._searchTimer) clearTimeout(this._searchTimer);
+    const kw = this.data.searchKeyword.trim();
+    if (kw) {
+      const history = wx.getStorageSync('searchHistory') || [];
+      const filtered = history.filter(h => h !== kw);
+      filtered.unshift(kw);
+      wx.setStorageSync('searchHistory', filtered.slice(0, 20));
+    }
+    this.setData({ showHistory: false });
     this.loadWaypoints();
+  },
+  onHistoryTap(e) {
+    const kw = e.currentTarget.dataset.keyword;
+    this.setData({ searchKeyword: kw, showHistory: false });
+    this.loadWaypoints();
+  },
+  onClearHistory() {
+    wx.setStorageSync('searchHistory', []);
+    this.setData({ searchHistory: [], showHistory: false });
   },
 
   onRefresh() {
@@ -227,6 +260,23 @@ Page({
     const activeCategory = this.data.activeCategory === cat ? '' : cat;
     this.setData({ activeCategory });
     this.loadWaypoints();
+  },
+
+  // ── Drawer Drag (实时响应) ──
+  onDrawerTouchStart(e) {
+    this.setData({
+      drawerStartY: e.touches[0].clientY,
+      drawerStartH: this.data.drawerHeight,
+    });
+  },
+  onDrawerTouchMove(e) {
+    if (!this.data.drawerStartY) return;
+    const dy = this.data.drawerStartY - e.touches[0].clientY;
+    const newH = Math.max(120, Math.min(550, this.data.drawerStartH + dy));
+    this.setData({ drawerHeight: newH });
+  },
+  onDrawerTouchEnd() {
+    this.setData({ drawerStartY: 0 });
   },
 
   onMarkerTap(e) {

@@ -80,6 +80,11 @@ Page({
     });
   },
 
+  // ── Navigation ──
+  onBackToHome() {
+    wx.switchTab({ url: '/pages/home/home' });
+  },
+
   // ── Mode Switching ──
   onEdit() { this.setData({ mode: 'edit' }); },
   onCancel() {

@@ -2,7 +2,20 @@
    元气手绘探店风 — Detail Page
    ═════════════════════════════════════ */
 
-.page { min-height: 100vh; background: #FFFDF7; padding-bottom: 140rpx; }
+.page { min-height: 100vh; background: #FFFDF7; padding-bottom: 140rpx; display: flex; flex-direction: column; }
+
+/* ── Common Nav ── */
+.dnav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 56rpx 20rpx 12rpx; flex-shrink: 0; background: #FFFDF7;
+}
+.dnav-back {
+  width: 64rpx; height: 64rpx; background: #FFFFFF;
+  border: 2rpx solid #4A3A35; border-radius: 12rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; color: #4A3A35;
+}
+.dnav-title { font-size: 32rpx; font-weight: 700; color: #4A3A35; text-align: center; }
 
 /* ── View Mode: Image Swiper ── */
 .img-swiper { width: 100%; height: 480rpx; }
@@ -51,10 +64,27 @@
   display: flex; align-items: center; justify-content: center;
 }
 
+/* ── Edit Mode: Fixed Nav ── */
+.form-nav {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 56rpx 20rpx 12rpx; flex-shrink: 0; background: #FFFDF7;
+}
+.form-back {
+  width: 64rpx; height: 64rpx; background: #FFFFFF;
+  border: 2rpx solid #4A3A35; border-radius: 12rpx;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 24rpx; color: #4A3A35;
+}
+.form-nav-title { font-size: 32rpx; font-weight: 700; color: #4A3A35; }
+
 /* ── Edit Mode: Form ── */
-.form-scroll { flex: 1; }
-.form-section { padding: 24rpx; }
-.form-title { font-size: 34rpx; font-weight: 700; color: #4A3A35; margin-bottom: 24rpx; }
+.form-scroll {
+  flex: 1;
+  /* 确保不超出父容器，避免顶栏底栏被遮挡 */
+  height: 0;
+  min-height: 0;
+}
+.form-section { padding: 0 24rpx 24rpx; }
 
 .field { margin-bottom: 28rpx; }
 .field.required .field-label::after { content: ' *'; color: #FF6B6B; }

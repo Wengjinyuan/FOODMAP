@@ -5,17 +5,17 @@
     "pages/mine/mine"
   ],
   "window": {
-    "backgroundColor": "#1A1A2E",
-    "backgroundTextStyle": "dark",
-    "navigationBarBackgroundColor": "#1A1A2E",
+    "backgroundColor": "#FFFDF7",
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFFDF7",
     "navigationBarTitleText": "传送网",
-    "navigationBarTextStyle": "white"
+    "navigationBarTextStyle": "black"
   },
   "tabBar": {
-    "color": "#666666",
-    "selectedColor": "#00D4FF",
-    "backgroundColor": "#1A1A2E",
-    "borderStyle": "black",
+    "color": "#9E8A83",
+    "selectedColor": "#4A3A35",
+    "backgroundColor": "#FFFFFF",
+    "borderStyle": "white",
     "list": [
       {
         "pagePath": "pages/home/home",

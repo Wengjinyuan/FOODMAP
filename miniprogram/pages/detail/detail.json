@@ -1,4 +1,4 @@
 {
   "usingComponents": {},
-  "navigationBarTitleText": "传送点"
+  "navigationStyle": "custom"
 }

@@ -17,6 +17,8 @@
     <view class="search-box">
       <input class="search-input" placeholder="🔍 搜索美食地点..."
         value="{{searchKeyword}}"
+        bindfocus="onSearchFocus"
+        bindblur="onSearchBlur"
         bindinput="onSearchInput"
         bindconfirm="onSearchConfirm"
         confirm-type="search"
@@ -24,6 +26,18 @@
     </view>
     <view class="theme-btn" bindtap="toggleTheme">
       <text>🎨</text>
+    </view>
+  </view>
+
+  <!-- Search history dropdown -->
+  <view class="history-drop" wx:if="{{showHistory && searchHistory.length > 0}}">
+    <view class="history-header">
+      <text>搜索历史</text>
+      <text class="history-clear" bindtap="onClearHistory">清空</text>
+    </view>
+    <view class="history-item" wx:for="{{searchHistory}}" wx:key="*this"
+      bindtap="onHistoryTap" data-keyword="{{item}}">
+      <text>🕐 {{item}}</text>
     </view>
   </view>
 
@@ -47,11 +61,15 @@
 
   <!-- Bottom drawer -->
   <view class="drawer" style="height: {{drawerHeight}}rpx;">
-    <view class="drawer-handle">
+    <!-- 拖拽手柄 - 实时响应 -->
+    <view class="drawer-handle"
+      bindtouchstart="onDrawerTouchStart"
+      bindtouchmove="onDrawerTouchMove"
+      bindtouchend="onDrawerTouchEnd">
       <view class="drawer-bar"></view>
     </view>
 
-    <!-- Category filter chips (hidden scrollbar) -->
+    <!-- Category filter chips -->
     <scroll-view class="cat-scroll" scroll-x enhanced show-scrollbar="{{false}}">
       <view class="cat-chip {{activeCategory === '' ? 'active' : ''}}"
         bindtap="onCategoryTap" data-category="">全部</view>
@@ -62,7 +80,7 @@
       </view>
     </scroll-view>
 
-    <!-- Waypoint card list (hidden scrollbar) -->
+    <!-- Waypoint card list -->
     <scroll-view class="card-scroll" scroll-y enhanced show-scrollbar="{{false}}"
       refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}"
       bindrefresherrefresh="onRefresh">
@@ -89,6 +107,8 @@
         <text>🔍 附近暂无传送点</text>
         <text class="empty-hint">点击右下角 + 激活第一个传送点吧 ✨</text>
       </view>
+      <!-- 底部留白给 TabBar -->
+      <view style="height: 40rpx;"></view>
     </scroll-view>
   </view>
 </view>

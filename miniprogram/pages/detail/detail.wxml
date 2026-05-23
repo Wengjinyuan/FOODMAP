@@ -1,6 +1,12 @@
 <view class="page">
   <!-- ═══ VIEW MODE ═══ -->
   <block wx:if="{{mode === 'view'}}">
+    <!-- 顶栏：返回 + 标题 -->
+    <view class="dnav">
+      <view class="dnav-back" bindtap="onBackToHome">◀</view>
+      <text class="dnav-title">{{waypoint.name || '传送点'}}</text>
+      <view style="width:64rpx;"></view>
+    </view>
     <!-- Image swiper -->
     <swiper class="img-swiper" wx:if="{{waypoint.images && waypoint.images.length > 0}}"
       indicator-dots="{{true}}" indicator-color="rgba(0,0,0,0.2)" indicator-active-color="#4A3A35">
@@ -43,9 +49,15 @@
 
   <!-- ═══ EDIT / ADD MODE ═══ -->
   <block wx:if="{{mode === 'edit' || mode === 'add'}}">
+    <!-- 固定顶栏：返回 + 标题 -->
+    <view class="form-nav">
+      <view class="form-back" bindtap="onCancel">◀</view>
+      <text class="form-nav-title">{{mode === 'add' ? '⚡ 激活新传送点' : '✏️ 编辑传送点'}}</text>
+      <view style="width:64rpx;"></view>
+    </view>
+    <!-- 可滚动表单区，高度避开顶栏和底栏 -->
     <scroll-view class="form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
       <view class="form-section">
-        <view class="form-title">{{mode === 'add' ? '⚡ 激活新传送点' : '✏️ 编辑传送点'}}</view>
 
         <!-- Name -->
         <view class="field required">
