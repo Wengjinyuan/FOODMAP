@@ -5,25 +5,35 @@ const _ = db.command;
 
 const PRESET_CATEGORIES = ["美食", "咖啡", "风景", "根据地", "购物", "娱乐", "其他"];
 
+// 安全查询：集合不存在时返回空数组而非报错
+const safeGet = async (collection, query) => {
+  try {
+    return await query;
+  } catch (e) {
+    if (e.errCode === -502005 || e.message.includes('not found') || e.message.includes('not exist')) {
+      return { data: [] };
+    }
+    // geo 索引缺失也降级
+    if (e.errCode === -501007 || e.message.includes('geo') || e.message.includes('index')) {
+      console.warn('geo/index error, fallback:', e.message);
+      return { data: [] };
+    }
+    throw e;
+  }
+};
+
 // ── 附近传送点 ──
 const getNearbyWaypoints = async (event) => {
   const { latitude, longitude, maxDistance = 5000, skip = 0, limit = 50 } = event;
   try {
     const result = await db.collection("waypoints")
-      .where({
-        location: _.geoNear({
-          geometry: db.Geo.Point(latitude, longitude),
-          minDistance: 0,
-          maxDistance,
-        }),
-      })
+      .where({ location: _.geoNear({ geometry: db.Geo.Point(latitude, longitude), minDistance: 0, maxDistance }) })
       .skip(skip).limit(limit).get();
     return { success: true, data: result.data };
   } catch (e) {
-    // geo 索引不存在时，降级为全量查询
-    console.warn('geoNear failed, falling back to full query:', e.message);
-    const result = await db.collection("waypoints").skip(skip).limit(limit).get();
-    return { success: true, data: result.data, fallback: true };
+    console.warn('geoNear failed, fallback:', e.message);
+    const result = await safeGet("waypoints", db.collection("waypoints").skip(skip).limit(limit).get());
+    return { success: true, data: result.data };
   }
 };
 
@@ -34,16 +44,18 @@ const searchWaypoints = async (event) => {
   if (keyword) conditions.push({ name: db.RegExp({ regexp: keyword, options: "i" }) });
   if (category) conditions.push({ category });
   const query = conditions.length > 0 ? _.and(conditions) : {};
-  const result = await db.collection("waypoints").where(query).skip(skip).limit(limit).get();
+  const result = await safeGet("waypoints", db.collection("waypoints").where(query).skip(skip).limit(limit).get());
   return { success: true, data: result.data };
 };
 
 // ── 传送点详情 ──
 const getWaypointDetail = async (event) => {
   const { waypointId } = event;
-  const doc = await db.collection("waypoints").doc(waypointId).get();
-  if (!doc.data) return { success: false, errMsg: "传送点不存在" };
-  return { success: true, data: doc.data };
+  try {
+    const doc = await db.collection("waypoints").doc(waypointId).get();
+    if (!doc.data) return { success: false, errMsg: "传送点不存在" };
+    return { success: true, data: doc.data };
+  } catch (e) { return { success: false, errMsg: "传送点不存在" }; }
 };
 
 // ── 新增传送点 ──
@@ -112,19 +124,21 @@ const getMyWaypoints = async (event) => {
   const { category = "", orderBy = "create_time", skip = 0, limit = 50 } = event;
   const query = { _openid: wxContext.OPENID };
   if (category) query.category = category;
-  const result = await db.collection("waypoints").where(query).orderBy(orderBy, "desc").skip(skip).limit(limit).get();
+  const result = await safeGet("waypoints", db.collection("waypoints").where(query).orderBy(orderBy, "desc").skip(skip).limit(limit).get());
   return { success: true, data: result.data };
 };
 
 // ── 统计 ──
 const getMyStats = async () => {
   const wxContext = cloud.getWXContext();
-  const all = await db.collection("waypoints").where({ _openid: wxContext.OPENID }).get();
-  const categoryCount = {};
-  all.data.forEach((wp) => {
-    categoryCount[wp.category] = (categoryCount[wp.category] || 0) + 1;
-  });
-  return { success: true, data: { total: all.data.length, categories: categoryCount } };
+  try {
+    const all = await db.collection("waypoints").where({ _openid: wxContext.OPENID }).get();
+    const categoryCount = {};
+    all.data.forEach((wp) => { categoryCount[wp.category] = (categoryCount[wp.category] || 0) + 1; });
+    return { success: true, data: { total: all.data.length, categories: categoryCount } };
+  } catch (e) {
+    return { success: true, data: { total: 0, categories: {} } };
+  }
 };
 
 // ── 获取预定义分类 ──
@@ -145,20 +159,18 @@ const seedSamples = async () => {
     { name: '深夜食堂', category: '美食', location: db.Geo.Point(39.9400, 116.4300), address: '东城区东直门内大街', notes: '凌晨两点还在营业的拉面馆', tags: ['深夜档', '好吃'], rating: 4.3 },
   ];
 
-  let count = 0;
-  for (const s of samples) {
-    await db.collection("waypoints").add({
-      data: {
-        ...s,
-        images: [],
-        _openid: wxContext.OPENID,
-        create_time: now,
-        update_time: now,
-      },
-    });
-    count++;
+  try {
+    let count = 0;
+    for (const s of samples) {
+      await db.collection("waypoints").add({
+        data: { ...s, images: [], _openid: wxContext.OPENID, create_time: now, update_time: now },
+      });
+      count++;
+    }
+    return { success: true, data: { count, message: '已播种 ' + count + ' 个测试传送点' } };
+  } catch (e) {
+    return { success: false, errMsg: '播种失败: ' + (e.message || '请在云开发控制台创建 waypoints 集合') };
   }
-  return { success: true, data: { count, message: '已播种 ' + count + ' 个测试传送点' } };
 };
 
 // ── 主入口 ──
