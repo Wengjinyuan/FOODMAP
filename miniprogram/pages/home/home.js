@@ -320,6 +320,22 @@ Page({
     wx.navigateTo({ url: '/pages/detail/detail?id=' + id });
   },
 
+  onSeedSamples() {
+    wx.showLoading({ title: '播种中...' });
+    app.callFunction('waypointFunctions', { action: 'seedSamples' }).then((res) => {
+      wx.hideLoading();
+      if (res.result && res.result.success) {
+        wx.showToast({ title: res.result.data.message, icon: 'success' });
+        this.loadWaypoints();
+      } else {
+        wx.showToast({ title: '播种失败，请先部署云函数', icon: 'none' });
+      }
+    }).catch(() => {
+      wx.hideLoading();
+      wx.showToast({ title: '播种失败，请先部署云函数', icon: 'none' });
+    });
+  },
+
   onAddTap() {
     wx.navigateTo({ url: '/pages/detail/detail?mode=add' });
   },

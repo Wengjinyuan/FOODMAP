@@ -106,6 +106,7 @@
       <view class="empty-state" wx:elif="{{!loading}}">
         <text>🔍 附近暂无传送点</text>
         <text class="empty-hint">点击右下角 + 激活第一个传送点吧 ✨</text>
+        <view class="seed-btn" bindtap="onSeedSamples">🌱 一键播种测试数据</view>
       </view>
       <!-- 底部留白给 TabBar -->
       <view style="height: 40rpx;"></view>

@@ -125,6 +125,35 @@ const getPresetCategories = async () => {
   return { success: true, data: PRESET_CATEGORIES };
 };
 
+// ── 播种测试数据 ──
+const seedSamples = async () => {
+  const wxContext = cloud.getWXContext();
+  const now = new Date();
+  const samples = [
+    { name: '张记烧烤大排档', category: '美食', location: db.Geo.Point(39.9150, 116.4720), address: '朝阳区建国路88号', notes: '必点烤串和冰啤酒，周五晚上人超多', tags: ['好吃', '回头客', '深夜档'], rating: 4.5 },
+    { name: '星巴克(望京店)', category: '咖啡', location: db.Geo.Point(40.0020, 116.4800), address: '望京街10号', notes: '二楼靠窗位置最舒服', tags: ['环境好', '外卖可'], rating: 4.2 },
+    { name: '西山观景台', category: '风景', location: db.Geo.Point(39.9950, 116.1900), address: '海淀区香山路', notes: '秋天红叶季最美，建议工作日去人少', tags: ['风景好', '推荐'], rating: 4.8 },
+    { name: '秘密基地', category: '根据地', location: db.Geo.Point(39.9420, 116.3890), address: '西城区鼓楼大街55号', notes: '藏在胡同深处的小院，有猫', tags: ['老字号', '难找'], rating: 5.0 },
+    { name: '朝阳大悦城', category: '购物', location: db.Geo.Point(39.9210, 116.5170), address: '朝阳区朝阳北路101号', notes: 'B1美食广场选择超多', tags: ['品牌全', '好逛'], rating: 4.0 },
+    { name: '深夜食堂', category: '美食', location: db.Geo.Point(39.9400, 116.4300), address: '东城区东直门内大街', notes: '凌晨两点还在营业的拉面馆', tags: ['深夜档', '好吃'], rating: 4.3 },
+  ];
+
+  let count = 0;
+  for (const s of samples) {
+    await db.collection("waypoints").add({
+      data: {
+        ...s,
+        images: [],
+        _openid: wxContext.OPENID,
+        create_time: now,
+        update_time: now,
+      },
+    });
+    count++;
+  }
+  return { success: true, data: { count, message: '已播种 ' + count + ' 个测试传送点' } };
+};
+
 // ── 主入口 ──
 exports.main = async (event, context) => {
   const { action } = event;
@@ -138,6 +167,7 @@ exports.main = async (event, context) => {
     case "getMyWaypoints": return await getMyWaypoints(event);
     case "getMyStats": return await getMyStats();
     case "getPresetCategories": return await getPresetCategories();
+    case "seedSamples": return await seedSamples();
     default: return { success: false, errMsg: "未知操作: " + action };
   }
 };
