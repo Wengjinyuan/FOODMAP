@@ -1,3 +1,94 @@
-<view class="page">
-  <text>地图页面</text>
+<view class="page {{theme}}">
+  <!-- Full-screen map -->
+  <map
+    id="waypointMap"
+    class="map"
+    latitude="{{latitude}}"
+    longitude="{{longitude}}"
+    scale="{{scale}}"
+    markers="{{markers}}"
+    show-location="{{true}}"
+    bindmarkertap="onMarkerTap"
+    bindregionchange="onMapRegionChange"
+  />
+
+  <!-- Top bar: search + theme toggle -->
+  <view class="top-bar">
+    <view class="search-box">
+      <input class="search-input" placeholder="搜索标记点..."
+        value="{{searchKeyword}}"
+        bindinput="onSearchInput"
+        bindconfirm="onSearchConfirm"
+        confirm-type="search"
+      />
+    </view>
+    <view class="theme-btn" bindtap="toggleTheme">
+      <text>{{theme === 'dark' ? '☀️' : '🌙'}}</text>
+    </view>
+  </view>
+
+  <!-- Add waypoint FAB -->
+  <view class="fab" bindtap="onAddTap">
+    <text class="fab-icon">+</text>
+  </view>
+
+  <!-- Marker callout overlay -->
+  <view class="callout-overlay" wx:if="{{selectedWaypoint}}" bindtap="onCalloutTap">
+    <view class="callout-card">
+      <view class="callout-close" catchtap="onCalloutClose">✕</view>
+      <text class="callout-name">{{selectedWaypoint.name}}</text>
+      <view class="callout-meta">
+        <text class="callout-cat">{{selectedWaypoint.category}}</text>
+        <text class="callout-stars" wx:if="{{selectedWaypoint.ratingStars}}">{{selectedWaypoint.ratingStars}}</text>
+      </view>
+      <text class="callout-hint">点击查看详情 ▶</text>
+    </view>
+  </view>
+
+  <!-- Bottom drawer -->
+  <view class="drawer" style="height: {{drawerHeight}}rpx;">
+    <view class="drawer-handle">
+      <view class="drawer-bar"></view>
+    </view>
+
+    <!-- Category filter chips (hidden scrollbar) -->
+    <scroll-view class="cat-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="cat-chip {{activeCategory === '' ? 'active' : ''}}"
+        bindtap="onCategoryTap" data-category="">全部</view>
+      <view class="cat-chip {{activeCategory === item ? 'active' : ''}}"
+        wx:for="{{categories}}" wx:key="*this"
+        bindtap="onCategoryTap" data-category="{{item}}">
+        {{item}}
+      </view>
+    </scroll-view>
+
+    <!-- Waypoint card list (hidden scrollbar) -->
+    <scroll-view class="card-scroll" scroll-y enhanced show-scrollbar="{{false}}"
+      refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}"
+      bindrefresherrefresh="onRefresh">
+      <block wx:if="{{waypoints.length > 0}}">
+        <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id"
+          bindtap="onCardTap" data-id="{{item._id}}">
+          <view class="card-thumb">
+            <image wx:if="{{item.images && item.images.length > 0}}"
+              src="{{item.images[0]}}" mode="aspectFill" class="thumb-img" />
+            <text wx:else class="thumb-emoji">📍</text>
+          </view>
+          <view class="card-body">
+            <text class="card-name">{{item.name}}</text>
+            <view class="card-row">
+              <text class="card-cat">{{item.category}}</text>
+              <text class="card-star" wx:if="{{item.rating > 0}}">⭐{{item.rating}}</text>
+            </view>
+            <text class="card-addr">{{item.address || '暂无地址'}}</text>
+          </view>
+          <text class="card-arrow">▶</text>
+        </view>
+      </block>
+      <view class="empty-state" wx:elif="{{!loading}}">
+        <text>附近暂无标记点</text>
+        <text class="empty-hint">点击 + 激活第一个标记点</text>
+      </view>
+    </scroll-view>
+  </view>
 </view>

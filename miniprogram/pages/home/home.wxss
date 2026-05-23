@@ -1,6 +1,196 @@
+/* =============================================
+   Home Page Styles - Class-based Theming
+   WXSS does NOT support CSS custom properties (--var).
+   All theme variants use .page.dark / .page.light.
+   ============================================= */
+
+/* ── Page Shell ── */
 .page {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 100%;
+  width: 100vw; height: 100vh; overflow: hidden; position: relative;
 }
+.page.dark  { background: #0F0F23; }
+.page.light { background: #F5F5F5; }
+
+/* ── Map ── */
+.map { width: 100%; height: 100%; }
+
+/* ── Top Bar ── */
+.top-bar {
+  position: absolute; top: 80rpx; left: 20rpx; right: 20rpx;
+  display: flex; align-items: center; gap: 12rpx; z-index: 10;
+}
+
+/* Search box */
+.search-box {
+  flex: 1; height: 72rpx; border-radius: 36rpx;
+  padding: 0 28rpx; display: flex; align-items: center;
+}
+.page.dark  .search-box { background: rgba(26,26,46,0.9);  border: 1rpx solid rgba(255,255,255,0.08); }
+.page.light .search-box { background: rgba(255,255,255,0.95); border: 1rpx solid rgba(0,0,0,0.08); }
+
+.search-input { flex: 1; font-size: 28rpx; }
+.page.dark  .search-input { color: #E0E0E0; }
+.page.light .search-input { color: #222222; }
+
+/* Theme toggle button */
+.theme-btn {
+  width: 72rpx; height: 72rpx; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32rpx; flex-shrink: 0;
+}
+.page.dark  .theme-btn { background: rgba(26,26,46,0.9);  border: 1rpx solid rgba(255,255,255,0.08); }
+.page.light .theme-btn { background: rgba(255,255,255,0.95); border: 1rpx solid rgba(0,0,0,0.08); }
+
+/* ── FAB (Add Button) ── */
+.fab {
+  position: absolute; bottom: 300rpx; right: 28rpx;
+  width: 100rpx; height: 100rpx;
+  background: linear-gradient(135deg, #00D4FF, #0088CC);
+  border-radius: 50%; z-index: 10;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 8rpx 28rpx rgba(0,212,255,0.35);
+}
+.fab-icon { font-size: 52rpx; color: #FFFFFF; font-weight: 300; }
+.fab:active { transform: scale(0.95); }
+
+/* ── Marker Callout Overlay ── */
+.callout-overlay {
+  position: absolute; top: 0; left: 0; right: 0; bottom: 320rpx;
+  display: flex; align-items: flex-end; justify-content: center;
+  padding-bottom: 40rpx; z-index: 11;
+}
+
+.callout-card {
+  width: 85%; border-radius: 16rpx;
+  padding: 24rpx; position: relative;
+}
+.page.dark  .callout-card { background: rgba(255,255,255,0.04); border: 1rpx solid rgba(255,255,255,0.08); }
+.page.light .callout-card { background: #FFFFFF; border: 1rpx solid rgba(0,0,0,0.08); }
+
+.callout-close {
+  position: absolute; top: 16rpx; right: 16rpx;
+  font-size: 28rpx; padding: 8rpx;
+}
+.page.dark  .callout-close { color: #666666; }
+.page.light .callout-close { color: #999999; }
+
+.callout-name {
+  font-size: 32rpx; font-weight: 700; display: block;
+}
+.page.dark  .callout-name { color: #E0E0E0; }
+.page.light .callout-name { color: #222222; }
+
+.callout-meta {
+  display: flex; align-items: center; margin-top: 8rpx;
+}
+.callout-meta .callout-cat { margin-right: 12rpx; }
+
+.callout-cat {
+  font-size: 24rpx; padding: 4rpx 14rpx; border-radius: 6rpx;
+}
+.page.dark  .callout-cat { color: #00D4FF; background: rgba(0,212,255,0.12); }
+.page.light .callout-cat { color: #007AFF; background: rgba(0,122,255,0.1); }
+
+.callout-stars { font-size: 24rpx; }
+
+.callout-hint {
+  font-size: 22rpx; margin-top: 12rpx; display: block;
+}
+.page.dark  .callout-hint { color: #00D4FF; }
+.page.light .callout-hint { color: #007AFF; }
+
+/* ── Bottom Drawer ── */
+.drawer {
+  position: absolute; bottom: 0; left: 0; right: 0;
+  border-radius: 24rpx 24rpx 0 0;
+  z-index: 9; display: flex; flex-direction: column;
+}
+.page.dark  .drawer { background: #141428; border-top: 1rpx solid rgba(255,255,255,0.08); }
+.page.light .drawer { background: #FFFFFF; border-top: 1rpx solid rgba(0,0,0,0.08); }
+
+.drawer-handle {
+  display: flex; justify-content: center; padding: 14rpx 0 8rpx;
+}
+.drawer-bar {
+  width: 48rpx; height: 4rpx;
+  background: rgba(128,128,128,0.3); border-radius: 2rpx;
+}
+
+/* ── Category Scroll (horizontal, no scrollbar) ── */
+.cat-scroll {
+  display: flex; white-space: nowrap;
+  padding: 4rpx 20rpx 12rpx;
+  height: 60rpx;
+}
+.cat-chip {
+  display: inline-flex; align-items: center;
+  padding: 8rpx 22rpx; margin-right: 10rpx;
+  border-radius: 28rpx; font-size: 24rpx; flex-shrink: 0;
+  border: 1rpx solid transparent;
+}
+
+.page.dark  .cat-chip { background: rgba(255,255,255,0.05); color: #666666; }
+.page.light .cat-chip { background: #EEEEEE; color: #999999; }
+
+.page.dark  .cat-chip.active {
+  background: rgba(0,212,255,0.12); color: #00D4FF;
+  border-color: #00D4FF; font-weight: 600;
+}
+.page.light .cat-chip.active {
+  background: rgba(0,122,255,0.1); color: #007AFF;
+  border-color: #007AFF; font-weight: 600;
+}
+
+/* ── Waypoint Card List (vertical, no scrollbar) ── */
+.card-scroll { flex: 1; padding: 0 20rpx; }
+
+.wp-card {
+  display: flex; align-items: center; padding: 16rpx; margin-bottom: 10rpx;
+  border-radius: 12rpx;
+}
+.page.dark  .wp-card { background: rgba(255,255,255,0.04); border: 1rpx solid rgba(255,255,255,0.08); }
+.page.light .wp-card { background: #FFFFFF; border: 1rpx solid rgba(0,0,0,0.08); }
+
+.card-thumb {
+  width: 96rpx; height: 96rpx; border-radius: 10rpx; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center; overflow: hidden;
+}
+.page.dark  .card-thumb { background: rgba(255,255,255,0.05); }
+.page.light .card-thumb { background: #EEEEEE; }
+
+.thumb-img  { width: 100%; height: 100%; }
+.thumb-emoji { font-size: 40rpx; }
+
+.card-body { flex: 1; margin-left: 16rpx; min-width: 0; }
+
+.card-name { font-size: 30rpx; font-weight: 600; display: block; }
+.page.dark  .card-name { color: #E0E0E0; }
+.page.light .card-name { color: #222222; }
+
+.card-row { display: flex; align-items: center; margin-top: 4rpx; }
+.card-cat {
+  font-size: 22rpx; padding: 2rpx 10rpx; border-radius: 4rpx;
+  margin-right: 10rpx;
+}
+.page.dark  .card-cat { color: #00D4FF; background: rgba(0,212,255,0.12); }
+.page.light .card-cat { color: #007AFF; background: rgba(0,122,255,0.1); }
+
+.card-star { font-size: 22rpx; }
+
+.card-addr {
+  font-size: 22rpx; margin-top: 4rpx;
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;
+}
+.page.dark  .card-addr { color: #666666; }
+.page.light .card-addr { color: #999999; }
+
+.card-arrow { font-size: 24rpx; margin-left: 8rpx; opacity: 0.4; }
+.page.dark  .card-arrow { color: #666666; }
+.page.light .card-arrow { color: #999999; }
+
+/* ── Empty State ── */
+.empty-state { text-align: center; padding: 60rpx 0; font-size: 26rpx; }
+.page.dark  .empty-state { color: #666666; }
+.page.light .empty-state { color: #999999; }
+
+.empty-hint { display: block; margin-top: 8rpx; font-size: 22rpx; }
