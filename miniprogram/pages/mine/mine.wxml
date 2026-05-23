@@ -1,3 +1,73 @@
 <view class="page">
-  <text>我的页面</text>
+  <!-- Stats Header -->
+  <view class="stats-box">
+    <view class="stats-total">
+      <text class="stats-num">{{stats.total}}</text>
+      <text class="stats-label">传送点</text>
+    </view>
+    <view class="stats-bd">
+      <view class="stats-item" wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat">
+        <text class="stats-count">{{count}}</text>
+        <text class="stats-cat">{{cat}}</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Marker Style -->
+  <view class="section">
+    <text class="section-title">Marker 风格</text>
+    <view class="style-row">
+      <view class="style-opt {{markerStyle === 'game' ? 'active' : ''}}"
+        bindtap="onMarkerStyleChange" data-style="game">
+        <text class="style-icon">💎</text>
+        <text>游戏风</text>
+      </view>
+      <view class="style-opt {{markerStyle === 'minimal' ? 'active' : ''}}"
+        bindtap="onMarkerStyleChange" data-style="minimal">
+        <text class="style-icon">📌</text>
+        <text>简约</text>
+      </view>
+      <view class="style-opt {{markerStyle === 'numbered' ? 'active' : ''}}"
+        bindtap="onMarkerStyleChange" data-style="numbered">
+        <text class="style-icon">🔢</text>
+        <text>编号</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- Category Filter -->
+  <scroll-view class="filter-row" scroll-x enhanced show-scrollbar="{{false}}">
+    <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"
+      bindtap="onCategoryFilter" data-category="">全部</view>
+    <view class="filter-chip {{activeCategory === cat ? 'active' : ''}}"
+      wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat"
+      bindtap="onCategoryFilter" data-category="{{cat}}">{{cat}} ({{count}})</view>
+  </scroll-view>
+
+  <!-- Waypoint List -->
+  <scroll-view class="wp-list" scroll-y enhanced show-scrollbar="{{false}}">
+    <block wx:if="{{waypoints.length > 0}}">
+      <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id"
+        bindtap="onWaypointTap" data-id="{{item._id}}">
+        <view class="card-thumb">
+          <image wx:if="{{item.images && item.images.length > 0}}"
+            src="{{item.images[0]}}" mode="aspectFill" class="thumb-img" />
+          <text wx:else class="thumb-emoji">📍</text>
+        </view>
+        <view class="card-body">
+          <text class="card-name">{{item.name}}</text>
+          <view class="card-meta">
+            <text class="card-cat">{{item.category}}</text>
+            <text class="card-star" wx:if="{{item.rating > 0}}">⭐{{item.rating}}</text>
+          </view>
+          <text class="card-addr">{{item.address || '暂无地址'}}</text>
+        </view>
+        <text class="card-arrow">▶</text>
+      </view>
+    </block>
+    <view class="empty" wx:elif="{{!loading}}">
+      <text>🔍 暂无传送点</text>
+      <text class="empty-hint">去地图页激活你的第一个传送点吧 ✨</text>
+    </view>
+  </scroll-view>
 </view>
