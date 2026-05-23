@@ -8,16 +8,23 @@ const PRESET_CATEGORIES = ["美食", "咖啡", "风景", "根据地", "购物", 
 // ── 附近传送点 ──
 const getNearbyWaypoints = async (event) => {
   const { latitude, longitude, maxDistance = 5000, skip = 0, limit = 50 } = event;
-  const result = await db.collection("waypoints")
-    .where({
-      location: _.geoNear({
-        geometry: db.Geo.Point(latitude, longitude),
-        minDistance: 0,
-        maxDistance,
-      }),
-    })
-    .skip(skip).limit(limit).get();
-  return { success: true, data: result.data };
+  try {
+    const result = await db.collection("waypoints")
+      .where({
+        location: _.geoNear({
+          geometry: db.Geo.Point(latitude, longitude),
+          minDistance: 0,
+          maxDistance,
+        }),
+      })
+      .skip(skip).limit(limit).get();
+    return { success: true, data: result.data };
+  } catch (e) {
+    // geo 索引不存在时，降级为全量查询
+    console.warn('geoNear failed, falling back to full query:', e.message);
+    const result = await db.collection("waypoints").skip(skip).limit(limit).get();
+    return { success: true, data: result.data, fallback: true };
+  }
 };
 
 // ── 搜索传送点 ──
