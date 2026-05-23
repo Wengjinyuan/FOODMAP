@@ -36,7 +36,7 @@
   </view>
 
   <!-- Category Filter -->
-  <scroll-view class="filter-row" scroll-x enhanced show-scrollbar="{{false}}">
+  <scroll-view class="filter-row" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
     <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"
       bindtap="onCategoryFilter" data-category="">全部</view>
     <view class="filter-chip {{activeCategory === cat ? 'active' : ''}}"
@@ -45,7 +45,7 @@
   </scroll-view>
 
   <!-- Waypoint List -->
-  <scroll-view class="wp-list" scroll-y enhanced show-scrollbar="{{false}}">
+  <scroll-view class="wp-list" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
     <block wx:if="{{waypoints.length > 0}}">
       <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id"
         bindtap="onWaypointTap" data-id="{{item._id}}">

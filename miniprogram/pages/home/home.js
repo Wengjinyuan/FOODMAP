@@ -38,10 +38,14 @@ Page({
   },
 
   onShow() {
-    // 每次显示时重读 markerStyle，确保"我的"页切换后生效
+    // 重读 markerStyle（"我的"页切换后会变）
+    const style = app.globalData.markerStyle || wx.getStorageSync('markerStyle') || 'game';
+    // 强制刷新 markers：先清空再重建，确保 map 组件重新渲染
     if (this.data.waypoints.length > 0) {
-      const markers = this.buildMarkers(this.data.waypoints);
-      this.setData({ markers });
+      this.setData({ markers: [] }, () => {
+        const markers = this.buildMarkers(this.data.waypoints);
+        this.setData({ markers });
+      });
     }
     this.loadWaypoints();
   },
@@ -142,16 +146,20 @@ Page({
       '美食': '🍜', '咖啡': '☕', '风景': '🏔️', '根据地': '🏠', '购物': '🛍️', '娱乐': '🎮', '其他': '📍'
     };
 
+    // 每种风格使用不同的 id 偏移，确保切换时 map 组件检测到变化
+    const idOffset = markerStyle === 'numbered' ? 2000 : markerStyle === 'minimal' ? 1000 : 0;
+
     return waypoints.map((wp, index) => {
       const loc = wp.location || {};
       const lat = loc.latitude || (loc.coordinates && loc.coordinates[1]) || 0;
       const lng = loc.longitude || (loc.coordinates && loc.coordinates[0]) || 0;
       const color = colors[wp.category] || '#6B7280';
+      const markerId = idOffset + index;
 
       // Numbered style
       if (markerStyle === 'numbered') {
         return {
-          id: index,
+          id: markerId,
           latitude: lat, longitude: lng,
           iconPath: '', width: 1, height: 1,
           label: {
@@ -171,7 +179,7 @@ Page({
       // Game style (emoji pins)
       if (markerStyle === 'game') {
         return {
-          id: index,
+          id: markerId,
           latitude: lat, longitude: lng,
           iconPath: '', width: 1, height: 1,
           label: {
@@ -190,7 +198,7 @@ Page({
 
       // Minimal style (colored triangles)
       return {
-        id: index,
+        id: markerId,
         latitude: lat, longitude: lng,
         iconPath: '', width: 1, height: 1,
         label: {

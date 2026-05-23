@@ -70,7 +70,7 @@
     </view>
 
     <!-- Category filter chips -->
-    <scroll-view class="cat-scroll" scroll-x enhanced show-scrollbar="{{false}}">
+    <scroll-view class="cat-scroll" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
       <view class="cat-chip {{activeCategory === '' ? 'active' : ''}}"
         bindtap="onCategoryTap" data-category="">全部</view>
       <view class="cat-chip {{activeCategory === item ? 'active' : ''}}"
@@ -81,7 +81,7 @@
     </scroll-view>
 
     <!-- Waypoint card list -->
-    <scroll-view class="card-scroll" scroll-y enhanced show-scrollbar="{{false}}"
+    <scroll-view class="card-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}"
       refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}"
       bindrefresherrefresh="onRefresh">
       <block wx:if="{{waypoints.length > 0}}">

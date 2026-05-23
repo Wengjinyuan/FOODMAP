@@ -2,7 +2,7 @@
    元气手绘探店风 — Mine Page
    ═════════════════════════════════════ */
 
-.page { min-height: 100vh; background: #FFFDF7; padding-bottom: 40rpx; }
+.page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ── Stats Header ── */
 .stats-box {
@@ -58,7 +58,7 @@
 .filter-chip.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 
 /* ── Waypoint List ── */
-.wp-list { padding: 0 24rpx; }
+.wp-list { flex: 1; padding: 0 24rpx; height: 0; min-height: 0; }
 .wp-card {
   display: flex; align-items: center; padding: 16rpx; margin-bottom: 14rpx;
   background: #FFFFFF;

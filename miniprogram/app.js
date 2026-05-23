@@ -20,10 +20,22 @@ App({
   },
 
   getDb: function () {
+    if (!this.globalData.isCloudReady) {
+      console.warn("云开发未配置，无法使用数据库");
+      return null;
+    }
     return wx.cloud.database();
   },
 
   callFunction: function (name, data) {
+    if (!this.globalData.isCloudReady) {
+      wx.showModal({
+        title: '云开发未开通',
+        content: '请在微信开发者工具中点击"云开发"按钮开通云开发服务，然后在 app.js 中填入环境 ID。',
+        showCancel: false,
+      });
+      return Promise.reject(new Error('云开发未配置'));
+    }
     return wx.cloud.callFunction({ name, data });
   },
 });

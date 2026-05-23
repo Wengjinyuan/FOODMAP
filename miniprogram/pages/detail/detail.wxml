@@ -56,7 +56,7 @@
       <view style="width:64rpx;"></view>
     </view>
     <!-- 可滚动表单区，高度避开顶栏和底栏 -->
-    <scroll-view class="form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+    <scroll-view class="form-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
       <view class="form-section">
 
         <!-- Name -->

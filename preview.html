@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>个人传送网 - 美食地图</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:#E8E8ED;display:flex;justify-content:center;align-items:center;min-height:100vh;padding:20px}
+:root{--cream:#FFFDF7;--brown:#4A3A35;--yellow:#FFD23F;--sub:#9E8A83;--hint:#C4B5AF;--red:#FF6B6B;--border:3px solid #4A3A35;--shadow:4px 4px 0px #4A3A35;--radius:14px;--dash:#E8D5C8}
+.phone{width:390px;height:844px;background:var(--cream);border-radius:40px;overflow:hidden;position:relative;border:var(--border);box-shadow:0 24px 80px rgba(0,0,0,.15)}
+
+/* PAGE ISOLATION */
+.pg{position:absolute;inset:0;display:none;flex-direction:column;z-index:1;background:var(--cream)}
+.pg.on{display:flex;z-index:2}
+
+/* STATUS BAR */
+.sb{height:48px;display:flex;justify-content:space-between;align-items:center;padding:14px 24px 0;font-size:12px;font-weight:700;color:var(--brown);flex-shrink:0}
+
+/* ═══ HOME: MAP ═══ */
+.map-wrap{flex:1;position:relative;background:#F5F0E8;background-image:linear-gradient(rgba(180,170,160,.12) 1px,transparent 1px),linear-gradient(90deg,rgba(180,170,160,.12) 1px,transparent 1px);background-size:40px 40px}
+.road{position:absolute;background:rgba(170,160,148,.25)}
+.rh1{top:170px;left:0;right:0;height:5px}.rh2{top:390px;left:0;right:0;height:3px}.rv1{left:180px;top:0;bottom:0;width:5px}.rv2{left:290px;top:0;bottom:200px;width:3px}
+.pk1{position:absolute;top:440px;left:30px;width:90px;height:60px;background:rgba(150,190,140,.2);border-radius:8px}
+.pk2{position:absolute;top:110px;right:60px;width:60px;height:60px;background:rgba(150,190,140,.2);border-radius:50%}
+.pin{position:absolute;transform:translate(-50%,-100%);width:28px;height:34px;cursor:pointer;z-index:2;transition:transform .15s}
+.pin:hover{transform:translate(-50%,-100%) scale(1.2);z-index:3}
+.pd{width:26px;height:26px;border-radius:50%;display:flex;align-items:center;justify-content:center;margin:0 auto;border:2px solid var(--brown);box-shadow:1px 1px 0 var(--brown);font-size:13px}
+.pp{width:0;height:0;border-left:6px solid transparent;border-right:6px solid transparent;border-top:8px solid var(--brown);margin:0 auto}
+.myloc{position:absolute;top:390px;left:195px;width:14px;height:14px;background:#007AFF;border-radius:50%;border:2.5px solid white;box-shadow:0 0 0 4px rgba(0,122,255,.25);z-index:4}
+
+.topbar{position:absolute;top:56px;left:16px;right:16px;height:44px;display:flex;align-items:center;gap:10px;z-index:10}
+.sbox{flex:1;height:44px;background:white;border:var(--border);border-radius:14px;display:flex;align-items:center;padding:0 16px;position:relative}
+.sbox input{flex:1;border:none;background:transparent;font-size:13px;color:var(--brown);outline:none;font-family:inherit}
+.sbox input::placeholder{color:var(--hint)}
+.tbtn{width:44px;height:44px;background:white;border:var(--border);border-radius:12px;display:flex;align-items:center;justify-content:center;font-size:18px;cursor:pointer;flex-shrink:0}
+
+/* SEARCH HISTORY */
+.hist{position:absolute;top:106px;left:16px;right:72px;background:white;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);z-index:13;display:none;flex-direction:column;max-height:300px;overflow-y:auto}
+.hist.on{display:flex}
+.hhdr{display:flex;justify-content:space-between;padding:12px 18px 8px;font-size:12px;font-weight:600;color:var(--brown);border-bottom:2px dashed var(--dash)}
+.hclr{color:var(--red);cursor:pointer;font-size:11px}
+.hitem{padding:12px 18px;font-size:12px;color:var(--brown);cursor:pointer;border-bottom:1px solid #F0EBE5}
+.hitem:hover{background:#FFF9E6}
+.hitem:last-child{border-bottom:none}
+
+.fab{position:absolute;bottom:260px;right:20px;width:52px;height:52px;background:var(--yellow);border:var(--border);border-radius:18px;box-shadow:var(--shadow);z-index:10;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:var(--brown);cursor:pointer;transition:all .12s}
+.fab:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--brown)}
+
+/* DRAWER */
+.drawer{position:absolute;bottom:0;left:0;right:0;background:var(--cream);border-top:var(--border);border-left:var(--border);border-right:var(--border);border-radius:24px 24px 0 0;display:flex;flex-direction:column;z-index:9;transition:height .05s}
+.drh{cursor:ns-resize;display:flex;justify-content:center;padding:10px 0 6px;flex-shrink:0;user-select:none;position:relative}
+.drb{width:40px;height:5px;background:var(--brown);border-radius:4px;pointer-events:none}
+.drhint{position:absolute;top:-18px;font-size:10px;color:var(--hint);pointer-events:none;opacity:0;transition:opacity .2s}
+.drhint.on{opacity:1}
+.cr{display:flex;gap:6px;padding:2px 16px 10px;overflow-x:auto;flex-shrink:0;scrollbar-width:none;align-items:center}
+.cr::-webkit-scrollbar{display:none}
+.cc{padding:5px 14px;background:#FFF9E6;color:var(--sub);border:2px solid var(--brown);border-radius:12px;font-size:11px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:all .12s}
+.cc.on,.cc:hover{background:var(--yellow);color:var(--brown);font-weight:700}
+.cl{flex:1;padding:0 16px;overflow-y:auto;display:flex;flex-direction:column;gap:8px;scrollbar-width:none}
+.cl::-webkit-scrollbar{display:none}
+.wc{display:flex;align-items:center;padding:12px;background:white;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);cursor:pointer;flex-shrink:0;transition:all .12s}
+.wc:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--brown)}
+.cth{width:52px;height:52px;border-radius:10px;flex-shrink:0;background:#FFF9E6;border:2px solid var(--brown);display:flex;align-items:center;justify-content:center;font-size:24px}
+.cbd{flex:1;margin-left:12px;min-width:0}
+.cnm{font-size:14px;font-weight:700;color:var(--brown)}
+.cmt{display:flex;align-items:center;gap:6px;margin-top:2px}
+.cct{font-size:10px;padding:2px 8px;background:var(--yellow);color:var(--brown);border:1.5px solid var(--brown);border-radius:5px;font-weight:700}
+.cst{font-size:11px}
+.cad{font-size:10px;color:var(--sub);margin-top:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.car{color:var(--hint);font-size:12px;margin-left:4px;flex-shrink:0}
+.rcnt{font-size:10px;color:var(--hint);padding:0 16px 4px;flex-shrink:0}
+
+/* ═══ DETAIL ═══ */
+.dnav{display:flex;align-items:center;justify-content:space-between;padding:56px 20px 12px;flex-shrink:0;background:var(--cream)}
+.dback{width:40px;height:40px;background:white;border:2px solid var(--brown);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.dtl{font-size:18px;font-weight:700;color:var(--brown)}
+.swp{width:100%;height:240px;flex-shrink:0;background:#FFF9E6;display:flex;align-items:center;justify-content:center;font-size:72px;border-bottom:var(--border)}
+.dhd{padding:18px 20px 10px}
+.dnm{font-size:22px;font-weight:700;color:var(--brown)}
+.dmt{display:flex;align-items:center;gap:12px;margin-top:6px}
+.dct{font-size:13px;padding:4px 14px;background:var(--yellow);color:var(--brown);border:2px solid var(--brown);border-radius:6px;font-weight:700}
+.icd{margin:10px 20px;background:white;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:18px}
+.irow{display:flex;padding:10px 0;border-bottom:2px dashed var(--dash)}
+.irow:last-child{border-bottom:none}
+.ilb{width:70px;font-size:12px;color:var(--sub);flex-shrink:0}
+.ivl{flex:1;font-size:12px;color:var(--brown)}
+.abar{display:flex;margin:12px 20px;gap:10px}
+.nbtn{flex:1;height:48px;background:var(--yellow);color:var(--brown);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.nbtn:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--brown)}
+.ebtn{width:48px;height:48px;background:white;color:var(--brown);border:var(--border);border-radius:var(--radius);font-size:20px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center}
+
+/* ═══ FORM ═══ */
+.fnav{display:flex;align-items:center;justify-content:space-between;padding:56px 20px 12px;flex-shrink:0;background:var(--cream)}
+.fback{width:40px;height:40px;background:white;border:2px solid var(--brown);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer}
+.fttl{font-size:18px;font-weight:700;color:var(--brown)}
+.fscrl{flex:1;overflow-y:auto;scrollbar-width:none;padding:0 20px;height:0;min-height:0}
+.fscrl::-webkit-scrollbar{display:none}
+.fsec{padding:12px 0}
+.fld{margin-bottom:18px}
+.flb{font-size:12px;color:var(--brown);font-weight:600;display:block;margin-bottom:6px}
+.flb.req::after{content:' *';color:var(--red)}
+.finp{width:100%;height:42px;background:white;border:var(--border);border-radius:10px;padding:0 14px;font-size:13px;color:var(--brown);font-family:inherit;outline:none}
+.ftarea{width:100%;height:90px;background:white;border:var(--border);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--brown);font-family:inherit;outline:none;resize:vertical}
+.cgrid{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 14px;background:#FFF9E6;color:var(--sub);border:2px solid var(--brown);border-radius:10px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
+.chip.sel,.chip:hover{background:var(--yellow);color:var(--brown);font-weight:700}
+.lpick{min-height:42px;background:white;border:3px dashed var(--brown);border-radius:10px;padding:10px 14px;font-size:13px;color:var(--brown);cursor:pointer;display:flex;align-items:center}
+.srow{display:flex;gap:3px}
+.sbtn{font-size:28px;color:var(--dash);cursor:pointer;transition:color .1s;background:none;border:none;font-family:inherit;padding:0;line-height:1}
+.sbtn.on{color:var(--yellow)}
+.crow2{display:flex;gap:8px;margin-top:8px}
+.cinp2{flex:1;height:36px;background:white;border:2px solid var(--brown);border-radius:10px;padding:0 10px;font-size:11px;color:var(--brown);font-family:inherit;outline:none}
+.cbtn2{width:36px;height:36px;background:var(--yellow);border:2px solid var(--brown);border-radius:10px;color:var(--brown);font-size:18px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center}
+.imgrid{display:flex;flex-wrap:wrap;gap:8px}
+.iim{position:relative;width:90px;height:90px}
+.ipv{width:100%;height:100%;border-radius:8px;background:#FFF9E6;border:2px solid var(--brown);display:flex;align-items:center;justify-content:center;font-size:30px}
+.irm{position:absolute;top:-6px;right:-6px;width:22px;height:22px;background:var(--red);color:white;border:2px solid var(--brown);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:12px;cursor:pointer}
+.iadd{width:90px;height:90px;background:#FFF9E6;border:3px dashed var(--brown);border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:32px;color:var(--hint);cursor:pointer}
+.facts{display:flex;gap:8px;padding:10px 16px 28px;border-top:var(--border);flex-shrink:0;background:var(--cream)}
+.cxl{flex:1;height:46px;background:var(--yellow);color:var(--brown);border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);font-size:14px;font-weight:700;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center;transition:all .12s}
+.cxl:hover{transform:translate(2px,2px);box-shadow:2px 2px 0 var(--brown)}
+.cxl2{padding:0 18px;height:46px;background:white;color:var(--brown);border:var(--border);border-radius:var(--radius);font-size:14px;cursor:pointer;font-family:inherit;display:flex;align-items:center}
+.dbtn{width:46px;height:46px;background:white;color:var(--red);border:3px solid var(--red);border-radius:var(--radius);font-size:18px;cursor:pointer;font-family:inherit;display:flex;align-items:center;justify-content:center}
+
+/* ═══ MINE ═══ */
+.sbox2{margin:16px 20px;background:white;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;display:flex;align-items:center;gap:24px}
+.stot{flex-shrink:0;text-align:center}
+.snum{font-size:56px;font-weight:800;color:var(--yellow);display:block;line-height:1;-webkit-text-stroke:2px var(--brown)}
+.slbl{font-size:11px;color:var(--sub);margin-top:4px;display:block}
+.sbd2{display:flex;flex-wrap:wrap;gap:10px}
+.sitem{text-align:center}
+.scnt{font-size:26px;font-weight:700;color:var(--brown);display:block}
+.scat{font-size:10px;color:var(--sub);display:block}
+.scard{margin:0 20px 14px;background:white;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.sttl{font-size:14px;font-weight:700;color:var(--brown);margin-bottom:10px;display:block}
+.sr2{display:flex;gap:8px}
+.sopt{flex:1;text-align:center;padding:10px 0;background:#FFF9E6;color:var(--sub);border:2px solid var(--brown);border-radius:10px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .12s}
+.sopt.on{background:var(--yellow);color:var(--brown);font-weight:700}
+.sico{display:block;font-size:20px;margin-bottom:1px}
+.frow{display:flex;gap:6px;padding:4px 20px 8px;overflow-x:auto;scrollbar-width:none}
+.frow::-webkit-scrollbar{display:none}
+.fchip{padding:5px 12px;background:#FFF9E6;color:var(--sub);border:2px solid var(--brown);border-radius:12px;font-size:10px;cursor:pointer;white-space:nowrap;flex-shrink:0;font-family:inherit;transition:all .12s}
+.fchip.on,.fchip:hover{background:var(--yellow);color:var(--brown);font-weight:700}
+.mlist{flex:1;padding:0 20px 20px;overflow-y:auto;scrollbar-width:none}
+.mlist::-webkit-scrollbar{display:none}
+.emp2{text-align:center;padding:50px 0;color:var(--sub);font-size:12px}
+
+/* TAB BAR */
+.tbar{position:absolute;bottom:0;left:0;right:0;height:64px;background:white;border-top:var(--border);display:flex;z-index:20}
+.titem{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:10px;color:var(--sub);cursor:pointer;font-family:inherit;background:none;border:none;transition:color .15s}
+.titem.on{color:var(--brown);font-weight:700}
+.tico{font-size:20px;margin-bottom:2px}
+
+/* TOAST & MODAL */
+.toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:var(--brown);color:white;padding:10px 20px;border-radius:10px;font-size:12px;z-index:100;pointer-events:none;opacity:0;transition:opacity .2s}
+.toast.show{opacity:1}
+.modal{position:absolute;inset:0;background:rgba(0,0,0,.4);z-index:90;display:none;align-items:center;justify-content:center}
+.modal.show{display:flex}
+.mbox{background:white;border:var(--border);border-radius:var(--radius);box-shadow:var(--shadow);padding:22px;width:260px;text-align:center}
+.mmsg{font-size:13px;color:var(--brown);margin-bottom:18px}
+.mbts{display:flex;gap:8px}
+.mbtn{flex:1;padding:8px;border:var(--border);border-radius:10px;font-size:13px;cursor:pointer;font-family:inherit;font-weight:600}
+.mbtn.cnl{background:white;color:var(--sub)}
+.mbtn.cfm{background:var(--red);color:white;border-color:var(--red)}
+</style>
+</head>
+<body>
+
+<div class="phone" id="phone">
+
+  <!-- ═══════════ HOME ═══════════ -->
+  <div class="pg on" id="pgHome">
+    <div class="sb"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="map-wrap">
+      <div class="road rh1"></div><div class="road rh2"></div><div class="road rv1"></div><div class="road rv2"></div>
+      <div class="pk1"></div><div class="pk2"></div>
+      <div class="pin" style="top:170px;left:120px" onclick="goDet('张记烧烤大排档','美食','4.5','朝阳区建国路88号','10:00-02:00','好吃,回头客,深夜档','🍜')"><div class="pd" style="background:#FF6B35">🍜</div><div class="pp"></div></div>
+      <div class="pin" style="top:310px;left:260px" onclick="goDet('星巴克(望京店)','咖啡','4.2','望京街10号','07:00-22:00','环境好,外卖可','☕')"><div class="pd" style="background:#8B5E3C">☕</div><div class="pp"></div></div>
+      <div class="pin" style="top:460px;left:140px" onclick="goDet('西山观景台','风景','4.8','海淀区香山路','06:00-18:00','风景好,推荐','🏔️')"><div class="pd" style="background:#10B981">🏔️</div><div class="pp"></div></div>
+      <div class="pin" style="top:230px;left:310px" onclick="goDet('秘密基地','根据地','5.0','西城区鼓楼大街55号','全天','老字号,难找','🏠')"><div class="pd" style="background:#6366F1">🏠</div><div class="pp"></div></div>
+      <div class="pin" style="top:540px;left:280px" onclick="goDet('朝阳大悦城','购物','4.0','朝阳区朝阳北路101号','10:00-22:00','品牌全,好逛','🛍️')"><div class="pd" style="background:#F59E0B">🛍️</div><div class="pp"></div></div>
+      <div class="pin" style="top:370px;left:60px" onclick="goDet('深夜食堂','美食','4.3','东城区东直门内大街','18:00-04:00','深夜档,好吃','🍜')"><div class="pd" style="background:#FF6B35">🍜</div><div class="pp"></div></div>
+      <div class="myloc"></div>
+    </div>
+    <div class="topbar">
+      <div class="sbox">
+        <input id="hs" placeholder="🔍 搜索美食地点..." onfocus="showHist()" onblur="hideHist()" oninput="doSearch()" onkeydown="if(event.key==='Enter')confirmSearch()">
+      </div>
+      <div class="tbtn" onclick="goMine()">👤</div>
+    </div>
+    <!-- HISTORY -->
+    <div class="hist" id="histDrop"></div>
+    <!-- FAB -->
+    <div class="fab" onclick="goAdd()">+</div>
+    <!-- DRAWER -->
+    <div class="drawer" id="drawer" style="height:310px">
+      <div class="drh" id="drh">
+        <div class="drhint" id="drHint">↕ 拖动缩放</div>
+        <div class="drb"></div>
+      </div>
+      <div class="cr" id="hcr">
+        <span class="cc on" onclick="filHome('',this)">全部</span>
+        <span class="cc" onclick="filHome('美食',this)">🍜 美食</span>
+        <span class="cc" onclick="filHome('咖啡',this)">☕ 咖啡</span>
+        <span class="cc" onclick="filHome('风景',this)">🏔️ 风景</span>
+        <span class="cc" onclick="filHome('根据地',this)">🏠 根据地</span>
+        <span class="cc" onclick="filHome('购物',this)">🛍️ 购物</span>
+        <span class="cc" onclick="filHome('娱乐',this)">🎮 娱乐</span>
+        <span class="cc" onclick="filHome('其他',this)">📍 其他</span>
+      </div>
+      <div class="rcnt" id="hcnt">共 6 个传送点</div>
+      <div class="cl" id="hcl"></div>
+    </div>
+    <div class="tbar"><button class="titem on"><span class="tico">🗺️</span>地图</button><button class="titem" onclick="goMine()"><span class="tico">👤</span>我的</button></div>
+  </div>
+
+  <!-- ═══════════ DETAIL VIEW ═══════════ -->
+  <div class="pg" id="pgDet">
+    <div class="sb"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="dnav"><div class="dback" onclick="goHome()">◀</div><span class="dtl" id="dT">传送点</span><div style="width:40px"></div></div>
+    <div class="swp" id="dE">📍</div>
+    <div class="dhd"><div class="dnm" id="dN"></div><div class="dmt"><span class="dct" id="dC"></span><span style="font-size:14px" id="dS"></span></div></div>
+    <div class="icd">
+      <div class="irow"><span class="ilb">📍 地址</span><span class="ivl" id="dA"></span></div>
+      <div class="irow"><span class="ilb">🕐 时间</span><span class="ivl" id="dTi"></span></div>
+      <div class="irow"><span class="ilb">🏷️ 标签</span><span class="ivl" id="dTa"></span></div>
+    </div>
+    <div class="abar"><button class="nbtn" onclick="toast('⚡ 开始传送！实际调用 wx.openLocation')">⚡ 开始传送</button><button class="ebtn" onclick="goEdit()">✏️</button></div>
+    <div class="tbar"><button class="titem on" onclick="goHome()"><span class="tico">🗺️</span>地图</button><button class="titem" onclick="goMine()"><span class="tico">👤</span>我的</button></div>
+  </div>
+
+  <!-- ═══════════ EDIT ═══════════ -->
+  <div class="pg" id="pgEdit">
+    <div class="sb"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="fnav"><div class="fback" onclick="goDet2()">◀</div><span class="fttl">✏️ 编辑传送点</span><div style="width:40px"></div></div>
+    <div class="fscrl"><div class="fsec">
+      <div class="fld"><span class="flb req">名称</span><input class="finp" id="efNm" placeholder="传送点名称"></div>
+      <div class="fld"><span class="flb req">分类</span><div class="cgrid" id="efCs"><span class="chip" onclick="selChip(this,'efCs')">美食</span><span class="chip" onclick="selChip(this,'efCs')">咖啡</span><span class="chip" onclick="selChip(this,'efCs')">风景</span><span class="chip" onclick="selChip(this,'efCs')">根据地</span><span class="chip" onclick="selChip(this,'efCs')">购物</span><span class="chip" onclick="selChip(this,'efCs')">娱乐</span><span class="chip" onclick="selChip(this,'efCs')">其他</span></div></div>
+      <div class="fld"><span class="flb">位置</span><div class="lpick" onclick="toast('📍 实际调用 wx.chooseLocation')">📍 点击在地图上选择位置</div></div>
+      <div class="fld"><span class="flb">评分</span><div class="srow" id="efSt"><button class="sbtn on" onclick="setStars(1,'efSt')">★</button><button class="sbtn on" onclick="setStars(2,'efSt')">★</button><button class="sbtn on" onclick="setStars(3,'efSt')">★</button><button class="sbtn on" onclick="setStars(4,'efSt')">★</button><button class="sbtn" onclick="setStars(5,'efSt')">★</button></div></div>
+      <div class="fld"><span class="flb">标签</span><div class="cgrid"><span class="chip" onclick="this.classList.toggle('sel')">好吃</span><span class="chip" onclick="this.classList.toggle('sel')">推荐</span><span class="chip" onclick="this.classList.toggle('sel')">回头客</span><span class="chip" onclick="this.classList.toggle('sel')">环境好</span><span class="chip" onclick="this.classList.toggle('sel')">深夜档</span></div><div class="crow2"><input class="cinp2" placeholder="自定义标签..."><span class="cbtn2">+</span></div></div>
+      <div class="fld"><span class="flb">图片 (2/6)</span><div class="imgrid"><div class="iim"><div class="ipv">🍜</div><span class="irm">✕</span></div><div class="iim"><div class="ipv">📸</div><span class="irm">✕</span></div><div class="iadd" onclick="toast('📸 wx.chooseMedia + uploadFile')">+</div></div></div>
+      <div class="fld"><span class="flb">备注</span><textarea class="ftarea" id="efNt" placeholder="好吃的菜品、避坑指南...">必点烤串和冰啤酒！</textarea></div>
+    </div></div>
+    <div class="facts"><button class="cxl2" onclick="goDet2()">取消</button><button class="cxl" onclick="toast('✅ 已保存！');goDet2()">💾 保存</button><button class="dbtn" onclick="showDel()">🗑️</button></div>
+  </div>
+
+  <!-- ═══════════ ADD ═══════════ -->
+  <div class="pg" id="pgAdd">
+    <div class="sb"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="fnav"><div class="fback" onclick="goHome()">◀</div><span class="fttl">⚡ 激活新传送点</span><div style="width:40px"></div></div>
+    <div class="fscrl"><div class="fsec">
+      <div class="fld"><span class="flb req">名称</span><input class="finp" placeholder="比如：张记烧烤大排档"></div>
+      <div class="fld"><span class="flb req">分类</span><div class="cgrid" id="afCs"><span class="chip sel" onclick="selChip(this,'afCs')">美食</span><span class="chip" onclick="selChip(this,'afCs')">咖啡</span><span class="chip" onclick="selChip(this,'afCs')">风景</span><span class="chip" onclick="selChip(this,'afCs')">根据地</span><span class="chip" onclick="selChip(this,'afCs')">购物</span><span class="chip" onclick="selChip(this,'afCs')">娱乐</span><span class="chip" onclick="selChip(this,'afCs')">其他</span></div></div>
+      <div class="fld"><span class="flb">位置</span><div class="lpick" onclick="toast('📍 实际调用 wx.chooseLocation')">📍 点击在地图上选择位置</div></div>
+      <div class="fld"><span class="flb">评分</span><div class="srow"><button class="sbtn on" onclick="setStars(1,'afSt')">★</button><button class="sbtn on" onclick="setStars(2,'afSt')">★</button><button class="sbtn on" onclick="setStars(3,'afSt')">★</button><button class="sbtn on" onclick="setStars(4,'afSt')">★</button><button class="sbtn" onclick="setStars(5,'afSt')">★</button></div></div>
+      <div class="fld"><span class="flb">标签</span><div class="cgrid"><span class="chip" onclick="this.classList.toggle('sel')">好吃</span><span class="chip" onclick="this.classList.toggle('sel')">推荐</span><span class="chip" onclick="this.classList.toggle('sel')">回头客</span><span class="chip" onclick="this.classList.toggle('sel')">环境好</span><span class="chip" onclick="this.classList.toggle('sel')">深夜档</span></div><div class="crow2"><input class="cinp2" placeholder="自定义标签..."><span class="cbtn2">+</span></div></div>
+      <div class="fld"><span class="flb">图片 (0/6)</span><div class="imgrid"><div class="iadd" onclick="toast('📸 wx.chooseMedia + uploadFile')">+</div></div></div>
+      <div class="fld"><span class="flb">备注</span><textarea class="ftarea" placeholder="好吃的菜品、避坑指南..."></textarea></div>
+    </div></div>
+    <div class="facts"><button class="cxl2" onclick="goHome()">取消</button><button class="cxl" onclick="toast('⚡ 传送点已激活！');goHome()">⚡ 激活</button></div>
+  </div>
+
+  <!-- ═══════════ MINE ═══════════ -->
+  <div class="pg" id="pgMine">
+    <div class="sb"><span>9:41</span><span>📶 🔋</span></div>
+    <div class="sbox2"><div class="stot"><span class="snum">6</span><span class="slbl">传送点</span></div><div class="sbd2" id="stBd"></div></div>
+    <div class="scard"><span class="sttl">Marker 风格</span><div class="sr2" id="mkSt"><div class="sopt on" onclick="pickStyle('game',this)"><span class="sico">💎</span>游戏风</div><div class="sopt" onclick="pickStyle('minimal',this)"><span class="sico">📌</span>简约</div><div class="sopt" onclick="pickStyle('numbered',this)"><span class="sico">🔢</span>编号</div></div></div>
+    <div class="frow"><span class="fchip on" onclick="filMine('',this)">全部</span><span class="fchip" onclick="filMine('美食',this)">美食 (2)</span><span class="fchip" onclick="filMine('咖啡',this)">咖啡 (1)</span><span class="fchip" onclick="filMine('风景',this)">风景 (1)</span><span class="fchip" onclick="filMine('根据地',this)">根据地 (1)</span><span class="fchip" onclick="filMine('购物',this)">购物 (1)</span></div>
+    <div class="mlist" id="ml"></div>
+    <div class="tbar"><button class="titem" onclick="goHome()"><span class="tico">🗺️</span>地图</button><button class="titem on"><span class="tico">👤</span>我的</button></div>
+  </div>
+
+  <div class="toast" id="toast"></div>
+  <div class="modal" id="delMod"><div class="mbox"><div class="mmsg">删除后无法恢复<br>确定要移除这个传送点吗？</div><div class="mbts"><button class="mbtn cnl" onclick="hideDel()">取消</button><button class="mbtn cfm" onclick="hideDel();toast('🗑️ 已删除！');goHome()">确认删除</button></div></div></div>
+</div>
+
+<script>
+const W=[{n:'张记烧烤大排档',c:'美食',s:'4.5',a:'朝阳区建国路88号 · 1.2km',e:'🍜',t:'10:00-02:00',g:'好吃,回头客,深夜档'},{n:'星巴克(望京店)',c:'咖啡',s:'4.2',a:'望京街10号 · 0.8km',e:'☕',t:'07:00-22:00',g:'环境好,外卖可'},{n:'西山观景台',c:'风景',s:'4.8',a:'海淀区香山路 · 8.5km',e:'🏔️',t:'06:00-18:00',g:'风景好,推荐'},{n:'秘密基地',c:'根据地',s:'5.0',a:'西城区鼓楼大街55号 · 3.2km',e:'🏠',t:'全天',g:'老字号,难找'},{n:'朝阳大悦城',c:'购物',s:'4.0',a:'朝阳区朝阳北路101号 · 2.0km',e:'🛍️',t:'10:00-22:00',g:'品牌全,好逛'},{n:'深夜食堂',c:'美食',s:'4.3',a:'东城区东直门内大街 · 4.1km',e:'🍜',t:'18:00-04:00',g:'深夜档,好吃'}];
+let hCat='',mCat='',hist=[],curD=null;
+
+function showPg(id){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));document.getElementById(id).classList.add('on')}
+function goHome(){showPg('pgHome');renderHome();renderHist()}
+function goMine(){showPg('pgMine');renderMine()}
+
+function goDet(n,c,s,a,t,g,e){curD={n,c,s,a,t,g,e};document.getElementById('dT').textContent=n;document.getElementById('dN').textContent=n;document.getElementById('dC').textContent=c;document.getElementById('dS').textContent='⭐'.repeat(Math.round(parseFloat(s)))+' '+s;document.getElementById('dA').textContent=a.replace(/ · .*/,'');document.getElementById('dTi').textContent=t||'';document.getElementById('dTa').textContent=(g||'').split(',').map(x=>'#'+x.trim()).join(' ');document.getElementById('dE').textContent=e;document.getElementById('efNm').value=n;document.getElementById('efNt').value='必点烤串和冰啤酒！';showPg('pgDet')}
+function goDet2(){if(curD)goDet(curD.n,curD.c,curD.s,curD.a,curD.t,curD.g,curD.e);else goHome()}
+function goEdit(){showPg('pgEdit')}
+function goAdd(){showPg('pgAdd')}
+
+// ═══ SEARCH HISTORY ═══
+function showHist(){try{hist=JSON.parse(localStorage.getItem('wpHist')||'[]')}catch(e){hist=[]};renderHist();document.getElementById('histDrop').classList.add('on')}
+function hideHist(){setTimeout(()=>document.getElementById('histDrop').classList.remove('on'),200)}
+function renderHist(){
+  const d=document.getElementById('histDrop');
+  d.innerHTML=hist.length===0?'<div style="padding:16px;text-align:center;font-size:11px;color:var(--hint)">暂无搜索历史</div>':
+    '<div class="hhdr"><span>搜索历史</span><span class="hclr" onclick="clearHist()">清空</span></div>'+hist.map(h=>'<div class="hitem" onmousedown="pickHist(\''+h+'\')">🕐 '+h+'</div>').join('');
+}
+function pickHist(kw){document.getElementById('hs').value=kw;document.getElementById('histDrop').classList.remove('on');doSearch()}
+function clearHist(){hist=[];localStorage.setItem('wpHist','[]');renderHist()}
+function confirmSearch(){const kw=document.getElementById('hs').value.trim();if(!kw)return;hist=hist.filter(h=>h!==kw);hist.unshift(kw);hist=hist.slice(0,20);localStorage.setItem('wpHist',JSON.stringify(hist));document.getElementById('histDrop').classList.remove('on');doSearch()}
+
+// ═══ DRAWER DRAG ═══
+let dDragging=false,dStartY=0,dStartH=0;
+document.addEventListener('DOMContentLoaded',()=>{
+  const h=document.getElementById('drh'),d=document.getElementById('drawer'),hi=document.getElementById('drHint');
+  h.addEventListener('mousedown',e=>{dDragging=true;dStartY=e.clientY;dStartH=parseInt(d.style.height)||310;hi.classList.add('on');e.preventDefault()});
+  document.addEventListener('mousemove',e=>{if(!dDragging)return;d.style.height=Math.max(120,Math.min(550,dStartH+(dStartY-e.clientY)))+'px'});
+  document.addEventListener('mouseup',()=>{dDragging=false;hi.classList.remove('on')});
+  h.addEventListener('touchstart',e=>{dDragging=true;dStartY=e.touches[0].clientY;dStartH=parseInt(d.style.height)||310;hi.classList.add('on')},{passive:false});
+  document.addEventListener('touchmove',e=>{if(!dDragging)return;d.style.height=Math.max(120,Math.min(550,dStartH+(dStartY-e.touches[0].clientY)))+'px'},{passive:false});
+  document.addEventListener('touchend',()=>{dDragging=false;hi.classList.remove('on')});
+});
+
+// ═══ HOME ═══
+function filHome(c,el){hCat=c;if(el){document.querySelectorAll('#hcr .cc').forEach(x=>x.classList.remove('on'));el.classList.add('on')}renderHome()}
+function doSearch(){renderHome()}
+function renderHome(){
+  const q=(document.getElementById('hs')?.value||'').toLowerCase();let f=W;if(hCat)f=f.filter(w=>w.c===hCat);if(q)f=f.filter(w=>w.n.toLowerCase().includes(q)||w.c.includes(q));
+  document.getElementById('hcnt').textContent='共 '+f.length+' 个传送点';
+  document.getElementById('hcl').innerHTML=f.map(w=>'<div class="wc" onclick="goDet(\''+w.n+'\',\''+w.c+'\',\''+w.s+'\',\''+w.a+'\',\''+w.t+'\',\''+w.g+'\',\''+w.e+'\')"><div class="cth">'+w.e+'</div><div class="cbd"><div class="cnm">'+w.n+'</div><div class="cmt"><span class="cct">'+w.c+'</span><span class="cst">⭐ '+w.s+'</span></div><div class="cad">'+w.a+'</div></div><span class="car">▶</span></div>').join('')+'<div style="height:40px"></div>';
+}
+
+// ═══ MINE ═══
+function filMine(c,el){mCat=c;if(el){document.querySelectorAll('#pgMine .fchip').forEach(x=>x.classList.remove('on'));el.classList.add('on')}renderMine()}
+function renderMine(){
+  let f=W;if(mCat)f=f.filter(w=>w.c===mCat);
+  document.getElementById('ml').innerHTML=f.map(w=>'<div class="wc" style="margin-bottom:10px" onclick="goDet(\''+w.n+'\',\''+w.c+'\',\''+w.s+'\',\''+w.a+'\',\''+w.t+'\',\''+w.g+'\',\''+w.e+'\')"><div class="cth">'+w.e+'</div><div class="cbd"><div class="cnm">'+w.n+'</div><div class="cmt"><span class="cct">'+w.c+'</span><span class="cst">⭐ '+w.s+'</span></div><div class="cad">'+w.a+'</div></div><span class="car">▶</span></div>').join('');
+  const cats={};W.forEach(w=>{cats[w.c]=(cats[w.c]||0)+1});
+  document.getElementById('stBd').innerHTML=Object.entries(cats).map(([k,v])=>'<div class="sitem"><span class="scnt">'+v+'</span><span class="scat">'+k+'</span></div>').join('');
+}
+
+function pickStyle(s,el){document.querySelectorAll('#mkSt .sopt').forEach(x=>x.classList.remove('on'));el.classList.add('on');toast('Marker 风格: '+(s==='game'?'💎 游戏风':s==='minimal'?'📌 简约':'🔢 编号'))}
+
+// ═══ HELPERS ═══
+function selChip(el,gid){document.querySelectorAll('#'+gid+' .chip').forEach(c=>c.classList.remove('sel'));el.classList.add('sel')}
+function setStars(n,gid){document.querySelectorAll('#'+gid+' .sbtn').forEach((s,i)=>{s.classList.toggle('on',i<n)})}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),1800)}
+function showDel(){document.getElementById('delMod').classList.add('show')}
+function hideDel(){document.getElementById('delMod').classList.remove('show')}
+
+renderHome();renderMine();renderHist();
+</script>
+</body>
+</html>
