@@ -1,7 +1,7 @@
 // app.js
 App({
   onLaunch: function () {
-    const envId = "";
+    const envId = "cloud1-d9g18kq6t987d3c37";
     this.globalData = {
       env: envId,
       isCloudReady: false,
