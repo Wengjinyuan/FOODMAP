@@ -1,3 +1,130 @@
 <view class="page">
-  <text>详情页面</text>
+  <!-- ═══ VIEW MODE ═══ -->
+  <block wx:if="{{mode === 'view'}}">
+    <!-- Image swiper -->
+    <swiper class="img-swiper" wx:if="{{waypoint.images && waypoint.images.length > 0}}"
+      indicator-dots="{{true}}" indicator-color="rgba(0,0,0,0.2)" indicator-active-color="#4A3A35">
+      <swiper-item wx:for="{{waypoint.images}}" wx:key="*this">
+        <image class="swiper-img" src="{{item}}" mode="aspectFill" />
+      </swiper-item>
+    </swiper>
+
+    <!-- Header -->
+    <view class="detail-header {{waypoint.images && waypoint.images.length > 0 ? '' : 'no-image'}}">
+      <text class="detail-name">{{waypoint.name}}</text>
+      <view class="detail-meta">
+        <text class="detail-cat">{{waypoint.category}}</text>
+        <text class="detail-stars" wx:if="{{waypoint.rating > 0}}">{{waypoint.ratingStars}}</text>
+      </view>
+    </view>
+
+    <!-- Info -->
+    <view class="info-card">
+      <view class="info-row" wx:if="{{waypoint.address}}">
+        <text class="info-label">📍 地址</text>
+        <text class="info-value">{{waypoint.address}}</text>
+      </view>
+      <view class="info-row" wx:if="{{waypoint.notes}}">
+        <text class="info-label">📝 备注</text>
+        <text class="info-value">{{waypoint.notes}}</text>
+      </view>
+      <view class="info-row" wx:if="{{waypoint.tags && waypoint.tags.length > 0}}">
+        <text class="info-label">🏷️ 标签</text>
+        <text class="info-value">{{waypoint.tags}}</text>
+      </view>
+    </view>
+
+    <!-- Actions -->
+    <view class="action-bar">
+      <button class="nav-btn" bindtap="onNavigate">⚡ 开始传送</button>
+      <button class="edit-btn" bindtap="onEdit">✏️ 编辑</button>
+    </view>
+  </block>
+
+  <!-- ═══ EDIT / ADD MODE ═══ -->
+  <block wx:if="{{mode === 'edit' || mode === 'add'}}">
+    <scroll-view class="form-scroll" scroll-y enhanced show-scrollbar="{{false}}">
+      <view class="form-section">
+        <view class="form-title">{{mode === 'add' ? '⚡ 激活新传送点' : '✏️ 编辑传送点'}}</view>
+
+        <!-- Name -->
+        <view class="field required">
+          <text class="field-label">传送点名称</text>
+          <input class="field-input" placeholder="比如：张记烧烤大排档" value="{{form.name}}" bindinput="onFormField" data-field="name" maxlength="50" />
+        </view>
+
+        <!-- Category -->
+        <view class="field required">
+          <text class="field-label">分类</text>
+          <view class="chip-grid">
+            <view class="chip {{form.category === item ? 'selected' : ''}}"
+              wx:for="{{categories}}" wx:key="*this"
+              bindtap="onCategorySelect" data-category="{{item}}">{{item}}</view>
+          </view>
+        </view>
+
+        <!-- Location -->
+        <view class="field">
+          <text class="field-label">位置</text>
+          <view class="location-pick" bindtap="onChooseLocation">
+            <text wx:if="{{form.address}}">📍 {{form.address}}</text>
+            <text wx:else class="placeholder">点击打开地图选点</text>
+          </view>
+        </view>
+
+        <!-- Rating -->
+        <view class="field">
+          <text class="field-label">评分</text>
+          <view class="star-row">
+            <text class="star {{index < form.rating ? 'active' : ''}}"
+              wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
+              bindtap="onRatingTap" data-rating="{{item}}">★</text>
+          </view>
+        </view>
+
+        <!-- Tags -->
+        <view class="field">
+          <text class="field-label">标签</text>
+          <view class="chip-grid">
+            <view class="chip {{form.tags.indexOf(item) > -1 ? 'selected' : ''}}"
+              wx:for="{{presetTags}}" wx:key="*this"
+              bindtap="onTagToggle" data-tag="{{item}}">{{item}}</view>
+          </view>
+          <view class="custom-row">
+            <input class="custom-input" placeholder="自定义标签..." value="{{customTag}}" bindinput="onCustomTagInput" maxlength="10" />
+            <view class="custom-btn" bindtap="onAddCustomTag">+</view>
+          </view>
+        </view>
+
+        <!-- Images -->
+        <view class="field">
+          <text class="field-label">图片 ({{form.images.length}}/6)</text>
+          <view class="img-grid">
+            <view class="img-item" wx:for="{{form.images}}" wx:key="*this">
+              <image class="img-preview" src="{{item}}" mode="aspectFill" />
+              <view class="img-remove" bindtap="onRemoveImage" data-index="{{index}}">✕</view>
+            </view>
+            <view class="img-add" wx:if="{{form.images.length < 6}}" bindtap="onChooseImage">
+              <text class="img-add-icon">+</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- Notes -->
+        <view class="field">
+          <text class="field-label">备注</text>
+          <textarea class="field-textarea" placeholder="好吃的菜品、避坑指南..." value="{{form.notes}}" bindinput="onFormField" data-field="notes" maxlength="500" />
+        </view>
+      </view>
+    </scroll-view>
+
+    <!-- Bottom actions -->
+    <view class="form-actions">
+      <button class="cancel-btn" bindtap="onCancel">取消</button>
+      <button class="submit-btn" bindtap="onSubmit" disabled="{{submitting}}">
+        {{submitting ? '保存中...' : (mode === 'add' ? '⚡ 激活' : '💾 保存')}}
+      </button>
+      <button class="del-btn" wx:if="{{mode === 'edit'}}" bindtap="onDelete">🗑️</button>
+    </view>
+  </block>
 </view>

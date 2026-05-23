@@ -1,4 +1,230 @@
+const app = getApp();
+
 Page({
-  data: {},
-  onLoad() {},
+  data: {
+    mode: 'view',       // 'view' | 'edit' | 'add'
+    waypointId: null,
+    waypoint: {},
+    form: {
+      name: '', category: '', latitude: null, longitude: null,
+      address: '', notes: '', tags: [], rating: 0, images: [],
+    },
+    categories: [],
+    presetTags: ['好吃', '推荐', '回头客', '环境好', '性价比高', '难找', '深夜档'],
+    customTag: '',
+    submitting: false,
+    isOwner: false,
+  },
+
+  onLoad(options) {
+    const { id, mode } = options;
+    this.loadCategories();
+    if (mode === 'add') {
+      this.setData({ mode: 'add' });
+      this.getCurrentLocation();
+    } else if (id) {
+      this.setData({ waypointId: id, mode: 'view' });
+      this.loadDetail();
+    }
+  },
+
+  // ── Location ──
+  getCurrentLocation() {
+    wx.getLocation({
+      type: 'gcj02',
+      success: (res) => {
+        this.setData({
+          'form.latitude': res.latitude,
+          'form.longitude': res.longitude,
+        });
+      },
+    });
+  },
+
+  // ── Data ──
+  loadCategories() {
+    app.callFunction('waypointFunctions', { action: 'getPresetCategories' }).then((res) => {
+      if (res.result && res.result.success) {
+        this.setData({ categories: res.result.data });
+      }
+    });
+  },
+
+  loadDetail() {
+    app.callFunction('waypointFunctions', {
+      action: 'getWaypointDetail',
+      waypointId: this.data.waypointId,
+    }).then((res) => {
+      if (res.result && res.result.success) {
+        const wp = res.result.data;
+        const loc = wp.location || {};
+        wp.ratingRounded = Math.round(wp.rating || 0);
+        wp.ratingStars = wp.rating > 0 ? '⭐'.repeat(wp.ratingRounded) : '';
+        this.setData({
+          waypoint: wp,
+          isOwner: true,
+          form: {
+            name: wp.name,
+            category: wp.category,
+            latitude: loc.latitude || (loc.coordinates && loc.coordinates[1]) || null,
+            longitude: loc.longitude || (loc.coordinates && loc.coordinates[0]) || null,
+            address: wp.address || '',
+            notes: wp.notes || '',
+            tags: wp.tags || [],
+            rating: wp.rating || 0,
+            images: wp.images || [],
+          },
+        });
+        wx.setNavigationBarTitle({ title: wp.name || '传送点' });
+      }
+    });
+  },
+
+  // ── Mode Switching ──
+  onEdit() { this.setData({ mode: 'edit' }); },
+  onCancel() {
+    if (this.data.mode === 'add') {
+      wx.navigateBack();
+    } else {
+      this.setData({ mode: 'view' });
+      this.loadDetail();
+    }
+  },
+
+  // ── Form Fields ──
+  onFormField(e) {
+    const field = e.currentTarget.dataset.field;
+    this.setData({ ['form.' + field]: e.detail.value });
+  },
+  onCategorySelect(e) {
+    this.setData({ 'form.category': e.currentTarget.dataset.category });
+  },
+
+  // ── Tags ──
+  onTagToggle(e) {
+    const tag = e.currentTarget.dataset.tag;
+    const tags = [...this.data.form.tags];
+    const idx = tags.indexOf(tag);
+    if (idx > -1) { tags.splice(idx, 1); }
+    else { if (tags.length >= 5) return wx.showToast({ title: '最多5个标签', icon: 'none' }); tags.push(tag); }
+    this.setData({ 'form.tags': tags });
+  },
+  onCustomTagInput(e) { this.setData({ customTag: e.detail.value }); },
+  onAddCustomTag() {
+    const t = this.data.customTag.trim();
+    if (!t || this.data.form.tags.includes(t)) return;
+    this.setData({ 'form.tags': [...this.data.form.tags, t], customTag: '' });
+  },
+
+  // ── Location Picker ──
+  onChooseLocation() {
+    wx.chooseLocation({
+      success: (res) => {
+        this.setData({
+          'form.address': res.address || res.name,
+          'form.latitude': res.latitude,
+          'form.longitude': res.longitude,
+        });
+      },
+    });
+  },
+
+  // ── Images ──
+  onChooseImage() {
+    const remain = 6 - this.data.form.images.length;
+    if (remain <= 0) return wx.showToast({ title: '最多6张', icon: 'none' });
+    wx.chooseMedia({
+      count: remain, mediaType: ['image'], sizeType: ['compressed'],
+      success: (res) => {
+        wx.showLoading({ title: '上传中...' });
+        const uploads = res.tempFiles.map((file) =>
+          wx.cloud.uploadFile({
+            cloudPath: 'waypoint-images/' + Date.now() + '_' + Math.random().toString(36).substr(2, 8) + '.jpg',
+            filePath: file.tempFilePath,
+          })
+        );
+        Promise.all(uploads).then((results) => {
+          wx.hideLoading();
+          const newImages = [...this.data.form.images, ...results.map(r => r.fileID)];
+          this.setData({ 'form.images': newImages });
+        }).catch(() => {
+          wx.hideLoading();
+          wx.showToast({ title: '上传失败', icon: 'none' });
+        });
+      },
+    });
+  },
+  onRemoveImage(e) {
+    const idx = e.currentTarget.dataset.index;
+    const images = [...this.data.form.images];
+    images.splice(idx, 1);
+    this.setData({ 'form.images': images });
+  },
+
+  // ── Rating ──
+  onRatingTap(e) {
+    this.setData({ 'form.rating': Number(e.currentTarget.dataset.rating) });
+  },
+
+  // ── Submit ──
+  onSubmit() {
+    const { form, submitting, mode, waypointId } = this.data;
+    if (submitting) return;
+    if (!form.name.trim()) return wx.showToast({ title: '请输入名称', icon: 'none' });
+    if (!form.category) return wx.showToast({ title: '请选择分类', icon: 'none' });
+
+    this.setData({ submitting: true });
+    const action = mode === 'add' ? 'addWaypoint' : 'updateWaypoint';
+    const params = { action, ...form };
+    if (mode === 'edit') params.waypointId = waypointId;
+
+    app.callFunction('waypointFunctions', params).then((res) => {
+      this.setData({ submitting: false });
+      if (res.result && res.result.success) {
+        wx.showToast({ title: mode === 'add' ? '传送点已激活!' : '已更新!', icon: 'success' });
+        if (mode === 'add') { wx.switchTab({ url: '/pages/home/home' }); }
+        else { this.setData({ mode: 'view' }); this.loadDetail(); }
+      } else {
+        wx.showToast({ title: res.result.errMsg || '操作失败', icon: 'none' });
+      }
+    }).catch(() => {
+      this.setData({ submitting: false });
+      wx.showToast({ title: '网络错误', icon: 'none' });
+    });
+  },
+
+  // ── Delete ──
+  onDelete() {
+    wx.showModal({
+      title: '确认删除',
+      content: '删除后无法恢复，确定要移除这个传送点吗？',
+      confirmColor: '#FF6B6B',
+      success: (res) => {
+        if (res.confirm) {
+          app.callFunction('waypointFunctions', {
+            action: 'deleteWaypoint',
+            waypointId: this.data.waypointId,
+          }).then((res) => {
+            if (res.result && res.result.success) {
+              wx.showToast({ title: '已删除', icon: 'success' });
+              wx.switchTab({ url: '/pages/home/home' });
+            }
+          });
+        }
+      },
+    });
+  },
+
+  // ── Navigate ──
+  onNavigate() {
+    const wp = this.data.waypoint;
+    const loc = wp.location || {};
+    wx.openLocation({
+      name: wp.name,
+      address: wp.address,
+      latitude: loc.latitude || (loc.coordinates && loc.coordinates[1]) || 0,
+      longitude: loc.longitude || (loc.coordinates && loc.coordinates[0]) || 0,
+      scale: 16,
+    });
+  },
 });
