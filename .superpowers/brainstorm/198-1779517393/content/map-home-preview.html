@@ -1,0 +1,259 @@
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #0a0a1a; }
+
+  .phone { width: 390px; height: 844px; margin: 20px auto; background: #0F0F23; border-radius: 32px; overflow: hidden; position: relative; border: 2px solid #1a1a3e; box-shadow: 0 20px 60px rgba(0,212,255,0.1); }
+
+  /* ── Map Area ── */
+  .map-area {
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, #0d1b2a 0%, #1b2838 30%, #162030 60%, #0d1b2a 100%);
+  }
+  /* Map grid lines */
+  .map-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+  /* Fake roads */
+  .road { position: absolute; background: rgba(255,255,255,0.04); }
+  .road-h1 { top: 200px; left: 0; right: 0; height: 3px; }
+  .road-h2 { top: 420px; left: 0; right: 0; height: 3px; }
+  .road-v1 { left: 180px; top: 0; bottom: 0; width: 3px; }
+  .road-v2 { left: 300px; top: 0; bottom: 0; width: 2px; }
+
+  /* Marker indicators */
+  .marker {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 36px; height: 36px; border-radius: 50% 50% 50% 0;
+    transform: translate(-50%, -50%) rotate(-45deg);
+    box-shadow: 0 0 16px rgba(0,212,255,0.3);
+    display: flex; align-items: center; justify-content: center;
+  }
+  .marker span { transform: rotate(45deg); font-size: 16px; }
+  .marker-food { background: linear-gradient(135deg, #FF6B35, #FF4444); top: 180px; left: 120px; }
+  .marker-cafe { background: linear-gradient(135deg, #8B5E3C, #A0522D); top: 320px; left: 260px; }
+  .marker-scene { background: linear-gradient(135deg, #10B981, #059669); top: 480px; left: 150px; }
+  .marker-base { background: linear-gradient(135deg, #6366F1, #4F46E5); top: 250px; left: 330px; }
+  .marker-shop { background: linear-gradient(135deg, #F59E0B, #D97706); top: 550px; left: 290px; }
+
+  /* Current location dot */
+  .current-loc {
+    position: absolute; top: 390px; left: 200px;
+    width: 16px; height: 16px; background: #00D4FF;
+    border-radius: 50%; box-shadow: 0 0 20px #00D4FF;
+    border: 3px solid white;
+  }
+  .current-loc::after {
+    content: ''; position: absolute; top: -8px; left: -8px;
+    width: 24px; height: 24px; border-radius: 50%;
+    border: 2px solid rgba(0,212,255,0.3);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { transform: scale(1); opacity: 1; }
+    50% { transform: scale(2); opacity: 0; }
+  }
+
+  /* ── Floating Search Bar ── */
+  .search-bar {
+    position: absolute; top: 60px; left: 16px; right: 16px;
+    display: flex; align-items: center; gap: 10px; z-index: 10;
+  }
+  .search-input {
+    flex: 1; height: 44px; background: rgba(26,26,46,0.92);
+    border: 1px solid rgba(0,212,255,0.25); border-radius: 22px;
+    padding: 0 20px; font-size: 14px; color: #ccc;
+    backdrop-filter: blur(10px);
+  }
+  .search-input::placeholder { color: #555; }
+  .search-btn {
+    width: 44px; height: 44px; background: rgba(0,212,255,0.15);
+    border: 1px solid rgba(0,212,255,0.3); border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; backdrop-filter: blur(10px);
+  }
+
+  /* ── Floating + Button ── */
+  .add-btn {
+    position: absolute; bottom: 260px; right: 20px;
+    width: 56px; height: 56px;
+    background: linear-gradient(135deg, #00D4FF, #0088CC);
+    border-radius: 50%; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(0,212,255,0.35);
+    font-size: 32px; color: white; font-weight: 300;
+    cursor: pointer; transition: transform 0.2s;
+  }
+  .add-btn:hover { transform: scale(1.05); }
+
+  /* ── Bottom Drawer ── */
+  .drawer {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 340px;
+    background: linear-gradient(180deg, rgba(20,20,40,0.97), rgba(10,10,26,0.99));
+    border-radius: 20px 20px 0 0;
+    backdrop-filter: blur(20px);
+    border-top: 1px solid rgba(0,212,255,0.1);
+  }
+  .drawer-handle {
+    display: flex; justify-content: center; padding: 12px 0 8px;
+  }
+  .drawer-line {
+    width: 40px; height: 4px; background: rgba(255,255,255,0.15); border-radius: 2px;
+  }
+
+  /* Category chips */
+  .cat-row {
+    display: flex; gap: 8px; padding: 6px 16px 12px;
+    overflow-x: auto; white-space: nowrap;
+  }
+  .cat-chip {
+    padding: 6px 16px; border-radius: 16px; font-size: 12px;
+    background: rgba(255,255,255,0.05); color: #777;
+    white-space: nowrap; flex-shrink: 0; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.2s;
+  }
+  .cat-chip.active { background: rgba(0,212,255,0.12); color: #00D4FF; border-color: rgba(0,212,255,0.3); font-weight: 600; }
+  .cat-chip:hover { background: rgba(0,212,255,0.08); }
+
+  /* Waypoint cards */
+  .card-list {
+    padding: 0 16px; height: 240px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+  }
+  .wp-card {
+    display: flex; align-items: center; padding: 12px;
+    background: rgba(255,255,255,0.03); border-radius: 12px;
+    border: 1px solid rgba(255,255,255,0.05);
+    cursor: pointer; transition: all 0.2s;
+  }
+  .wp-card:hover { background: rgba(255,255,255,0.06); border-color: rgba(0,212,255,0.2); }
+  .card-img {
+    width: 64px; height: 64px; border-radius: 8px; flex-shrink: 0;
+    display: flex; align-items: center; justify-content: center; font-size: 28px;
+    background: rgba(255,255,255,0.05);
+  }
+  .card-body { flex: 1; margin-left: 12px; }
+  .card-name { font-size: 15px; font-weight: 600; color: #eee; }
+  .card-meta { display: flex; gap: 8px; align-items: center; margin-top: 3px; }
+  .card-cat { font-size: 11px; color: #00D4FF; background: rgba(0,212,255,0.1); padding: 2px 8px; border-radius: 4px; }
+  .card-stars { font-size: 12px; color: #FFD700; }
+  .card-addr { font-size: 11px; color: #555; margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-arrow { color: #444; font-size: 14px; margin-left: 8px; }
+
+  .empty-state { text-align: center; padding: 40px 0; color: #555; font-size: 13px; }
+
+  /* ── Status bar ── */
+  .status-bar {
+    position: absolute; top: 0; left: 0; right: 0; height: 36px;
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 0 24px; font-size: 11px; color: rgba(255,255,255,0.6); z-index: 20;
+  }
+</style>
+
+<div class="phone">
+  <!-- Status Bar -->
+  <div class="status-bar">
+    <span>9:41</span>
+    <span>📶 🔋</span>
+  </div>
+
+  <!-- Map -->
+  <div class="map-area">
+    <div class="map-grid"></div>
+    <div class="road road-h1"></div>
+    <div class="road road-h2"></div>
+    <div class="road road-v1"></div>
+    <div class="road road-v2"></div>
+
+    <!-- Markers -->
+    <div class="marker marker-food"><span>🍜</span></div>
+    <div class="marker marker-cafe"><span>☕</span></div>
+    <div class="marker marker-scene"><span>🏔️</span></div>
+    <div class="marker marker-base"><span>🏠</span></div>
+    <div class="marker marker-shop"><span>🛍️</span></div>
+
+    <!-- Current Location -->
+    <div class="current-loc"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input class="search-input" placeholder="🔍 搜索传送点..." readonly>
+    <div class="search-btn">🔍</div>
+  </div>
+
+  <!-- Add Button -->
+  <div class="add-btn">+</div>
+
+  <!-- Drawer -->
+  <div class="drawer">
+    <div class="drawer-handle"><div class="drawer-line"></div></div>
+
+    <!-- Category row -->
+    <div class="cat-row">
+      <div class="cat-chip active">全部</div>
+      <div class="cat-chip">🍜 美食</div>
+      <div class="cat-chip">☕ 咖啡</div>
+      <div class="cat-chip">🏔️ 风景</div>
+      <div class="cat-chip">🏠 根据地</div>
+      <div class="cat-chip">🛍️ 购物</div>
+      <div class="cat-chip">🎮 娱乐</div>
+      <div class="cat-chip">📍 其他</div>
+    </div>
+
+    <!-- Cards -->
+    <div class="card-list">
+      <div class="wp-card">
+        <div class="card-img">🍜</div>
+        <div class="card-body">
+          <div class="card-name">张记烧烤大排档</div>
+          <div class="card-meta">
+            <span class="card-cat">美食</span>
+            <span class="card-stars">⭐ 4.5</span>
+          </div>
+          <div class="card-addr">朝阳区建国路88号 · 1.2km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card">
+        <div class="card-img">☕</div>
+        <div class="card-body">
+          <div class="card-name">星巴克(望京店)</div>
+          <div class="card-meta">
+            <span class="card-cat">咖啡</span>
+            <span class="card-stars">⭐ 4.2</span>
+          </div>
+          <div class="card-addr">望京街10号 · 0.8km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card">
+        <div class="card-img">🏠</div>
+        <div class="card-body">
+          <div class="card-name">秘密基地</div>
+          <div class="card-meta">
+            <span class="card-cat">根据地</span>
+            <span class="card-stars">⭐ 5.0</span>
+          </div>
+          <div class="card-addr">西城区鼓楼大街55号 · 3.2km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card">
+        <div class="card-img">🏔️</div>
+        <div class="card-body">
+          <div class="card-name">西山观景台</div>
+          <div class="card-meta">
+            <span class="card-cat">风景</span>
+            <span class="card-stars">⭐ 4.8</span>
+          </div>
+          <div class="card-addr">海淀区香山路 · 8.5km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+    </div>
+  </div>
+</div>

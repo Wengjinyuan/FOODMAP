@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>美食地图 - 双主题演示</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  /* ══════════════════════════════════════
+     方案一：暖色生活指南风 (WARM)
+     ══════════════════════════════════════ */
+  :root[data-theme="warm"] {
+    --primary: #FF6A00;
+    --primary-light: #FFF0E5;
+    --primary-gradient: linear-gradient(135deg, #FF8D33, #FF6A00);
+    --bg-page: #F7F8FA;
+    --bg-card: #FFFFFF;
+    --bg-search: rgba(255,255,255,0.95);
+    --bg-drawer: #FFFFFF;
+    --text-main: #2C2C2C;
+    --text-sub: #8A8F99;
+    --text-hint: #B0B5BD;
+    --border: #F0F0F0;
+    --shadow-card: 0 8rpx 24rpx rgba(255,106,0,0.08);
+    --shadow-fab: 0 4px 12px rgba(255,106,0,0.3);
+    --radius-card: 20px;
+    --radius-chip: 20px;
+    --map-bg: #F0EDE8;
+    --star-color: #FF9500;
+    --chip-bg: #F5F5F5;
+    --chip-active-bg: #FFF0E5;
+    --chip-active-text: #FF6A00;
+    --divider: #F2F2F2;
+    --callout-bg: #FFFFFF;
+    --nav-text: #007AFF;
+    --scroller-thumb: #DDD;
+  }
+
+  /* ══════════════════════════════════════
+     方案二：元气手绘探店风 (CUTE)
+     ══════════════════════════════════════ */
+  :root[data-theme="cute"] {
+    --primary: #FFD23F;
+    --primary-light: #FFF9E6;
+    --primary-gradient: linear-gradient(135deg, #FFE066, #FFD23F);
+    --bg-page: #FFFDF7;
+    --bg-card: #FFFFFF;
+    --bg-search: rgba(255,255,255,0.95);
+    --bg-drawer: #FFFDF7;
+    --text-main: #4A3A35;
+    --text-sub: #9E8A83;
+    --text-hint: #C4B5AF;
+    --border: #4A3A35;
+    --shadow-card: 4px 4px 0px #4A3A35;
+    --shadow-fab: 2px 2px 0px #4A3A35;
+    --radius-card: 16px;
+    --radius-chip: 16px;
+    --map-bg: #FBF5E8;
+    --star-color: #FFD23F;
+    --chip-bg: #FFF9E6;
+    --chip-active-bg: #FFD23F;
+    --chip-active-text: #4A3A35;
+    --divider: #E8D5C8;
+    --callout-bg: #FFFFFF;
+    --nav-text: #FF6B6B;
+    --scroller-thumb: #E8D5C8;
+  }
+
+  /* ══════════════════════════════════════
+     基础布局 (像素级对齐)
+     ══════════════════════════════════════ */
+  body {
+    font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif;
+    background: #E8E8ED;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    gap: 32px;
+    flex-wrap: wrap;
+  }
+
+  .phone {
+    width: 390px;
+    height: 844px;
+    border-radius: 40px;
+    overflow: hidden;
+    position: relative;
+    flex-shrink: 0;
+    box-shadow: 0 24px 80px rgba(0,0,0,0.18);
+  }
+
+  .phone-label {
+    position: absolute;
+    top: -32px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 13px;
+    font-weight: 700;
+    color: #666;
+    white-space: nowrap;
+    letter-spacing: 0.5px;
+  }
+
+  /* ── 地图区域 ── */
+  .map-area {
+    position: absolute;
+    inset: 0;
+    background: var(--map-bg);
+  }
+  /* 写实道路模拟 */
+  .road-major {
+    position: absolute;
+    background: rgba(180,170,160,0.35);
+  }
+  .road-minor {
+    position: absolute;
+    background: rgba(180,170,160,0.18);
+  }
+  .road-h1 { top: 25%; left: 0; right: 0; height: 6px; }
+  .road-h2 { top: 52%; left: 0; right: 0; height: 4px; }
+  .road-h3 { top: 72%; left: 0; right: 30%; height: 3px; }
+  .road-v1 { left: 46%; top: 0; bottom: 0; width: 6px; }
+  .road-v2 { left: 76%; top: 0; bottom: 35%; width: 3px; }
+  .road-v3 { left: 20%; top: 22%; bottom: 28%; width: 3px; }
+  .park {
+    position: absolute;
+    background: rgba(140,198,120,0.15);
+    border-radius: 12px;
+  }
+  .park1 { top: 58%; left: 8%; width: 22%; height: 10%; }
+  .park2 { top: 18%; right: 10%; width: 16%; height: 8%; border-radius: 50%; }
+  .water {
+    position: absolute;
+    top: 0;
+    right: 70px;
+    width: 28px;
+    bottom: 45%;
+    background: linear-gradient(180deg, rgba(100,160,220,0.12), rgba(100,160,220,0.04));
+  }
+  .building {
+    position: absolute;
+    background: rgba(160,155,148,0.1);
+    border-radius: 2px;
+  }
+  .building:nth-child(1) { top: 14%; left: 13%; width: 18%; height: 8%; }
+  .building:nth-child(2) { top: 20%; left: 50%; width: 24%; height: 6%; }
+  .building:nth-child(3) { top: 42%; left: 28%; width: 16%; height: 7%; }
+  .building:nth-child(4) { top: 38%; left: 72%; width: 20%; height: 9%; }
+
+  /* 位置标记 */
+  .pin {
+    position: absolute;
+    transform: translate(-50%, -100%);
+    cursor: pointer;
+    z-index: 2;
+    transition: transform 0.15s;
+  }
+  .pin:hover { transform: translate(-50%, -100%) scale(1.15); z-index: 3; }
+  .pin-body {
+    width: 30px;
+    height: 30px;
+    border-radius: 50% 50% 50% 0;
+    transform: rotate(-45deg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  }
+  .pin-body span {
+    transform: rotate(45deg);
+    font-size: 14px;
+    line-height: 1;
+  }
+  .pin-shadow {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: rgba(0,0,0,0.12);
+    margin: 4px auto 0;
+  }
+  .pin:nth-child(1) { top: 22%; left: 30%; }
+  .pin:nth-child(2) { top: 38%; left: 68%; }
+  .pin:nth-child(3) { top: 56%; left: 34%; }
+  .pin:nth-child(4) { top: 28%; left: 84%; }
+  .pin:nth-child(5) { top: 64%; left: 74%; }
+  .pin:nth-child(6) { top: 46%; left: 18%; }
+  .pin-food .pin-body { background: #FF6A00; }
+  .pin-cafe .pin-body { background: #8B5E3C; }
+  .pin-scene .pin-body { background: #10B981; }
+  .pin-base .pin-body { background: #6366F1; }
+
+  /* 当前位置点 */
+  .my-loc {
+    position: absolute;
+    top: 48%;
+    left: 50%;
+    width: 14px;
+    height: 14px;
+    background: #007AFF;
+    border-radius: 50%;
+    border: 3px solid white;
+    box-shadow: 0 0 0 4px rgba(0,122,255,0.2);
+    z-index: 4;
+  }
+
+  /* ── 顶部栏 (严格对齐) ── */
+  .top-bar {
+    position: absolute;
+    top: 54px;
+    left: 16px;
+    right: 16px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    z-index: 10;
+  }
+  .search-box {
+    flex: 1;
+    height: 44px;
+    background: var(--bg-search);
+    border-radius: 22px;
+    display: flex;
+    align-items: center;
+    padding: 0 18px;
+    backdrop-filter: blur(12px);
+  }
+  .search-box[data-theme="cute"] {
+    border: 2px solid var(--border);
+    border-radius: 16px;
+  }
+  :root[data-theme="cute"] .search-box {
+    border: 2px solid #4A3A35;
+    border-radius: 16px;
+  }
+  .search-icon { font-size: 15px; margin-right: 8px; opacity: 0.5; flex-shrink: 0; }
+  .search-input {
+    flex: 1;
+    border: none;
+    background: transparent;
+    font-size: 14px;
+    color: var(--text-main);
+    outline: none;
+    font-family: inherit;
+  }
+  .search-input::placeholder { color: var(--text-hint); }
+  .theme-btn {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: var(--bg-search);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    flex-shrink: 0;
+    backdrop-filter: blur(12px);
+    border: none;
+    transition: transform 0.15s;
+  }
+  .theme-btn:hover { transform: scale(1.05); }
+  :root[data-theme="cute"] .theme-btn {
+    border: 2px solid #4A3A35;
+    border-radius: 12px;
+  }
+
+  /* ── FAB 按钮 (严格对齐) ── */
+  .fab {
+    position: absolute;
+    bottom: 260px;
+    right: 20px;
+    width: 52px;
+    height: 52px;
+    border-radius: 50%;
+    background: var(--primary-gradient);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    font-weight: 300;
+    cursor: pointer;
+    z-index: 10;
+    border: none;
+    transition: transform 0.15s;
+    box-shadow: var(--shadow-fab);
+  }
+  .fab:hover { transform: scale(1.06); }
+  .fab:active { transform: scale(0.94); }
+  :root[data-theme="cute"] .fab {
+    border-radius: 20px;
+    border: 3px solid #4A3A35;
+    color: #4A3A35;
+  }
+
+  /* ── 底部抽屉 (严格对齐) ── */
+  .drawer {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 310px;
+    background: var(--bg-drawer);
+    border-radius: 24px 24px 0 0;
+    display: flex;
+    flex-direction: column;
+    z-index: 9;
+  }
+  :root[data-theme="cute"] .drawer {
+    border-top: 3px solid #4A3A35;
+    border-left: 3px solid #4A3A35;
+    border-right: 3px solid #4A3A35;
+  }
+  .drawer-handle {
+    display: flex;
+    justify-content: center;
+    padding: 12px 0 8px;
+    flex-shrink: 0;
+  }
+  .drawer-bar {
+    width: 40px;
+    height: 4px;
+    border-radius: 2px;
+    background: #DDD;
+  }
+  :root[data-theme="cute"] .drawer-bar {
+    background: #4A3A35;
+    border-radius: 4px;
+    height: 5px;
+  }
+
+  /* 分类行 */
+  .cat-row {
+    display: flex;
+    gap: 8px;
+    padding: 0 16px 10px;
+    overflow-x: auto;
+    flex-shrink: 0;
+    scrollbar-width: none;
+    align-items: center;
+  }
+  .cat-row::-webkit-scrollbar { display: none; }
+  .cat-chip {
+    padding: 6px 16px;
+    border-radius: var(--radius-chip);
+    font-size: 12px;
+    background: var(--chip-bg);
+    color: var(--text-sub);
+    cursor: pointer;
+    white-space: nowrap;
+    flex-shrink: 0;
+    transition: all 0.15s;
+    border: none;
+    font-family: inherit;
+    line-height: 1.4;
+  }
+  .cat-chip:hover { opacity: 0.8; }
+  .cat-chip.active {
+    background: var(--chip-active-bg);
+    color: var(--chip-active-text);
+    font-weight: 600;
+  }
+  :root[data-theme="cute"] .cat-chip {
+    border: 2px solid #4A3A35;
+    border-radius: 14px;
+  }
+  :root[data-theme="cute"] .cat-chip.active {
+    background: #FFD23F;
+    color: #4A3A35;
+    font-weight: 700;
+  }
+
+  /* 卡片列表 */
+  .card-list {
+    flex: 1;
+    padding: 0 16px;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    scrollbar-width: none;
+  }
+  .card-list::-webkit-scrollbar { display: none; }
+
+  .card {
+    display: flex;
+    align-items: center;
+    padding: 14px;
+    background: var(--bg-card);
+    border-radius: var(--radius-card);
+    cursor: pointer;
+    transition: all 0.15s;
+    flex-shrink: 0;
+  }
+  .card:hover { transform: translateX(3px); }
+  :root[data-theme="cute"] .card {
+    border: 3px solid #4A3A35;
+    box-shadow: 4px 4px 0px #4A3A35;
+  }
+  :root[data-theme="cute"] .card:hover {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px #4A3A35;
+  }
+  .card-thumb {
+    width: 56px;
+    height: 56px;
+    border-radius: 12px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    background: var(--chip-bg);
+  }
+  :root[data-theme="cute"] .card-thumb {
+    border: 2px solid #4A3A35;
+    border-radius: 10px;
+    background: #FFF9E6;
+  }
+  .card-body {
+    flex: 1;
+    margin-left: 12px;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .card-name {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-main);
+    line-height: 1.3;
+  }
+  .card-meta {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .card-cat {
+    font-size: 11px;
+    padding: 2px 8px;
+    border-radius: 4px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 500;
+    line-height: 1.4;
+  }
+  :root[data-theme="cute"] .card-cat {
+    border: 1.5px solid #4A3A35;
+    border-radius: 6px;
+    background: #FFD23F;
+    color: #4A3A35;
+    font-weight: 700;
+  }
+  .card-star {
+    font-size: 12px;
+    color: var(--star-color);
+  }
+  .card-addr {
+    font-size: 11px;
+    color: var(--text-sub);
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    line-height: 1.3;
+  }
+  .card-arrow {
+    color: var(--text-hint);
+    font-size: 14px;
+    margin-left: 4px;
+    flex-shrink: 0;
+  }
+
+  /* 结果计数 */
+  .result-count {
+    font-size: 11px;
+    color: var(--text-hint);
+    padding: 0 16px 6px;
+    flex-shrink: 0;
+    line-height: 1.4;
+  }
+
+  /* ── Callout 名片 ── */
+  .callout {
+    position: absolute;
+    bottom: 320px;
+    left: 24px;
+    right: 84px;
+    background: var(--callout-bg);
+    border-radius: 16px;
+    padding: 16px 20px;
+    z-index: 11;
+    box-shadow: var(--shadow-card);
+    cursor: pointer;
+  }
+  :root[data-theme="cute"] .callout {
+    border: 3px solid #4A3A35;
+    box-shadow: 4px 4px 0px #4A3A35;
+    border-radius: 14px;
+  }
+  .callout-close {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    font-size: 18px;
+    color: var(--text-hint);
+    cursor: pointer;
+    padding: 4px;
+    line-height: 1;
+  }
+  .callout-name {
+    font-size: 17px;
+    font-weight: 700;
+    color: var(--text-main);
+    margin-bottom: 4px;
+    display: block;
+    line-height: 1.3;
+  }
+  .callout-meta {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .callout-cat {
+    font-size: 12px;
+    padding: 2px 10px;
+    border-radius: 4px;
+    background: var(--primary-light);
+    color: var(--primary);
+    font-weight: 500;
+  }
+  :root[data-theme="cute"] .callout-cat {
+    border: 2px solid #4A3A35;
+    background: #FFD23F;
+    color: #4A3A35;
+    font-weight: 700;
+    border-radius: 6px;
+  }
+  .callout-stars { font-size: 13px; color: var(--star-color); }
+  .callout-hint {
+    font-size: 11px;
+    color: var(--nav-text);
+    display: block;
+    line-height: 1.3;
+  }
+
+  /* ── 状态栏 ── */
+  .status-bar {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 48px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 28px 0;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-main);
+    z-index: 20;
+  }
+
+  /* ── 主题指示器 ── */
+  .theme-indicator {
+    position: absolute;
+    bottom: 16px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 11px;
+    color: var(--text-hint);
+    z-index: 20;
+    background: var(--bg-search);
+    padding: 4px 14px;
+    border-radius: 10px;
+    backdrop-filter: blur(8px);
+  }
+
+  /* ── 无内容状态 ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 30px 0;
+    color: var(--text-hint);
+    font-size: 13px;
+    text-align: center;
+  }
+  .empty-state .empty-icon { font-size: 36px; margin-bottom: 8px; }
+
+  /* ── 全局主题切换器 ── */
+  .global-switcher {
+    position: fixed;
+    top: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    background: white;
+    border-radius: 28px;
+    padding: 4px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+    z-index: 100;
+    gap: 2px;
+  }
+  .global-switcher button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 24px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: inherit;
+    background: transparent;
+    color: #888;
+    white-space: nowrap;
+  }
+  .global-switcher button.active {
+    color: white;
+  }
+  .global-switcher button.warm-btn.active { background: #FF6A00; }
+  .global-switcher button.cute-btn.active { background: #FFD23F; color: #4A3A35; }
+  .global-switcher button:hover:not(.active) { color: #555; }
+
+  @media (max-width: 860px) {
+    body { flex-direction: column; padding: 80px 10px 20px; }
+  }
+</style>
+</head>
+<body data-theme="warm">
+
+<!-- 全局切换器 -->
+<div class="global-switcher">
+  <button class="warm-btn active" onclick="switchTheme('warm')">🍜 暖色生活风</button>
+  <button class="cute-btn" onclick="switchTheme('cute')">✨ 元气手绘风</button>
+</div>
+
+<!-- ═══ 左侧: 方案一 ═══ -->
+<div class="phone" id="phone1" style="border: 1px solid #E8E8E8;">
+  <div style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:12px;color:#FF6A00;font-weight:700;">暖色生活指南风</div>
+  <div class="map-area">
+    <div class="road-major road-h1"></div><div class="road-major road-h2"></div>
+    <div class="road-minor road-h3"></div>
+    <div class="road-major road-v1"></div><div class="road-minor road-v2"></div><div class="road-minor road-v3"></div>
+    <div class="park park1"></div><div class="park park2"></div>
+    <div class="water"></div>
+    <div style="position:absolute;top:14%;left:13%;width:18%;height:8%;background:rgba(160,155,148,0.1);border-radius:2px;"></div>
+    <div style="position:absolute;top:20%;left:50%;width:24%;height:6%;background:rgba(160,155,148,0.1);border-radius:2px;"></div>
+    <div style="position:absolute;top:42%;left:28%;width:16%;height:7%;background:rgba(160,155,148,0.1);border-radius:2px;"></div>
+    <div style="position:absolute;top:38%;left:72%;width:20%;height:9%;background:rgba(160,155,148,0.1);border-radius:2px;"></div>
+
+    <div class="pin pin-food"><div class="pin-body"><span>🍜</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-cafe"><div class="pin-body"><span>☕</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-scene"><div class="pin-body"><span>🏔️</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-base"><div class="pin-body"><span>🏠</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-food" style="top:64%;left:74%;"><div class="pin-body"><span>🍜</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-cafe" style="top:46%;left:18%;"><div class="pin-body"><span>☕</span></div><div class="pin-shadow"></div></div>
+
+    <div class="my-loc"></div>
+  </div>
+
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="search-box">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" placeholder="搜索美食地点..." oninput="doSearch(1, this.value)">
+    </div>
+    <button class="theme-btn" onclick="switchPhoneTheme(1)" id="themeBtn1">🌓</button>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" onclick="alert('➕ 实际跳转到添加传送点页面')">+</button>
+
+  <!-- Callout -->
+  <div class="callout" id="callout1" style="display:none;" onclick="alert('📋 实际跳转到详情页面')">
+    <span class="callout-close" onclick="event.stopPropagation();document.getElementById('callout1').style.display='none'">✕</span>
+    <span class="callout-name" id="calloutName1">张记烧烤大排档</span>
+    <div class="callout-meta">
+      <span class="callout-cat">美食</span>
+      <span class="callout-stars">⭐ 4.5</span>
+    </div>
+    <span class="callout-hint">点击查看详情 ▶</span>
+  </div>
+
+  <!-- 底部抽屉 -->
+  <div class="drawer">
+    <div class="drawer-handle"><div class="drawer-bar"></div></div>
+    <div class="cat-row" id="catRow1">
+      <button class="cat-chip active" onclick="filterCat(1,'',this)">全部</button>
+      <button class="cat-chip" onclick="filterCat(1,'美食',this)">🍜 美食</button>
+      <button class="cat-chip" onclick="filterCat(1,'咖啡',this)">☕ 咖啡</button>
+      <button class="cat-chip" onclick="filterCat(1,'风景',this)">🏔️ 风景</button>
+      <button class="cat-chip" onclick="filterCat(1,'根据地',this)">🏠 根据地</button>
+      <button class="cat-chip" onclick="filterCat(1,'购物',this)">🛍️ 购物</button>
+      <button class="cat-chip" onclick="filterCat(1,'娱乐',this)">🎮 娱乐</button>
+      <button class="cat-chip" onclick="filterCat(1,'其他',this)">📍 其他</button>
+    </div>
+    <div class="result-count" id="count1">共 6 个传送点</div>
+    <div class="card-list" id="cardList1">
+    </div>
+  </div>
+
+  <div class="theme-indicator">暖色生活指南风</div>
+</div>
+
+<!-- ═══ 右侧: 方案二 ═══ -->
+<div class="phone" id="phone2" style="border: 3px solid #4A3A35;">
+  <div style="position:absolute;top:-30px;left:50%;transform:translateX(-50%);font-size:12px;color:#4A3A35;font-weight:700;">元气手绘探店风</div>
+  <div class="map-area" style="background:#FBF5E8;">
+    <div class="road-major road-h1" style="background:rgba(180,170,160,0.4);"></div>
+    <div class="road-major road-h2" style="background:rgba(180,170,160,0.3);"></div>
+    <div class="road-minor road-h3" style="background:rgba(180,170,160,0.2);"></div>
+    <div class="road-major road-v1" style="background:rgba(180,170,160,0.4);"></div>
+    <div class="road-minor road-v2" style="background:rgba(180,170,160,0.2);"></div>
+    <div class="road-minor road-v3" style="background:rgba(180,170,160,0.2);"></div>
+    <div class="park park1" style="border:2px solid #4A3A35;background:rgba(180,210,160,0.3);"></div>
+    <div class="park park2" style="border:2px solid #4A3A35;background:rgba(180,210,160,0.3);"></div>
+    <div class="water" style="border-left:2px dashed #8BB8D0;"></div>
+    <div style="position:absolute;top:14%;left:13%;width:18%;height:8%;background:rgba(160,155,148,0.12);border-radius:2px;border:1.5px solid rgba(74,58,53,0.2);"></div>
+    <div style="position:absolute;top:20%;left:50%;width:24%;height:6%;background:rgba(160,155,148,0.12);border-radius:2px;border:1.5px solid rgba(74,58,53,0.2);"></div>
+    <div style="position:absolute;top:42%;left:28%;width:16%;height:7%;background:rgba(160,155,148,0.12);border-radius:2px;border:1.5px solid rgba(74,58,53,0.2);"></div>
+    <div style="position:absolute;top:38%;left:72%;width:20%;height:9%;background:rgba(160,155,148,0.12);border-radius:2px;border:1.5px solid rgba(74,58,53,0.2);"></div>
+
+    <div class="pin pin-food" style="top:22%;left:30%;"><div class="pin-body" style="border-radius:50%;border:2px solid #4A3A35;"><span>🍜</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-cafe" style="top:38%;left:68%;"><div class="pin-body" style="border-radius:30%;border:2px solid #4A3A35;"><span>☕</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-scene" style="top:56%;left:34%;"><div class="pin-body" style="border-radius:40%;border:2px solid #4A3A35;"><span>🏔️</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-base" style="top:28%;left:84%;"><div class="pin-body" style="border-radius:30%;border:2px solid #4A3A35;"><span>🏠</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-food" style="top:64%;left:74%;"><div class="pin-body" style="border-radius:50%;border:2px solid #4A3A35;"><span>🍜</span></div><div class="pin-shadow"></div></div>
+    <div class="pin pin-cafe" style="top:46%;left:18%;"><div class="pin-body" style="border-radius:30%;border:2px solid #4A3A35;"><span>☕</span></div><div class="pin-shadow"></div></div>
+
+    <div class="my-loc" style="border-color:#FFFDF7;box-shadow:0 0 0 4px rgba(255,210,63,0.4);"></div>
+  </div>
+
+  <!-- 顶部栏 -->
+  <div class="top-bar">
+    <div class="search-box" style="border:2px solid #4A3A35;border-radius:16px;">
+      <span class="search-icon">🔍</span>
+      <input class="search-input" placeholder="搜索美食地点..." style="color:#4A3A35;" oninput="doSearch(2, this.value)">
+    </div>
+    <button class="theme-btn" style="border:2px solid #4A3A35;border-radius:12px;" onclick="switchPhoneTheme(2)" id="themeBtn2">🌓</button>
+  </div>
+
+  <!-- FAB -->
+  <button class="fab" style="border:3px solid #4A3A35;border-radius:20px;color:#4A3A35;" onclick="alert('➕ 实际跳转到添加传送点页面')">+</button>
+
+  <!-- Callout -->
+  <div class="callout" id="callout2" style="display:none;border:3px solid #4A3A35;box-shadow:4px 4px 0px #4A3A35;border-radius:14px;" onclick="alert('📋 实际跳转到详情页面')">
+    <span class="callout-close" onclick="event.stopPropagation();document.getElementById('callout2').style.display='none'">✕</span>
+    <span class="callout-name" id="calloutName2">张记烧烤大排档</span>
+    <div class="callout-meta">
+      <span class="callout-cat" style="border:2px solid #4A3A35;background:#FFD23F;color:#4A3A35;font-weight:700;border-radius:6px;">美食</span>
+      <span class="callout-stars">⭐ 4.5</span>
+    </div>
+    <span class="callout-hint" style="color:#FF6B6B;">点击查看详情 ▶</span>
+  </div>
+
+  <!-- 底部抽屉 -->
+  <div class="drawer" style="border-top:3px solid #4A3A35;border-left:3px solid #4A3A35;border-right:3px solid #4A3A35;">
+    <div class="drawer-handle"><div class="drawer-bar" style="background:#4A3A35;height:5px;border-radius:4px;"></div></div>
+    <div class="cat-row" id="catRow2">
+      <button class="cat-chip active" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'',this)">全部</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'美食',this)">🍜 美食</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'咖啡',this)">☕ 咖啡</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'风景',this)">🏔️ 风景</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'根据地',this)">🏠 根据地</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'购物',this)">🛍️ 购物</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'娱乐',this)">🎮 娱乐</button>
+      <button class="cat-chip" style="border:2px solid #4A3A35;border-radius:14px;" onclick="filterCat(2,'其他',this)">📍 其他</button>
+    </div>
+    <div class="result-count" id="count2">共 6 个传送点</div>
+    <div class="card-list" id="cardList2">
+    </div>
+  </div>
+
+  <div class="theme-indicator">元气手绘探店风</div>
+</div>
+
+<script>
+  // ═══ 模拟数据 ═══
+  const waypoints = [
+    { name:'张记烧烤大排档', cat:'美食', stars:4.5, addr:'朝阳区建国路88号 · 1.2km', emoji:'🍜' },
+    { name:'星巴克(望京店)', cat:'咖啡', stars:4.2, addr:'望京街10号 · 0.8km', emoji:'☕' },
+    { name:'秘密基地', cat:'根据地', stars:5.0, addr:'西城区鼓楼大街55号 · 3.2km', emoji:'🏠' },
+    { name:'西山观景台', cat:'风景', stars:4.8, addr:'海淀区香山路 · 8.5km', emoji:'🏔️' },
+    { name:'朝阳大悦城', cat:'购物', stars:4.0, addr:'朝阳区朝阳北路101号 · 2.0km', emoji:'🛍️' },
+    { name:'深夜食堂', cat:'美食', stars:4.3, addr:'东城区东直门内大街 · 4.1km', emoji:'🍜' },
+  ];
+
+  const themes = { 1:'warm', 2:'cute' };
+
+  // ═══ 全局主题同步 ═══
+  function switchTheme(t) {
+    document.body.setAttribute('data-theme', t);
+    document.querySelectorAll('.global-switcher button').forEach(b => b.classList.remove('active'));
+    document.querySelector('.' + t + '-btn').classList.add('active');
+    // 两边同步
+    document.getElementById('phone1').setAttribute('data-theme', t);
+    document.getElementById('phone2').setAttribute('data-theme', t);
+    renderCards(1);
+    renderCards(2);
+  }
+
+  function switchPhoneTheme(n) {
+    const current = themes[n];
+    const next = current === 'warm' ? 'cute' : 'warm';
+    themes[n] = next;
+    document.getElementById('phone' + n).setAttribute('data-theme', next);
+    renderCards(n);
+  }
+
+  // ═══ 渲染卡片 ═══
+  function renderCards(n) {
+    const list = document.getElementById('cardList' + n);
+    const t = themes[n];
+    const isCute = t === 'cute';
+    const primary = isCute ? '#FFD23F' : '#FF6A00';
+    const primaryLight = isCute ? '#FFF9E6' : '#FFF0E5';
+    const textMain = isCute ? '#4A3A35' : '#2C2C2C';
+    const textSub = isCute ? '#9E8A83' : '#8A8F99';
+    const border = isCute ? '3px solid #4A3A35' : '1px solid #F0F0F0';
+    const shadow = isCute ? '4px 4px 0px #4A3A35' : '0 4px 16px rgba(255,106,0,0.06)';
+    const radius = isCute ? '14px' : '18px';
+
+    const activeCat = list.parentElement.querySelector('.cat-chip.active')?.textContent.replace(/[^一-龥]/g,'') || '';
+    const searchInput = list.parentElement.parentElement.querySelector('.search-input');
+    const searchTerm = (searchInput?.value || '').toLowerCase().trim();
+
+    let filtered = waypoints;
+    if (activeCat && activeCat !== '全部') {
+      filtered = waypoints.filter(w => w.cat === activeCat);
+    }
+    if (searchTerm) {
+      filtered = filtered.filter(w => w.name.toLowerCase().includes(searchTerm) || w.cat.includes(searchTerm));
+    }
+
+    // Update count
+    const countEl = document.getElementById('count' + n);
+    if (countEl) countEl.textContent = '共 ' + filtered.length + ' 个传送点';
+
+    list.innerHTML = filtered.length === 0
+      ? '<div class="empty-state"><div class="empty-icon">🔍</div>没有找到匹配的地点<br><small>试试其他关键词或分类</small></div>'
+      : filtered.map((w, i) => `
+        <div class="card" onclick="showCallout(${n}, '${w.name}', '${w.cat}', ${w.stars})"
+          style="border:${border};box-shadow:${shadow};border-radius:${radius};${isCute && i===0 ? 'margin-top:2px;' : ''}">
+          <div class="card-thumb" style="${isCute ? 'border:2px solid #4A3A35;border-radius:10px;background:#FFF9E6;' : ''}">${w.emoji}</div>
+          <div class="card-body">
+            <div class="card-name" style="color:${textMain};">${w.name}</div>
+            <div class="card-meta">
+              <span class="card-cat" style="background:${primaryLight};color:${primary};${isCute ? 'border:1.5px solid #4A3A35;border-radius:6px;font-weight:700;background:#FFD23F;color:#4A3A35;' : ''}">${w.cat}</span>
+              <span class="card-star">⭐ ${w.stars}</span>
+            </div>
+            <div class="card-addr" style="color:${textSub};">${w.addr}</div>
+          </div>
+          <span class="card-arrow" style="color:${textSub};">▶</span>
+        </div>
+      `).join('');
+  }
+
+  // ═══ 分类筛选 ═══
+  function filterCat(n, cat, btn) {
+    const row = document.getElementById('catRow' + n);
+    row.querySelectorAll('.cat-chip').forEach(c => c.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards(n);
+  }
+
+  // ═══ 搜索 ═══
+  function doSearch(n, val) {
+    renderCards(n);
+  }
+
+  // ═══ Callout ═══
+  function showCallout(n, name, cat, stars) {
+    const callout = document.getElementById('callout' + n);
+    document.getElementById('calloutName' + n).textContent = name;
+    callout.style.display = 'block';
+  }
+
+  // ═══ 初始化 ═══
+  document.getElementById('phone1').setAttribute('data-theme', 'warm');
+  document.getElementById('phone2').setAttribute('data-theme', 'cute');
+  renderCards(1);
+  renderCards(2);
+</script>
+
+</body>
+</html>

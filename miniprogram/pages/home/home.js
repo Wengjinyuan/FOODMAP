@@ -9,7 +9,7 @@ Page({
     markers: [],
 
     // Theme
-    theme: 'dark',
+    theme: 'cute',
 
     // Waypoint data
     waypoints: [],
@@ -25,7 +25,7 @@ Page({
   },
 
   onLoad() {
-    const theme = app.globalData.theme || wx.getStorageSync('theme') || 'dark';
+    const theme = app.globalData.theme || wx.getStorageSync('theme') || 'cute';
     this.setData({ theme });
     this.applyTheme(theme);
     this.loadCategories();
@@ -38,7 +38,7 @@ Page({
 
   // ── Theme ──
   toggleTheme() {
-    const theme = this.data.theme === 'dark' ? 'light' : 'dark';
+    const theme = this.data.theme === 'cute' ? 'warm' : 'cute';
     this.setData({ theme });
     app.globalData.theme = theme;
     wx.setStorageSync('theme', theme);
@@ -46,15 +46,16 @@ Page({
   },
 
   applyTheme(theme) {
-    const isDark = theme === 'dark';
+    // 元气手绘风: 奶油底 #FFFDF7, 暖咖字 #4A3A35
+    // 暖色生活风: 灰白底 #F7F8FA, 深灰字 #2C2C2C
+    const isCute = theme === 'cute';
     wx.setNavigationBarColor({
-      frontColor: isDark ? '#ffffff' : '#000000',
-      backgroundColor: isDark ? '#1A1A2E' : '#FFFFFF',
+      frontColor: '#000000',
+      backgroundColor: isCute ? '#FFFDF7' : '#F7F8FA',
     });
     wx.setBackgroundColor({
-      backgroundColor: isDark ? '#0F0F23' : '#F5F5F5',
+      backgroundColor: isCute ? '#FFFDF7' : '#F7F8FA',
     });
-    // Rebuild markers with correct theme-dependent callout colors
     if (this.data.waypoints.length > 0) {
       const markers = this.buildMarkers(this.data.waypoints);
       this.setData({ markers });
@@ -123,8 +124,9 @@ Page({
   // ── Markers ──
   buildMarkers(waypoints) {
     const markerStyle = app.globalData.markerStyle || 'game';
-    const isDark = this.data.theme === 'dark';
-    const calloutBgColor = isDark ? '#1A1A2E' : '#333333';
+    const isCute = this.data.theme === 'cute';
+    const calloutBgColor = '#FFFDF7';
+    const calloutTextColor = '#4A3A35';
     const colors = {
       '美食': '#FF6B35', '咖啡': '#8B5E3C', '风景': '#10B981',
       '根据地': '#6366F1', '购物': '#F59E0B', '娱乐': '#EC4899', '其他': '#6B7280'
@@ -152,7 +154,7 @@ Page({
             display: 'ALWAYS', textAlign: 'center'
           },
           callout: {
-            content: wp.name, color: '#FFFFFF', fontSize: 12,
+            content: wp.name, color: calloutTextColor, fontSize: 12,
             bgColor: calloutBgColor,
             borderRadius: 8, padding: 6, display: 'BYCLICK'
           },
@@ -172,7 +174,7 @@ Page({
             display: 'ALWAYS', textAlign: 'center'
           },
           callout: {
-            content: wp.name, color: '#FFFFFF', fontSize: 12,
+            content: wp.name, color: calloutTextColor, fontSize: 12,
             bgColor: calloutBgColor,
             borderRadius: 8, padding: 6, display: 'BYCLICK'
           },
@@ -191,7 +193,7 @@ Page({
           display: 'ALWAYS', textAlign: 'center'
         },
         callout: {
-          content: wp.name, color: '#FFFFFF', fontSize: 12,
+          content: wp.name, color: calloutTextColor, fontSize: 12,
           bgColor: calloutBgColor,
           borderRadius: 8, padding: 6, display: 'BYCLICK'
         },

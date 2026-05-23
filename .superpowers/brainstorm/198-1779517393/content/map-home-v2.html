@@ -1,0 +1,534 @@
+<style>
+  :root {
+    --bg: #0F0F23;
+    --bg-card: rgba(255,255,255,0.04);
+    --bg-search: rgba(26,26,46,0.92);
+    --text: #E0E0E0;
+    --text-secondary: #666;
+    --border: rgba(255,255,255,0.08);
+    --accent: #00D4FF;
+    --accent-bg: rgba(0,212,255,0.12);
+    --drawer-bg: linear-gradient(180deg, rgba(20,20,40,0.97), rgba(10,10,26,0.99));
+    --chip-bg: rgba(255,255,255,0.05);
+    --map-bg: #1b2838;
+    --star: #FFD700;
+  }
+  :root.light {
+    --bg: #F5F5F5;
+    --bg-card: #FFFFFF;
+    --bg-search: rgba(255,255,255,0.95);
+    --text: #222222;
+    --text-secondary: #999;
+    --border: rgba(0,0,0,0.08);
+    --accent: #007AFF;
+    --accent-bg: rgba(0,122,255,0.1);
+    --drawer-bg: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(245,245,245,0.99));
+    --chip-bg: #EEEEEE;
+    --map-bg: #e8e4df;
+    --star: #FF9500;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: -apple-system, "PingFang SC", "Microsoft YaHei", sans-serif; background: #1a1a2e; display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+
+  .phone { width: 390px; height: 844px; background: var(--bg); border-radius: 32px; overflow: hidden; position: relative; border: 2px solid var(--border); box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+
+  /* ── Theme Toggle ── */
+  .theme-toggle {
+    position: absolute; top: 52px; right: 16px; z-index: 30;
+    width: 36px; height: 36px; border-radius: 50%;
+    background: var(--bg-search); border: 1px solid var(--border);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px; cursor: pointer; backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+
+  /* ── Map Area ── */
+  .map-area {
+    position: absolute; inset: 0;
+    background: var(--map-bg);
+    background-image:
+      radial-gradient(circle at 30% 40%, rgba(0,212,255,0.05) 0%, transparent 50%);
+  }
+  /* Realistic map styling — grid removed, roads as subtle lines */
+  .road { position: absolute; background: rgba(128,128,128,0.15); }
+  .road-h1 { top: 200px; left: 0; right: 0; height: 3px; }
+  .road-h2 { top: 420px; left: 0; right: 0; height: 2px; }
+  .road-h3 { top: 580px; left: 0; right: 40%; height: 2px; }
+  .road-v1 { left: 180px; top: 0; bottom: 0; width: 3px; }
+  .road-v2 { left: 300px; top: 0; bottom: 40%; width: 2px; }
+  .road-v3 { left: 80px; top: 180px; bottom: 200px; width: 2px; }
+
+  /* Parks/water areas */
+  .park { position: absolute; background: rgba(16,185,129,0.08); border-radius: 50%; }
+  .park1 { top: 480px; left: 40px; width: 80px; height: 60px; }
+  .river {
+    position: absolute; top: 0; right: 80px; width: 30px; bottom: 50%;
+    background: linear-gradient(180deg, rgba(59,130,246,0.1), transparent);
+  }
+
+  /* Building blocks */
+  .block { position: absolute; background: rgba(128,128,128,0.06); }
+  .block:nth-child(1) { top: 120px; left: 50px; width: 70px; height: 60px; }
+  .block:nth-child(2) { top: 150px; left: 200px; width: 90px; height: 40px; }
+  .block:nth-child(3) { top: 350px; left: 100px; width: 60px; height: 50px; }
+  .block:nth-child(4) { top: 300px; left: 280px; width: 80px; height: 70px; }
+
+  /* Markers — more realistic pin style */
+  .marker {
+    position: absolute; transform: translate(-50%, -100%);
+    width: 28px; height: 36px; cursor: pointer;
+    filter: drop-shadow(0 2px 6px rgba(0,0,0,0.3));
+    transition: transform 0.2s;
+  }
+  .marker:hover { transform: translate(-50%, -100%) scale(1.2); }
+  .marker::before {
+    content: ''; position: absolute; bottom: 0; left: 50%; transform: translateX(-50%);
+    width: 0; height: 0;
+    border-left: 14px solid transparent;
+    border-right: 14px solid transparent;
+    border-top: 14px solid var(--accent);
+  }
+  .marker::after {
+    content: ''; position: absolute; top: 0; left: 50%; transform: translateX(-50%);
+    width: 20px; height: 20px; border-radius: 50%;
+    background: var(--accent); border: 2px solid white;
+  }
+  .marker .pin-emoji {
+    position: absolute; top: 2px; left: 50%; transform: translateX(-50%);
+    font-size: 10px; z-index: 1; color: white; line-height: 1;
+  }
+  .marker:nth-child(1) { top: 170px; left: 120px; }
+  .marker:nth-child(2) { top: 310px; left: 260px; }
+  .marker:nth-child(3) { top: 470px; left: 140px; }
+  .marker:nth-child(4) { top: 240px; left: 330px; }
+  .marker:nth-child(5) { top: 540px; left: 280px; }
+  .marker:nth-child(6) { top: 380px; left: 60px; }
+
+  /* Current location */
+  .current-loc {
+    position: absolute; top: 390px; left: 200px;
+    width: 14px; height: 14px; background: var(--accent);
+    border-radius: 50%; box-shadow: 0 0 16px var(--accent);
+    border: 2.5px solid white; z-index: 5;
+  }
+
+  /* ── Search Bar ── */
+  .search-bar {
+    position: absolute; top: 60px; left: 16px; right: 56px;
+    display: flex; align-items: center; gap: 8px; z-index: 10;
+  }
+  .search-input {
+    flex: 1; height: 42px; background: var(--bg-search);
+    border: 1px solid var(--border); border-radius: 21px;
+    padding: 0 18px; font-size: 13px; color: var(--text);
+    backdrop-filter: blur(10px); outline: none;
+  }
+  .search-input::placeholder { color: var(--text-secondary); }
+
+  /* ── Add Button ── */
+  .add-btn {
+    position: absolute; bottom: 260px; right: 20px;
+    width: 52px; height: 52px;
+    background: linear-gradient(135deg, var(--accent), #0088CC);
+    border-radius: 50%; z-index: 10;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 6px 20px rgba(0,212,255,0.3);
+    font-size: 28px; color: white; font-weight: 300;
+    cursor: pointer; transition: all 0.2s;
+    border: none;
+  }
+  .add-btn:hover { transform: scale(1.08); box-shadow: 0 8px 28px rgba(0,212,255,0.45); }
+  .add-btn:active { transform: scale(0.95); }
+  .add-tooltip {
+    position: absolute; bottom: 330px; right: 10px;
+    background: var(--bg-search); color: var(--text);
+    padding: 8px 14px; border-radius: 8px; font-size: 12px;
+    border: 1px solid var(--border); white-space: nowrap;
+    pointer-events: none; opacity: 0; transform: translateY(8px);
+    transition: all 0.3s; box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+  }
+  .add-tooltip.show { opacity: 1; transform: translateY(0); }
+
+  /* ── Detail Overlay ── */
+  .detail-overlay {
+    position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+    z-index: 50; display: none; align-items: flex-end;
+    backdrop-filter: blur(2px);
+  }
+  .detail-overlay.show { display: flex; }
+  .detail-card {
+    width: 100%; background: var(--bg); border-radius: 20px 20px 0 0;
+    padding: 24px 20px 40px; max-height: 70%;
+    border-top: 1px solid var(--border); overflow-y: auto;
+  }
+  .detail-close {
+    float: right; width: 32px; height: 32px; border-radius: 50%;
+    background: var(--chip-bg); border: none; color: var(--text-secondary);
+    font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center;
+  }
+  .detail-placeholder { width: 100%; height: 160px; background: var(--chip-bg); border-radius: 12px; margin-bottom: 16px; display: flex; align-items: center; justify-content: center; font-size: 48px; }
+  .detail-name { font-size: 22px; font-weight: 700; color: var(--text); }
+  .detail-meta { display: flex; gap: 12px; margin: 8px 0 16px; align-items: center; }
+  .detail-cat { font-size: 13px; color: var(--accent); background: var(--accent-bg); padding: 3px 12px; border-radius: 6px; }
+  .detail-row { display: flex; padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; color: var(--text); }
+  .detail-label { width: 80px; color: var(--text-secondary); flex-shrink: 0; }
+  .nav-btn {
+    display: block; width: 100%; padding: 14px; margin-top: 16px;
+    background: linear-gradient(135deg, var(--accent), #0088CC);
+    color: white; border: none; border-radius: 14px; font-size: 16px;
+    font-weight: 600; cursor: pointer; text-align: center;
+  }
+
+  /* Add form overlay */
+  .add-overlay {
+    position: absolute; inset: 0; background: var(--bg);
+    z-index: 60; display: none; flex-direction: column;
+  }
+  .add-overlay.show { display: flex; }
+  .add-header {
+    display: flex; justify-content: space-between; align-items: center;
+    padding: 60px 20px 16px;
+  }
+  .add-title { font-size: 20px; font-weight: 700; color: var(--text); }
+  .add-close { background: none; border: none; color: var(--accent); font-size: 16px; cursor: pointer; }
+  .add-body { flex: 1; padding: 0 20px; overflow-y: auto; }
+  .field { margin-bottom: 20px; }
+  .field-label { font-size: 13px; color: var(--text-secondary); margin-bottom: 6px; display: block; }
+  .field-input {
+    width: 100%; padding: 12px; border-radius: 10px;
+    background: var(--chip-bg); border: 1px solid var(--border);
+    color: var(--text); font-size: 14px; outline: none;
+  }
+  .field-location {
+    padding: 14px; border-radius: 10px; background: var(--chip-bg);
+    border: 1px dashed var(--accent); color: var(--accent);
+    text-align: center; cursor: pointer; font-size: 14px;
+  }
+  .add-submit {
+    margin: 16px 20px 40px; padding: 16px;
+    background: linear-gradient(135deg, var(--accent), #0088CC);
+    color: white; border: none; border-radius: 16px;
+    font-size: 16px; font-weight: 600; cursor: pointer;
+  }
+
+  /* ── Drawer ── */
+  .drawer {
+    position: absolute; bottom: 0; left: 0; right: 0; height: 320px;
+    background: var(--drawer-bg); border-radius: 20px 20px 0 0;
+    backdrop-filter: blur(20px); border-top: 1px solid var(--border);
+    display: flex; flex-direction: column;
+  }
+  .drawer-handle { display: flex; justify-content: center; padding: 10px 0 6px; }
+  .drawer-line { width: 36px; height: 3px; background: rgba(128,128,128,0.3); border-radius: 2px; }
+
+  .cat-row {
+    display: flex; gap: 8px; padding: 4px 16px 10px;
+    overflow-x: auto; white-space: nowrap;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .cat-row::-webkit-scrollbar { display: none; }
+
+  .cat-chip {
+    padding: 6px 16px; border-radius: 16px; font-size: 12px;
+    background: var(--chip-bg); color: var(--text-secondary);
+    white-space: nowrap; flex-shrink: 0; cursor: pointer;
+    border: 1px solid transparent; transition: all 0.2s; user-select: none;
+  }
+  .cat-chip:hover { background: var(--accent-bg); color: var(--accent); }
+  .cat-chip.active { background: var(--accent-bg); color: var(--accent); border-color: var(--accent); font-weight: 600; }
+
+  .card-list {
+    flex: 1; padding: 0 16px; overflow-y: auto;
+    display: flex; flex-direction: column; gap: 8px;
+    scrollbar-width: none; -ms-overflow-style: none;
+  }
+  .card-list::-webkit-scrollbar { display: none; }
+
+  .wp-card {
+    display: flex; align-items: center; padding: 12px;
+    background: var(--bg-card); border-radius: 12px;
+    border: 1px solid var(--border); cursor: pointer;
+    transition: all 0.2s;
+  }
+  .wp-card:hover { border-color: var(--accent); transform: translateX(4px); }
+  .wp-card.hidden { display: none; }
+  .card-img { width: 56px; height: 56px; border-radius: 8px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 24px; background: var(--chip-bg); }
+  .card-body { flex: 1; margin-left: 12px; }
+  .card-name { font-size: 14px; font-weight: 600; color: var(--text); }
+  .card-meta { display: flex; gap: 8px; align-items: center; margin-top: 3px; }
+  .card-cat { font-size: 11px; color: var(--accent); background: var(--accent-bg); padding: 2px 8px; border-radius: 4px; }
+  .card-stars { font-size: 11px; color: var(--star); }
+  .card-addr { font-size: 11px; color: var(--text-secondary); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .card-arrow { color: var(--text-secondary); font-size: 13px; margin-left: 8px; opacity: 0.5; }
+
+  .empty-state { display: none; text-align: center; padding: 48px 0; color: var(--text-secondary); font-size: 13px; }
+  .empty-state.show { display: block; }
+
+  .result-count { font-size: 11px; color: var(--text-secondary); padding: 0 16px 8px; }
+</style>
+
+<div class="phone" id="app">
+  <!-- Theme Toggle -->
+  <div class="theme-toggle" onclick="toggleTheme()" title="切换日间/夜间模式">🌓</div>
+
+  <!-- Map -->
+  <div class="map-area">
+    <div class="road road-h1"></div><div class="road road-h2"></div><div class="road road-h3"></div>
+    <div class="road road-v1"></div><div class="road road-v2"></div><div class="road road-v3"></div>
+    <div class="park park1"></div><div class="river"></div>
+    <div class="block"></div><div class="block"></div><div class="block"></div><div class="block"></div>
+
+    <!-- Waypoint Markers -->
+    <div class="marker" data-id="1" onclick="openDetail(event, '张记烧烤大排档', '美食', 4.5, '朝阳区建国路88号', '10:00-02:00', '人均 ¥85', '好吃,回头客,深夜档')"><div class="pin-emoji">🍜</div></div>
+    <div class="marker" data-id="2" onclick="openDetail(event, '星巴克(望京店)', '咖啡', 4.2, '望京街10号', '07:00-22:00', '人均 ¥38', '环境好,外卖可')"><div class="pin-emoji">☕</div></div>
+    <div class="marker" data-id="3" onclick="openDetail(event, '秘密基地', '根据地', 5.0, '西城区鼓楼大街55号', '全天', '免费', '老字号,难找')"><div class="pin-emoji">🏠</div></div>
+    <div class="marker" data-id="4" onclick="openDetail(event, '西山观景台', '风景', 4.8, '海淀区香山路', '06:00-18:00', '门票 ¥10', '风景好,推荐')"><div class="pin-emoji">🏔️</div></div>
+    <div class="marker" data-id="5" onclick="openDetail(event, '朝阳大悦城', '购物', 4.0, '朝阳区朝阳北路101号', '10:00-22:00', '免费停车', '品牌全,好逛')"><div class="pin-emoji">🛍️</div></div>
+    <div class="marker" data-id="6" onclick="openDetail(event, '深夜食堂', '美食', 4.3, '东城区东直门内大街', '18:00-04:00', '人均 ¥60', '深夜档,好吃')"><div class="pin-emoji">🍜</div></div>
+
+    <!-- Current Location -->
+    <div class="current-loc"></div>
+  </div>
+
+  <!-- Search -->
+  <div class="search-bar">
+    <input class="search-input" id="searchInput" placeholder="🔍 搜索传送点名称..." oninput="doSearch()" onfocus="this.select()">
+  </div>
+
+  <!-- Add Button -->
+  <button class="add-btn" onclick="openAddForm()" title="激活新传送点">+</button>
+  <div class="add-tooltip" id="addTooltip">激活新传送点</div>
+
+  <!-- Detail Overlay -->
+  <div class="detail-overlay" id="detailOverlay" onclick="if(event.target===this)closeDetail()">
+    <div class="detail-card">
+      <button class="detail-close" onclick="closeDetail()">✕</button>
+      <div class="detail-placeholder" id="detailEmoji">📍</div>
+      <div class="detail-name" id="detailName"></div>
+      <div class="detail-meta">
+        <span class="detail-cat" id="detailCat"></span>
+        <span style="color:var(--star);font-size:14px;" id="detailStars"></span>
+      </div>
+      <div class="detail-row"><span class="detail-label">📍 地址</span><span id="detailAddr"></span></div>
+      <div class="detail-row"><span class="detail-label">🕐 时间</span><span id="detailTime"></span></div>
+      <div class="detail-row"><span class="detail-label">💰 消费</span><span id="detailPrice"></span></div>
+      <div class="detail-row"><span class="detail-label">🏷️ 标签</span><span id="detailTags"></span></div>
+      <button class="nav-btn" onclick="startNavigate()">⚡ 开始传送</button>
+    </div>
+  </div>
+
+  <!-- Add Form Overlay -->
+  <div class="add-overlay" id="addOverlay">
+    <div class="add-header">
+      <div class="add-title">⚡ 激活新传送点</div>
+      <button class="add-close" onclick="closeAddForm()">取消</button>
+    </div>
+    <div class="add-body">
+      <div class="field">
+        <label class="field-label">传送点名称 *</label>
+        <input class="field-input" placeholder="比如：张记烧烤大排档">
+      </div>
+      <div class="field">
+        <label class="field-label">分类 *</label>
+        <div class="cat-row" style="padding:0;">
+          <span class="cat-chip" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">美食</span>
+          <span class="cat-chip" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">咖啡</span>
+          <span class="cat-chip" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">风景</span>
+          <span class="cat-chip" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">根据地</span>
+          <span class="cat-chip" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">购物</span>
+          <span class="cat-chip active" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">娱乐</span>
+          <span class="cat-chip" onclick="this.parentElement.querySelectorAll('.cat-chip').forEach(c=>c.classList.remove('active'));this.classList.add('active')">其他</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">位置 *</label>
+        <div class="field-location" onclick="alert('📍 实际将调用 wx.chooseLocation 打开地图选点')">📍 点击在地图上选择位置</div>
+      </div>
+      <div class="field">
+        <label class="field-label">评分</label>
+        <div style="display:flex;gap:4px;font-size:28px;cursor:pointer;" onclick="this.setAttribute('data-r',(event.target.dataset.v||0));Array.from(this.children).forEach((s,i)=>{s.style.color=i<event.target.dataset.v?'var(--star)':'var(--border)'})">
+          <span data-v="1" style="color:var(--border)">★</span>
+          <span data-v="2" style="color:var(--border)">★</span>
+          <span data-v="3" style="color:var(--border)">★</span>
+          <span data-v="4" style="color:var(--border)">★</span>
+          <span data-v="5" style="color:var(--border)">★</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">标签</label>
+        <div class="cat-row" style="padding:0;">
+          <span class="cat-chip" onclick="this.classList.toggle('active')">好吃</span>
+          <span class="cat-chip" onclick="this.classList.toggle('active')">推荐</span>
+          <span class="cat-chip" onclick="this.classList.toggle('active')">回头客</span>
+          <span class="cat-chip" onclick="this.classList.toggle('active')">环境好</span>
+          <span class="cat-chip" onclick="this.classList.toggle('active')">深夜档</span>
+        </div>
+      </div>
+      <div class="field">
+        <label class="field-label">备注</label>
+        <textarea class="field-input" rows="3" placeholder="写点备注..."></textarea>
+      </div>
+    </div>
+    <button class="add-submit" onclick="submitWaypoint()">⚡ 激活传送点</button>
+  </div>
+
+  <!-- Drawer -->
+  <div class="drawer">
+    <div class="drawer-handle"><div class="drawer-line"></div></div>
+    <div class="cat-row" id="catRow">
+      <span class="cat-chip active" data-cat="" onclick="filterCategory('')">全部</span>
+      <span class="cat-chip" data-cat="美食" onclick="filterCategory('美食')">🍜 美食</span>
+      <span class="cat-chip" data-cat="咖啡" onclick="filterCategory('咖啡')">☕ 咖啡</span>
+      <span class="cat-chip" data-cat="风景" onclick="filterCategory('风景')">🏔️ 风景</span>
+      <span class="cat-chip" data-cat="根据地" onclick="filterCategory('根据地')">🏠 根据地</span>
+      <span class="cat-chip" data-cat="购物" onclick="filterCategory('购物')">🛍️ 购物</span>
+      <span class="cat-chip" data-cat="娱乐" onclick="filterCategory('娱乐')">🎮 娱乐</span>
+      <span class="cat-chip" data-cat="其他" onclick="filterCategory('其他')">📍 其他</span>
+    </div>
+    <div class="result-count" id="resultCount">共 6 个传送点</div>
+    <div class="card-list" id="cardList">
+      <div class="wp-card" data-cat="美食" data-name="张记烧烤大排档" data-stars="4.5" data-addr="朝阳区建国路88号 · 1.2km" data-id="1" onclick="openDetail(event, '张记烧烤大排档', '美食', 4.5, '朝阳区建国路88号', '10:00-02:00', '人均 ¥85', '好吃,回头客,深夜档', '🍜')">
+        <div class="card-img">🍜</div>
+        <div class="card-body">
+          <div class="card-name">张记烧烤大排档</div>
+          <div class="card-meta"><span class="card-cat">美食</span><span class="card-stars">⭐ 4.5</span></div>
+          <div class="card-addr">朝阳区建国路88号 · 1.2km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card" data-cat="咖啡" data-name="星巴克" data-stars="4.2" data-addr="望京街10号 · 0.8km" data-id="2" onclick="openDetail(event, '星巴克(望京店)', '咖啡', 4.2, '望京街10号', '07:00-22:00', '人均 ¥38', '环境好,外卖可', '☕')">
+        <div class="card-img">☕</div>
+        <div class="card-body">
+          <div class="card-name">星巴克(望京店)</div>
+          <div class="card-meta"><span class="card-cat">咖啡</span><span class="card-stars">⭐ 4.2</span></div>
+          <div class="card-addr">望京街10号 · 0.8km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card" data-cat="根据地" data-name="秘密基地" data-stars="5.0" data-addr="西城区鼓楼大街55号 · 3.2km" data-id="3" onclick="openDetail(event, '秘密基地', '根据地', 5.0, '西城区鼓楼大街55号', '全天', '免费', '老字号,难找', '🏠')">
+        <div class="card-img">🏠</div>
+        <div class="card-body">
+          <div class="card-name">秘密基地</div>
+          <div class="card-meta"><span class="card-cat">根据地</span><span class="card-stars">⭐ 5.0</span></div>
+          <div class="card-addr">西城区鼓楼大街55号 · 3.2km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card" data-cat="风景" data-name="西山观景台" data-stars="4.8" data-addr="海淀区香山路 · 8.5km" data-id="4" onclick="openDetail(event, '西山观景台', '风景', 4.8, '海淀区香山路', '06:00-18:00', '门票 ¥10', '风景好,推荐', '🏔️')">
+        <div class="card-img">🏔️</div>
+        <div class="card-body">
+          <div class="card-name">西山观景台</div>
+          <div class="card-meta"><span class="card-cat">风景</span><span class="card-stars">⭐ 4.8</span></div>
+          <div class="card-addr">海淀区香山路 · 8.5km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card" data-cat="购物" data-name="朝阳大悦城" data-stars="4.0" data-addr="朝阳区朝阳北路101号 · 2.0km" data-id="5" onclick="openDetail(event, '朝阳大悦城', '购物', 4.0, '朝阳区朝阳北路101号', '10:00-22:00', '免费停车', '品牌全,好逛', '🛍️')">
+        <div class="card-img">🛍️</div>
+        <div class="card-body">
+          <div class="card-name">朝阳大悦城</div>
+          <div class="card-meta"><span class="card-cat">购物</span><span class="card-stars">⭐ 4.0</span></div>
+          <div class="card-addr">朝阳区朝阳北路101号 · 2.0km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+      <div class="wp-card" data-cat="美食" data-name="深夜食堂" data-stars="4.3" data-addr="东城区东直门内大街 · 4.1km" data-id="6" onclick="openDetail(event, '深夜食堂', '美食', 4.3, '东城区东直门内大街', '18:00-04:00', '人均 ¥60', '深夜档,好吃', '🍜')">
+        <div class="card-img">🍜</div>
+        <div class="card-body">
+          <div class="card-name">深夜食堂</div>
+          <div class="card-meta"><span class="card-cat">美食</span><span class="card-stars">⭐ 4.3</span></div>
+          <div class="card-addr">东城区东直门内大街 · 4.1km</div>
+        </div>
+        <span class="card-arrow">▶</span>
+      </div>
+    </div>
+    <div class="empty-state" id="emptyState">🔍 没有找到匹配的传送点<br><small>试试其他关键词或分类</small></div>
+  </div>
+</div>
+
+<script>
+  let activeCat = '';
+  let searchTerm = '';
+
+  function toggleTheme() {
+    document.documentElement.classList.toggle('light');
+    const isLight = document.documentElement.classList.contains('light');
+    const toggle = document.querySelector('.theme-toggle');
+    toggle.textContent = isLight ? '☀️' : '🌓';
+  }
+
+  function filterCategory(cat) {
+    activeCat = cat;
+    document.querySelectorAll('#catRow .cat-chip').forEach(c => c.classList.remove('active'));
+    document.querySelector(`#catRow .cat-chip[data-cat="${cat}"]`).classList.add('active');
+    applyFilters();
+  }
+
+  function doSearch() {
+    searchTerm = document.getElementById('searchInput').value.toLowerCase().trim();
+    applyFilters();
+  }
+
+  function applyFilters() {
+    const cards = document.querySelectorAll('#cardList .wp-card');
+    let count = 0;
+    cards.forEach(card => {
+      const cat = card.dataset.cat;
+      const name = card.dataset.name.toLowerCase();
+      const catMatch = !activeCat || cat === activeCat;
+      const searchMatch = !searchTerm || name.includes(searchTerm) || cat.includes(searchTerm);
+      if (catMatch && searchMatch) {
+        card.classList.remove('hidden');
+        count++;
+      } else {
+        card.classList.add('hidden');
+      }
+    });
+    document.getElementById('resultCount').textContent = `共 ${count} 个传送点`;
+    document.getElementById('emptyState').classList.toggle('show', count === 0);
+  }
+
+  function openDetail(event, name, cat, stars, addr, time, price, tags, emoji) {
+    event.stopPropagation();
+    document.getElementById('detailEmoji').textContent = emoji || '📍';
+    document.getElementById('detailName').textContent = name;
+    document.getElementById('detailCat').textContent = cat;
+    document.getElementById('detailStars').textContent = '⭐'.repeat(Math.round(stars)) + ' ' + stars;
+    document.getElementById('detailAddr').textContent = addr;
+    document.getElementById('detailTime').textContent = time;
+    document.getElementById('detailPrice').textContent = price;
+    document.getElementById('detailTags').textContent = tags.split(',').map(t => '#' + t.trim()).join(' ');
+    document.getElementById('detailOverlay').classList.add('show');
+  }
+
+  function closeDetail() {
+    document.getElementById('detailOverlay').classList.remove('show');
+  }
+
+  function startNavigate() {
+    alert('🗺️ 实际将调用 wx.openLocation 打开微信地图导航\n\n将引导你前往：' + document.getElementById('detailName').textContent);
+    closeDetail();
+  }
+
+  function openAddForm() {
+    document.getElementById('addOverlay').classList.add('show');
+  }
+
+  function closeAddForm() {
+    document.getElementById('addOverlay').classList.remove('show');
+  }
+
+  function submitWaypoint() {
+    closeAddForm();
+    setTimeout(() => alert('✅ 传送点已激活！\n\n实际将通过云函数保存到数据库，返回地图后 Marker 会自动刷新。'), 300);
+  }
+
+  // Show add tooltip on hover
+  document.querySelector('.add-btn').addEventListener('mouseenter', () => {
+    document.getElementById('addTooltip').classList.add('show');
+  });
+  document.querySelector('.add-btn').addEventListener('mouseleave', () => {
+    document.getElementById('addTooltip').classList.remove('show');
+  });
+</script>

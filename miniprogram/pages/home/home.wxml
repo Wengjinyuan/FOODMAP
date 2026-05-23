@@ -15,7 +15,7 @@
   <!-- Top bar: search + theme toggle -->
   <view class="top-bar">
     <view class="search-box">
-      <input class="search-input" placeholder="搜索标记点..."
+      <input class="search-input" placeholder="🔍 搜索美食地点..."
         value="{{searchKeyword}}"
         bindinput="onSearchInput"
         bindconfirm="onSearchConfirm"
@@ -23,7 +23,7 @@
       />
     </view>
     <view class="theme-btn" bindtap="toggleTheme">
-      <text>{{theme === 'dark' ? '☀️' : '🌙'}}</text>
+      <text>🎨</text>
     </view>
   </view>
 
@@ -86,8 +86,8 @@
         </view>
       </block>
       <view class="empty-state" wx:elif="{{!loading}}">
-        <text>附近暂无标记点</text>
-        <text class="empty-hint">点击 + 激活第一个标记点</text>
+        <text>🔍 附近暂无传送点</text>
+        <text class="empty-hint">点击右下角 + 激活第一个传送点吧 ✨</text>
       </view>
     </scroll-view>
   </view>
