@@ -126,11 +126,15 @@ Page({
   },
 
   loadCategories() {
+    // 兜底分类：云函数不可用时也能显示
+    const fallback = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
+    this.setData({ categories: fallback });
+    // 尝试从云函数加载（静默替换）
     app.callFunction('waypointFunctions', { action: 'getPresetCategories' }).then((res) => {
-      if (res.result && res.result.success) {
+      if (res.result && res.result.success && res.result.data.length > 0) {
         this.setData({ categories: res.result.data });
       }
-    });
+    }).catch(() => {});
   },
 
   // ── Markers ──
@@ -223,7 +227,8 @@ Page({
     this.setData({ searchHistory: history.slice(0, 10) });
   },
   onSearchFocus() {
-    this.setData({ showHistory: true });
+    // 聚焦时清空上次搜索文字 + 显示历史
+    this.setData({ searchKeyword: '', showHistory: true });
     this.loadSearchHistory();
   },
   onSearchBlur() {
@@ -288,7 +293,11 @@ Page({
   },
 
   onMarkerTap(e) {
-    const wp = this.data.waypoints[e.detail.markerId];
+    // 根据 id 偏移量反查真实 index
+    const markerStyle = app.globalData.markerStyle || wx.getStorageSync('markerStyle') || 'game';
+    const idOffset = markerStyle === 'numbered' ? 2000 : markerStyle === 'minimal' ? 1000 : 0;
+    const idx = e.detail.markerId - idOffset;
+    const wp = this.data.waypoints[idx];
     if (wp) {
       this.setData({ selectedWaypoint: wp });
     }

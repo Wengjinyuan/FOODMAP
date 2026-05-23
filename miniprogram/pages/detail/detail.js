@@ -43,11 +43,13 @@ Page({
 
   // ── Data ──
   loadCategories() {
+    const fallback = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
+    this.setData({ categories: fallback });
     app.callFunction('waypointFunctions', { action: 'getPresetCategories' }).then((res) => {
-      if (res.result && res.result.success) {
+      if (res.result && res.result.success && res.result.data.length > 0) {
         this.setData({ categories: res.result.data });
       }
-    });
+    }).catch(() => {});
   },
 
   loadDetail() {

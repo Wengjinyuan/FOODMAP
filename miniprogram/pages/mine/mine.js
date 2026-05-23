@@ -9,8 +9,17 @@ Page({
     loading: true,
   },
 
+  onLoad() {
+    // 从存储恢复 markerStyle
+    const saved = wx.getStorageSync('markerStyle');
+    if (saved) {
+      this.setData({ markerStyle: saved });
+      app.globalData.markerStyle = saved;
+    }
+  },
+
   onShow() {
-    this.setData({ markerStyle: app.globalData.markerStyle || 'game' });
+    this.setData({ markerStyle: app.globalData.markerStyle || wx.getStorageSync('markerStyle') || 'game' });
     this.loadStats();
     this.loadWaypoints();
   },
@@ -20,7 +29,7 @@ Page({
       if (res.result && res.result.success) {
         this.setData({ stats: res.result.data });
       }
-    });
+    }).catch(() => {});
   },
 
   loadWaypoints() {
