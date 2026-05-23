@@ -1,0 +1,86 @@
+<h2>传送点 Marker 在地图上的视觉风格？</h2>
+<p class="subtitle">Marker 是传送点的"灵魂"——游戏感、辨识度、分类区分都靠它</p>
+
+<div class="cards">
+  <div class="card" data-choice="marker-game-icon" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 A：游戏风图标</div>
+        <div class="mockup-body" style="padding:24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;min-height:200px;">
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#FF6B35,#FF4444);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(255,107,53,0.4);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:20px;">🍜</span></div>
+            <span style="font-size:10px;color:#666;">美食</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#3B82F6,#6366F1);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(59,130,246,0.4);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:20px;">☕</span></div>
+            <span style="font-size:10px;color:#666;">咖啡</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#10B981,#059669);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(16,185,129,0.4);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:20px;">🏔️</span></div>
+            <span style="font-size:10px;color:#666;">风景</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:48px;height:48px;background:linear-gradient(135deg,#F59E0B,#D97706);border-radius:50% 50% 50% 0;transform:rotate(-45deg);box-shadow:0 4px 12px rgba(245,158,11,0.4);margin:0 auto 8px;display:flex;align-items:center;justify-content:center;"><span style="transform:rotate(45deg);font-size:20px;">⭐</span></div>
+            <span style="font-size:10px;color:#666;">收藏</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>游戏风菱形针</h3>
+      <p>模仿 RPG 地图标记，分类用不同颜色+emoji 区分。游戏感拉满，契合"传送点"主题。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="marker-minimal-pin" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 B：简约地图针</div>
+        <div class="mockup-body" style="padding:24px;display:flex;flex-wrap:wrap;gap:16px;justify-content:center;align-items:center;min-height:200px;">
+          <div style="text-align:center;">
+            <div style="width:32px;height:42px;background:#FF6B35;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;box-shadow:0 2px 8px rgba(0,0,0,0.2);margin:0 auto 4px;position:relative;"><div style="width:8px;height:8px;background:white;border-radius:50%;position:absolute;top:8px;left:12px;"></div></div>
+            <span style="font-size:9px;color:#666;">张记烧烤</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:32px;height:42px;background:#3B82F6;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;box-shadow:0 2px 8px rgba(0,0,0,0.2);margin:0 auto 4px;position:relative;"><div style="width:8px;height:8px;background:white;border-radius:50%;position:absolute;top:8px;left:12px;"></div></div>
+            <span style="font-size:9px;color:#666;">星巴克</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:32px;height:42px;background:#10B981;border-radius:50% 50% 50% 50% / 60% 60% 40% 40%;box-shadow:0 2px 8px rgba(0,0,0,0.2);margin:0 auto 4px;position:relative;"><div style="width:8px;height:8px;background:white;border-radius:50%;position:absolute;top:8px;left:12px;"></div></div>
+            <span style="font-size:9px;color:#666;">山顶</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>简约倒水滴针</h3>
+      <p>经典地图标记样式，简洁干净。不同分类用不同颜色，不带 emoji，适合极简风。</p>
+    </div>
+  </div>
+
+  <div class="card" data-choice="marker-numbered" onclick="toggleSelect(this)">
+    <div class="card-image">
+      <div class="mockup">
+        <div class="mockup-header">方案 C：编号圆点</div>
+        <div class="mockup-body" style="padding:24px;display:flex;flex-wrap:wrap;gap:24px;justify-content:center;align-items:center;min-height:200px;">
+          <div style="text-align:center;">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,#FF6B35,#FF8F65);border-radius:50%;box-shadow:0 3px 10px rgba(255,107,53,0.5);margin:0 auto 4px;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;">1</div>
+            <span style="font-size:10px;color:#666;">张记烧烤</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,#3B82F6,#60A5FA);border-radius:50%;box-shadow:0 3px 10px rgba(59,130,246,0.5);margin:0 auto 4px;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;">2</div>
+            <span style="font-size:10px;color:#666;">秘密基地</span>
+          </div>
+          <div style="text-align:center;">
+            <div style="width:44px;height:44px;background:linear-gradient(135deg,#10B981,#34D399);border-radius:50%;box-shadow:0 3px 10px rgba(16,185,129,0.5);margin:0 auto 4px;display:flex;align-items:center;justify-content:center;color:white;font-size:18px;font-weight:700;">3</div>
+            <span style="font-size:10px;color:#666;">深夜食堂</span>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="card-body">
+      <h3>编号圆点</h3>
+      <p>大号数字圆形标记，和抽屉列表一一对应。一眼找到目标，适合"快速传送"场景。</p>
+    </div>
+  </div>
+</div>

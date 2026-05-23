@@ -1,0 +1,73 @@
+<h2>页面结构与导航流</h2>
+<p class="subtitle">3 个核心页面 + 关键交互路径</p>
+
+<div class="mockup">
+  <div class="mockup-header">页面导航架构</div>
+  <div class="mockup-body" style="padding:20px;display:flex;flex-direction:column;gap:16px;align-items:center;">
+    <!-- Map page as hub -->
+    <div style="background:linear-gradient(135deg,#F0F9FF,#E0F2FE);border:2px solid #3B82F6;border-radius:16px;padding:20px;width:100%;text-align:center;">
+      <h3 style="margin:0;color:#3B82F6;">🗺️ 地图首页 (TabBar)</h3>
+      <p style="font-size:12px;color:#666;margin:8px 0 0;">全屏地图 + 底部抽屉列表<br>悬浮搜索栏 + +号按钮</p>
+      <div style="display:flex;justify-content:center;gap:8px;margin-top:12px;">
+        <span style="font-size:11px;background:#3B82F6;color:white;padding:4px 8px;border-radius:4px;">点击 Marker → 详情卡片</span>
+        <span style="font-size:11px;background:#3B82F6;color:white;padding:4px 8px;border-radius:4px;">拖拽抽屉 → 浏览列表</span>
+        <span style="font-size:11px;background:#FF6B35;color:white;padding:4px 8px;border-radius:4px;">+ 按钮 → 激活新点</span>
+      </div>
+    </div>
+
+    <!-- Arrows -->
+    <div style="display:flex;gap:80px;font-size:24px;color:#999;">⬇️ ⬇️</div>
+
+    <!-- Two sub pages -->
+    <div style="display:flex;gap:20px;width:100%;">
+      <div style="flex:1;background:linear-gradient(135deg,#FFF7ED,#FFEDD5);border:2px solid #FF6B35;border-radius:16px;padding:16px;text-align:center;">
+        <h3 style="margin:0;color:#FF6B35;font-size:16px;">📍 添加/详情页</h3>
+        <p style="font-size:11px;color:#666;margin:8px 0 0;line-height:1.6;">
+          双模式切换：<br>
+          <strong>查看模式</strong> → 详情 + 导航<br>
+          <strong>编辑模式</strong> → 表单 + 选点
+        </p>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:10px;color:#999;">
+          <span>✏️ 名称、分类、标签</span>
+          <span>📍 wx.chooseLocation 选点</span>
+          <span>📸 图片上传（云存储）</span>
+          <span>📝 备注/评价</span>
+          <span>🗑️ 删除（仅创建者）</span>
+        </div>
+      </div>
+      <div style="flex:1;background:linear-gradient(135deg,#F5F5F5,#E5E5E5);border:2px solid #666;border-radius:16px;padding:16px;text-align:center;">
+        <h3 style="margin:0;color:#666;font-size:16px;">👤 我的 (TabBar)</h3>
+        <p style="font-size:11px;color:#666;margin:8px 0 0;line-height:1.6;">
+          个人数据概览：<br>
+          传送点总数<br>
+          我的收藏 / 创建列表
+        </p>
+        <div style="display:flex;flex-direction:column;gap:4px;margin-top:8px;font-size:10px;color:#999;">
+          <span>🎨 Marker 风格切换</span>
+          <span>📋 按分类筛选</span>
+          <span>☁️ 数据导出（预留）</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="section" style="margin-top:20px;">
+  <h3>关键交互流程</h3>
+  <div class="mockup">
+    <div class="mockup-body" style="padding:16px;display:flex;flex-direction:column;gap:8px;font-size:13px;color:#444;">
+      <div style="display:flex;align-items:center;gap:8px;background:#F0F9FF;padding:8px 12px;border-radius:8px;">
+        <span style="font-weight:700;color:#3B82F6;">激活传送</span>
+        <span>首页 + 按钮 → 地图选点 → 填写信息 → 上传图片 → 保存 → 返回地图（新 Marker 已出现）</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#FFF7ED;padding:8px 12px;border-radius:8px;">
+        <span style="font-weight:700;color:#FF6B35;">查看传送</span>
+        <span>地图点击 Marker / 抽屉点击卡片 → 详情页 → 展示信息+图片+备注 → 「传送」按钮导航</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;background:#F5F5F5;padding:8px 12px;border-radius:8px;">
+        <span style="font-weight:700;color:#666;">管理传送</span>
+        <span>我的页面 → 筛选分类 → 点击编辑（同一详情页切编辑模式）→ 修改/删除</span>
+      </div>
+    </div>
+  </div>
+</div>
