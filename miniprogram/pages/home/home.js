@@ -325,17 +325,27 @@ Page({
 
   onSeedSamples() {
     wx.showLoading({ title: '播种中...' });
-    app.callFunction('waypointFunctions', { action: 'seedSamples' }).then((res) => {
+    const call = app.callFunction('waypointFunctions', { action: 'seedSamples' });
+    const timeout = new Promise((r) => setTimeout(() => r(null), 10000));
+    Promise.race([call, timeout]).then((res) => {
       wx.hideLoading();
-      if (res.result && res.result.success) {
+      if (res && res.result && res.result.success) {
         wx.showToast({ title: res.result.data.message, icon: 'success' });
         this.loadWaypoints();
       } else {
-        wx.showToast({ title: '播种失败，请先部署云函数', icon: 'none' });
+        wx.showModal({
+          title: '播种失败',
+          content: '请在云开发控制台 → 数据库 → 新建集合 "waypoints"，然后再试。',
+          showCancel: false,
+        });
       }
     }).catch(() => {
       wx.hideLoading();
-      wx.showToast({ title: '播种失败，请先部署云函数', icon: 'none' });
+      wx.showModal({
+        title: '播种失败',
+        content: '请在云开发控制台 → 数据库 → 新建集合 "waypoints"，然后再试。',
+        showCancel: false,
+      });
     });
   },
 
