@@ -168,17 +168,22 @@ const seedSamples = async () => {
 // ── 主入口 ──
 exports.main = async (event, context) => {
   const { action } = event;
-  switch (action) {
-    case "getNearbyWaypoints": return await getNearbyWaypoints(event);
-    case "searchWaypoints": return await searchWaypoints(event);
-    case "getWaypointDetail": return await getWaypointDetail(event);
-    case "addWaypoint": return await addWaypoint(event);
-    case "updateWaypoint": return await updateWaypoint(event);
-    case "deleteWaypoint": return await deleteWaypoint(event);
-    case "getMyWaypoints": return await getMyWaypoints(event);
-    case "getMyStats": return await getMyStats();
-    case "getPresetCategories": return await getPresetCategories();
-    case "seedSamples": return await seedSamples();
-    default: return { success: false, errMsg: "未知操作: " + action };
+  try {
+    switch (action) {
+      case "ping": return { success: true, data: "pong" };
+      case "getNearbyWaypoints": return await getNearbyWaypoints(event);
+      case "searchWaypoints": return await searchWaypoints(event);
+      case "getWaypointDetail": return await getWaypointDetail(event);
+      case "addWaypoint": return await addWaypoint(event);
+      case "updateWaypoint": return await updateWaypoint(event);
+      case "deleteWaypoint": return await deleteWaypoint(event);
+      case "getMyWaypoints": return await getMyWaypoints(event);
+      case "getMyStats": return await getMyStats();
+      case "getPresetCategories": return await getPresetCategories();
+      case "seedSamples": return await seedSamples();
+      default: return { success: false, errMsg: "未知操作: " + action };
+    }
+  } catch (e) {
+    return { success: false, errMsg: e.message || "云函数内部错误" };
   }
 };
