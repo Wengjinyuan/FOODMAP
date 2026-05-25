@@ -23,7 +23,7 @@
   </scroll-view>
 
   <!-- Waypoint List -->
-  <scroll-view class="wp-list" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
+  <scroll-view class="wp-list" scroll-y enhanced enable-flex enable-back-to-top show-scrollbar="{{false}}">
     <block wx:if="{{waypoints.length > 0}}">
       <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id" bindtap="onWaypointTap" data-id="{{item._id}}">
         <view class="card-thumb">
