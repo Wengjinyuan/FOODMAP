@@ -5,20 +5,26 @@ const _ = db.command;
 
 const PRESET_CATEGORIES = ["美食", "咖啡", "风景", "根据地", "购物", "娱乐", "其他"];
 
-// 安全查询：集合不存在时返回空数组而非报错
+// 确保集合存在（首次写入自动创建）
+const ensureCollection = async () => {
+  try {
+    await db.createCollection("waypoints");
+  } catch (e) {
+    // 已存在则忽略
+  }
+};
+
+// 超时保护
+const withTimeout = (promise, ms = 5000) =>
+  Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('db_timeout')), ms))]);
+
+// 安全查询
 const safeGet = async (collection, query) => {
   try {
-    return await query;
+    await ensureCollection();
+    return await withTimeout(query);
   } catch (e) {
-    if (e.errCode === -502005 || e.message.includes('not found') || e.message.includes('not exist')) {
-      return { data: [] };
-    }
-    // geo 索引缺失也降级
-    if (e.errCode === -501007 || e.message.includes('geo') || e.message.includes('index')) {
-      console.warn('geo/index error, fallback:', e.message);
-      return { data: [] };
-    }
-    throw e;
+    return { data: [] };
   }
 };
 

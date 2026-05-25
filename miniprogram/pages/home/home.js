@@ -35,12 +35,11 @@ Page({
     this.loadCategories();
     this.getCurrentLocation();
     this.loadSearchHistory();
+    this.loadWaypoints();
   },
 
   onShow() {
-    // 重读 markerStyle（"我的"页切换后会变）
     const style = app.globalData.markerStyle || wx.getStorageSync('markerStyle') || 'game';
-    // 强制刷新 markers：先清空再重建，确保 map 组件重新渲染
     if (this.data.waypoints.length > 0) {
       this.setData({ markers: [] }, () => {
         const markers = this.buildMarkers(this.data.waypoints);
