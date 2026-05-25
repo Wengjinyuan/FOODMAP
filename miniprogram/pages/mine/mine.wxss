@@ -21,29 +21,6 @@
 .stats-count { font-size: 36rpx; font-weight: 700; color: #4A3A35; display: block; }
 .stats-cat { font-size: 20rpx; color: #9E8A83; display: block; }
 
-/* ── Section ── */
-.section {
-  margin: 0 24rpx 24rpx;
-  background: #FFFFFF;
-  border: 3rpx solid #4A3A35;
-  border-radius: 14rpx;
-  box-shadow: 4rpx 4rpx 0rpx #4A3A35;
-  padding: 24rpx;
-}
-.section-title { font-size: 28rpx; font-weight: 700; color: #4A3A35; margin-bottom: 16rpx; display: block; }
-
-/* Marker style options */
-.style-row { display: flex; gap: 10rpx; }
-.style-opt {
-  flex: 1; text-align: center; padding: 16rpx 0;
-  background: #FFF9E6; border: 2rpx solid #4A3A35;
-  border-radius: 12rpx; color: #9E8A83; font-size: 24rpx;
-  transition: all 0.15s;
-}
-.style-opt.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
-.style-icon { display: block; font-size: 32rpx; margin-bottom: 4rpx; }
-.style-opt:active { transform: translate(1rpx, 1rpx); }
-
 /* ── Filter Row ── */
 .filter-row {
   display: flex; white-space: nowrap;

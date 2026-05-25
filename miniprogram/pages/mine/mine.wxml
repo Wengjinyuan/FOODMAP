@@ -13,28 +13,6 @@
     </view>
   </view>
 
-  <!-- Marker Style -->
-  <view class="section">
-    <text class="section-title">Marker 风格</text>
-    <view class="style-row">
-      <view class="style-opt {{markerStyle === 'game' ? 'active' : ''}}"
-        bindtap="onMarkerStyleChange" data-style="game">
-        <text class="style-icon">💎</text>
-        <text>游戏风</text>
-      </view>
-      <view class="style-opt {{markerStyle === 'minimal' ? 'active' : ''}}"
-        bindtap="onMarkerStyleChange" data-style="minimal">
-        <text class="style-icon">📌</text>
-        <text>简约</text>
-      </view>
-      <view class="style-opt {{markerStyle === 'numbered' ? 'active' : ''}}"
-        bindtap="onMarkerStyleChange" data-style="numbered">
-        <text class="style-icon">🔢</text>
-        <text>编号</text>
-      </view>
-    </view>
-  </view>
-
   <!-- Category Filter -->
   <scroll-view class="filter-row" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
     <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"

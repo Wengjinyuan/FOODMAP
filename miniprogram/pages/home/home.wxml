@@ -3,6 +3,7 @@
   <map id="waypointMap" class="map"
     latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}"
     markers="{{markers}}" show-location="{{true}}"
+    enable-zoom="{{true}}" enable-scroll="{{true}}" enable-rotate="{{true}}"
     bindmarkertap="onMarkerTap" bindregionchange="onMapRegionChange" />
 
   <!-- 顶栏：搜索 + 主题 -->
@@ -16,7 +17,13 @@
 
   <!-- 搜索历史 -->
   <view class="history-drop" wx:if="{{showHistory && searchHistory.length > 0}}">
-    <view class="history-header"><text>搜索历史</text><text class="history-clear" bindtap="onClearHistory">清空</text></view>
+    <view class="history-header">
+      <text>搜索历史</text>
+      <view style="display:flex;gap:16rpx;align-items:center;">
+        <text class="history-clear" bindtap="onClearHistory">清空</text>
+        <text class="history-close" bindtap="onSearchBlur">✕</text>
+      </view>
+    </view>
     <view class="history-item" wx:for="{{searchHistory}}" wx:key="*this" bindtap="onHistoryTap" data-keyword="{{item}}">🕐 {{item}}</view>
   </view>
 

@@ -1,95 +1,57 @@
-/* ═══════════════════════════
-   传送网 — Home Page
-   ═══════════════════════════ */
-
+/* 传送网 — Home */
 .page { width: 100vw; height: 100vh; overflow: hidden; position: relative; background: #FFFDF7; }
 .map { width: 100%; height: 100%; }
 
-/* ── Top Bar ── */
-.top-bar {
-  position: absolute; top: 80rpx; left: 20rpx; right: 20rpx;
-  height: 64rpx; display: flex; align-items: center; z-index: 10;
-}
-.search-box {
-  flex: 1; height: 64rpx; background: rgba(255,255,255,0.95);
-  border: 3rpx solid #4A3A35; border-radius: 14rpx;
-  padding: 0 20rpx; display: flex; align-items: center;
-}
+/* Top bar */
+.top-bar { position: absolute; top: 80rpx; left: 20rpx; right: 20rpx; height: 64rpx; z-index: 10; }
+.search-box { width: 100%; height: 64rpx; background: rgba(255,255,255,0.95); border: 3rpx solid #4A3A35; border-radius: 14rpx; padding: 0 20rpx; display: flex; align-items: center; box-sizing: border-box; }
 .search-input { flex: 1; font-size: 26rpx; color: #4A3A35; }
 
-/* ── History ── */
-.history-drop {
-  position: absolute; top: 150rpx; left: 20rpx; right: 20rpx;
-  background: #FFFFFF; border: 3rpx solid #4A3A35;
-  border-radius: 14rpx; box-shadow: 4rpx 4rpx 0rpx #4A3A35;
-  z-index: 13; padding: 8rpx 0; max-height: 360rpx; overflow-y: auto;
-}
-.history-header { display: flex; justify-content: space-between; padding: 8rpx 20rpx 10rpx; font-size: 22rpx; font-weight: 600; color: #4A3A35; }
-.history-clear { color: #FF6B6B; font-size: 22rpx; }
+/* History */
+.history-drop { position: absolute; top: 150rpx; left: 20rpx; right: 20rpx; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 14rpx; box-shadow: 4rpx 4rpx 0 #4A3A35; z-index: 13; max-height: 360rpx; overflow-y: auto; }
+.history-header { display: flex; justify-content: space-between; padding: 10rpx 20rpx; font-size: 22rpx; font-weight: 600; color: #4A3A35; border-bottom: 2rpx dashed #E8D5C8; }
+.history-close { font-size: 28rpx; color: #9E8A83; padding: 0 8rpx; }
+.history-clear { color: #FF6B6B; font-size: 20rpx; }
 .history-item { padding: 12rpx 20rpx; font-size: 24rpx; color: #4A3A35; border-bottom: 1rpx solid #F0EBE5; }
 .history-item:active { background: #FFF9E6; }
 
-/* ── FAB (跟随抽屉) ── */
-.fab {
-  position: absolute; right: 24rpx;
-  width: 88rpx; height: 88rpx;
-  background: #FFD23F; border: 3rpx solid #4A3A35;
-  border-radius: 20rpx; box-shadow: 3rpx 3rpx 0rpx #4A3A35;
-  z-index: 10; display: flex; align-items: center; justify-content: center;
-}
-.fab-icon { font-size: 44rpx; color: #4A3A35; font-weight: 600; }
+/* FAB */
+.fab { position: absolute; right: 24rpx; width: 80rpx; height: 80rpx; background: #FFD23F; border: 3rpx solid #4A3A35; border-radius: 18rpx; box-shadow: 3rpx 3rpx 0 #4A3A35; z-index: 10; display: flex; align-items: center; justify-content: center; }
+.fab-icon { font-size: 40rpx; color: #4A3A35; font-weight: 600; }
 
-/* ── Callout ── */
-.callout-overlay {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 340rpx;
-  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 30rpx; z-index: 11;
-}
-.callout-card {
-  width: 80%; background: #FFFFFF; border: 3rpx solid #4A3A35;
-  border-radius: 14rpx; box-shadow: 4rpx 4rpx 0rpx #4A3A35; padding: 20rpx; position: relative;
-}
-.callout-close { position: absolute; top: 10rpx; right: 12rpx; font-size: 24rpx; color: #9E8A83; padding: 6rpx; }
+/* Callout */
+.callout-overlay { position: absolute; top: 0; left: 0; right: 0; bottom: 340rpx; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 20rpx; z-index: 11; }
+.callout-card { width: 80%; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 14rpx; box-shadow: 4rpx 4rpx 0 #4A3A35; padding: 18rpx; position: relative; }
+.callout-close { position: absolute; top: 8rpx; right: 10rpx; font-size: 22rpx; color: #9E8A83; padding: 4rpx; }
 .callout-name { font-size: 28rpx; font-weight: 700; color: #4A3A35; }
-.callout-meta { display: flex; align-items: center; margin-top: 6rpx; gap: 10rpx; }
-.callout-cat { font-size: 22rpx; padding: 3rpx 12rpx; color: #4A3A35; background: #FFD23F; border: 2rpx solid #4A3A35; border-radius: 6rpx; font-weight: 700; }
+.callout-meta { display: flex; gap: 8rpx; margin-top: 4rpx; }
+.callout-cat { font-size: 22rpx; padding: 3rpx 10rpx; color: #4A3A35; background: #FFD23F; border: 2rpx solid #4A3A35; border-radius: 6rpx; font-weight: 700; }
 .callout-stars { font-size: 22rpx; }
-.callout-hint { font-size: 22rpx; color: #FF6B6B; margin-top: 8rpx; }
+.callout-hint { font-size: 20rpx; color: #FF6B6B; margin-top: 6rpx; }
 
-/* ── Drawer ── */
-.drawer {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: #FFFDF7; border-top: 3rpx solid #4A3A35;
-  border-radius: 24rpx 24rpx 0 0; z-index: 9; display: flex; flex-direction: column;
-}
-.drawer-handle { display: flex; justify-content: center; padding: 10rpx 0 4rpx; flex-shrink: 0; }
+/* Drawer */
+.drawer { position: absolute; bottom: 0; left: 0; right: 0; background: #FFFDF7; border-top: 3rpx solid #4A3A35; border-radius: 24rpx 24rpx 0 0; z-index: 9; display: flex; flex-direction: column; overflow: hidden; }
+.drawer-handle { height: 36rpx; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
 .drawer-bar { width: 40rpx; height: 5rpx; background: #4A3A35; border-radius: 4rpx; }
 
-/* ── Category chips (精简) ── */
-.cat-scroll { display: flex; white-space: nowrap; padding: 4rpx 16rpx 8rpx; height: 52rpx; }
-.cat-chip {
-  display: inline-flex; align-items: center; padding: 6rpx 18rpx; margin-right: 8rpx;
-  background: #FFF9E6; color: #9E8A83; border: 2rpx solid #4A3A35;
-  border-radius: 12rpx; font-size: 22rpx; flex-shrink: 0;
-}
+/* Category chips - z-index above cards */
+.cat-scroll { display: flex; white-space: nowrap; padding: 0 16rpx 8rpx; height: 44rpx; flex-shrink: 0; position: relative; z-index: 1; }
+.cat-chip { display: inline-flex; align-items: center; padding: 5rpx 14rpx; margin-right: 6rpx; background: #FFF9E6; color: #9E8A83; border: 2rpx solid #4A3A35; border-radius: 10rpx; font-size: 20rpx; flex-shrink: 0; }
 .cat-chip.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 
-/* ── Cards (缩小版) ── */
-.card-scroll { flex: 1; padding: 0 16rpx; }
-.wp-card {
-  display: flex; align-items: center; padding: 14rpx 16rpx; margin-bottom: 8rpx;
-  background: #FFFFFF; border: 2rpx solid #4A3A35;
-  border-radius: 12rpx; box-shadow: 3rpx 3rpx 0rpx #4A3A35;
-}
-.card-thumb { width: 72rpx; height: 72rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; }
-.thumb-emoji { font-size: 30rpx; }
-.card-body { flex: 1; margin-left: 12rpx; min-width: 0; }
-.card-name { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-row { display: flex; align-items: center; margin-top: 2rpx; gap: 6rpx; }
-.card-cat { font-size: 20rpx; padding: 2rpx 8rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; }
-.card-star { font-size: 20rpx; }
-.card-addr { font-size: 20rpx; color: #9E8A83; margin-top: 2rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-arrow { color: #C4B5AF; font-size: 20rpx; margin-left: 6rpx; flex-shrink: 0; }
+/* Card list - FLEX GROW to fill remaining space */
+.card-scroll { flex: 1; padding: 0 16rpx; box-sizing: border-box; }
+.wp-card { display: flex; align-items: center; padding: 12rpx 14rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 10rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
+.card-thumb { width: 64rpx; height: 64rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 1.5rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; }
+.thumb-emoji { font-size: 28rpx; }
+.card-body { flex: 1; margin-left: 10rpx; min-width: 0; }
+.card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+.card-row { display: flex; gap: 4rpx; margin-top: 2rpx; }
+.card-cat { font-size: 18rpx; padding: 1rpx 8rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; }
+.card-star { font-size: 18rpx; }
+.card-addr { font-size: 18rpx; color: #9E8A83; margin-top: 2rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-arrow { color: #C4B5AF; font-size: 18rpx; margin-left: 4rpx; flex-shrink: 0; }
 
-/* ── Empty ── */
-.empty-state { text-align: center; padding: 40rpx 0; color: #9E8A83; font-size: 24rpx; display: flex; flex-direction: column; align-items: center; gap: 16rpx; }
-.seed-btn { padding: 12rpx 28rpx; background: #FFD23F; color: #4A3A35; border: 2rpx solid #4A3A35; border-radius: 12rpx; font-size: 24rpx; font-weight: 700; }
+/* Empty */
+.empty-state { text-align: center; padding: 30rpx 0; color: #9E8A83; font-size: 24rpx; display: flex; flex-direction: column; align-items: center; gap: 12rpx; }
+.seed-btn { padding: 10rpx 24rpx; background: #FFD23F; color: #4A3A35; border: 2rpx solid #4A3A35; border-radius: 10rpx; font-size: 22rpx; font-weight: 700; }
