@@ -18,7 +18,7 @@ Page({
     activeCategory: '',
 
     // UI state
-    drawerHeight: 320,
+    drawerHeight: 400,
     drawerStartY: 0,
     drawerStartH: 0,
     selectedWaypoint: null,

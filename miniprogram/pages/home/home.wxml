@@ -57,6 +57,8 @@
       <view class="cat-chip {{activeCategory === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" bindtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
     </scroll-view>
 
+    <!-- 间距分隔 -->
+    <view style="height:8rpx;flex-shrink:0;"></view>
     <!-- 卡片列表 -->
     <scroll-view class="card-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}"
       refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
