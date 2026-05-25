@@ -2,6 +2,7 @@ const app = getApp();
 
 Page({
   data: {
+    navTop: 0,
     mode: 'view',       // 'view' | 'edit' | 'add'
     waypointId: null,
     waypoint: {},
@@ -17,6 +18,11 @@ Page({
   },
 
   onLoad(options) {
+    // 适配胶囊按钮
+    const capsule = wx.getMenuButtonBoundingClientRect();
+    const scale = 750 / wx.getSystemInfoSync().windowWidth;
+    this.setData({ navTop: (capsule.bottom + 8) * scale });
+
     const { id, mode } = options;
     this.loadCategories();
     if (mode === 'add') {

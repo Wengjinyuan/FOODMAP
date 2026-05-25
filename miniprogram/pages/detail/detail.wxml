@@ -2,7 +2,7 @@
   <!-- ═══ VIEW MODE ═══ -->
   <block wx:if="{{mode === 'view'}}">
     <!-- 顶栏：返回 + 标题 -->
-    <view class="dnav">
+    <view class="dnav" style="padding-top:{{navTop}}rpx;">
       <view class="dnav-back" bindtap="onBackToHome">◀</view>
       <text class="dnav-title">{{waypoint.name || '传送点'}}</text>
       <view style="width:64rpx;"></view>
@@ -50,7 +50,7 @@
   <!-- ═══ EDIT / ADD MODE ═══ -->
   <block wx:if="{{mode === 'edit' || mode === 'add'}}">
     <!-- 固定顶栏：返回 + 标题 -->
-    <view class="form-nav">
+    <view class="form-nav" style="padding-top:{{navTop}}rpx;">
       <view class="form-back" bindtap="onCancel">◀</view>
       <text class="form-nav-title">{{mode === 'add' ? '⚡ 激活新传送点' : '✏️ 编辑传送点'}}</text>
       <view style="width:64rpx;"></view>
