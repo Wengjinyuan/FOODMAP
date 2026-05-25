@@ -25,25 +25,24 @@ Page({
   },
 
   loadStats() {
-    const call = app.callFunction('waypointFunctions', { action: 'getMyStats' });
-    const timeout = new Promise((r) => setTimeout(() => r(null), 5000));
-    Promise.race([call, timeout]).then((res) => {
-      if (res && res.result && res.result.success) {
-        this.setData({ stats: res.result.data });
-      }
+    const db = app.getDb();
+    if (!db) return;
+    db.collection('waypoints').get().then((res) => {
+      const data = res.data || [];
+      const catCount = {};
+      data.forEach(wp => { catCount[wp.category] = (catCount[wp.category] || 0) + 1; });
+      this.setData({ stats: { total: data.length, categories: catCount } });
     }).catch(() => {});
   },
 
   loadWaypoints() {
     this.setData({ loading: true });
-    const call = app.callFunction('waypointFunctions', { action: 'getMyWaypoints', category: this.data.activeCategory });
-    const timeout = new Promise((r) => setTimeout(() => r(null), 5000));
-    Promise.race([call, timeout]).then((res) => {
-      if (res && res.result && res.result.success) {
-        this.setData({ waypoints: res.result.data, loading: false });
-      } else {
-        this.setData({ waypoints: [], loading: false });
-      }
+    const db = app.getDb();
+    if (!db) { this.setData({ loading: false }); return; }
+    let query = db.collection('waypoints').orderBy('create_time', 'desc').limit(50);
+    if (this.data.activeCategory) query = query.where({ category: this.data.activeCategory });
+    query.get().then((res) => {
+      this.setData({ waypoints: res.data || [], loading: false });
     }).catch(() => {
       this.setData({ waypoints: [], loading: false });
     });

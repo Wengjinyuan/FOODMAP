@@ -90,30 +90,22 @@ Page({
   // ── Data Loading ──
   loadWaypoints() {
     this.setData({ loading: true });
-    const { latitude, longitude, searchKeyword, activeCategory } = this.data;
+    const { searchKeyword, activeCategory } = this.data;
+    const db = app.getDb();
+    if (!db) { this.setData({ loading: false }); return; }
 
-    const hasFilter = searchKeyword || activeCategory;
-    const action = hasFilter ? 'searchWaypoints' : 'getNearbyWaypoints';
-    const params = { action, skip: 0, limit: 50 };
-    if (searchKeyword) params.keyword = searchKeyword;
-    if (activeCategory) params.category = activeCategory;
-    if (!hasFilter) {
-      params.latitude = latitude;
-      params.longitude = longitude;
+    let query = db.collection('waypoints');
+    if (searchKeyword) {
+      query = query.where({ name: db.RegExp({ regexp: searchKeyword, options: 'i' }) });
+    } else if (activeCategory) {
+      query = query.where({ category: activeCategory });
     }
+    query = query.orderBy('create_time', 'desc').limit(50);
 
-    // 5 秒超时兜底，超时直接显示空状态
-    const call = app.callFunction('waypointFunctions', params);
-    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 5000));
-
-    return Promise.race([call, timeout]).then((res) => {
-      if (res && res.result && res.result.success) {
-        const waypoints = (res.result.data || []).map(wp => this.formatWaypoint(wp));
-        const markers = this.buildMarkers(waypoints);
-        this.setData({ waypoints, markers, loading: false });
-      } else {
-        this.setData({ waypoints: [], markers: [], loading: false });
-      }
+    query.get().then((res) => {
+      const waypoints = (res.data || []).map(wp => this.formatWaypoint(wp));
+      const markers = this.buildMarkers(waypoints);
+      this.setData({ waypoints, markers, loading: false });
     }).catch(() => {
       this.setData({ waypoints: [], markers: [], loading: false });
     });
@@ -128,16 +120,8 @@ Page({
   },
 
   loadCategories() {
-    const fallback = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
-    this.setData({ categories: fallback });
-    // 静默尝试云函数（5s 兜底）
-    const call = app.callFunction('waypointFunctions', { action: 'getPresetCategories' });
-    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 5000));
-    Promise.race([call, timeout]).then((res) => {
-      if (res && res.result && res.result.success && res.result.data.length > 0) {
-        this.setData({ categories: res.result.data });
-      }
-    }).catch(() => {});
+    // 直接硬编码，不走云函数
+    this.setData({ categories: ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'] });
   },
 
   // ── Markers ──
@@ -324,26 +308,33 @@ Page({
   },
 
   onSeedSamples() {
+    const db = app.getDb();
+    if (!db) return;
     wx.showLoading({ title: '播种中...' });
-    const call = app.callFunction('waypointFunctions', { action: 'seedSamples' });
-    const timeout = new Promise((r) => setTimeout(() => r(null), 10000));
-    Promise.race([call, timeout]).then((res) => {
+
+    const samples = [
+      { name: '张记烧烤大排档', category: '美食', location: db.Geo.Point(39.9150, 116.4720), address: '朝阳区建国路88号', notes: '必点烤串和冰啤酒，周五晚上人超多', tags: ['好吃', '回头客', '深夜档'], rating: 4.5 },
+      { name: '星巴克(望京店)', category: '咖啡', location: db.Geo.Point(40.0020, 116.4800), address: '望京街10号', notes: '二楼靠窗位置最舒服', tags: ['环境好', '外卖可'], rating: 4.2 },
+      { name: '西山观景台', category: '风景', location: db.Geo.Point(39.9950, 116.1900), address: '海淀区香山路', notes: '秋天红叶季最美，建议工作日去人少', tags: ['风景好', '推荐'], rating: 4.8 },
+      { name: '秘密基地', category: '根据地', location: db.Geo.Point(39.9420, 116.3890), address: '西城区鼓楼大街55号', notes: '藏在胡同深处的小院，有猫', tags: ['老字号', '难找'], rating: 5.0 },
+      { name: '朝阳大悦城', category: '购物', location: db.Geo.Point(39.9210, 116.5170), address: '朝阳区朝阳北路101号', notes: 'B1美食广场选择超多', tags: ['品牌全', '好逛'], rating: 4.0 },
+      { name: '深夜食堂', category: '美食', location: db.Geo.Point(39.9400, 116.4300), address: '东城区东直门内大街', notes: '凌晨两点还在营业的拉面馆', tags: ['深夜档', '好吃'], rating: 4.3 },
+    ];
+
+    const now = new Date();
+    const tasks = samples.map(s => db.collection('waypoints').add({
+      data: { ...s, images: [], create_time: now, update_time: now }
+    }));
+
+    Promise.all(tasks).then(() => {
       wx.hideLoading();
-      if (res && res.result && res.result.success) {
-        wx.showToast({ title: res.result.data.message, icon: 'success' });
-        this.loadWaypoints();
-      } else {
-        wx.showModal({
-          title: '播种失败',
-          content: '请在云开发控制台 → 数据库 → 新建集合 "waypoints"，然后再试。',
-          showCancel: false,
-        });
-      }
-    }).catch(() => {
+      wx.showToast({ title: '已播种 ' + samples.length + ' 个传送点！', icon: 'success' });
+      this.loadWaypoints();
+    }).catch((e) => {
       wx.hideLoading();
       wx.showModal({
         title: '播种失败',
-        content: '请在云开发控制台 → 数据库 → 新建集合 "waypoints"，然后再试。',
+        content: '请在云开发控制台 → 数据库 → 新建集合 "waypoints"，然后再试。\n\n错误：' + (e.message || ''),
         showCancel: false,
       });
     });

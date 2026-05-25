@@ -43,42 +43,30 @@ Page({
 
   // ── Data ──
   loadCategories() {
-    const fallback = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
-    this.setData({ categories: fallback });
-    app.callFunction('waypointFunctions', { action: 'getPresetCategories' }).then((res) => {
-      if (res.result && res.result.success && res.result.data.length > 0) {
-        this.setData({ categories: res.result.data });
-      }
-    }).catch(() => {});
+    this.setData({ categories: ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'] });
   },
 
   loadDetail() {
-    app.callFunction('waypointFunctions', {
-      action: 'getWaypointDetail',
-      waypointId: this.data.waypointId,
-    }).then((res) => {
-      if (res.result && res.result.success) {
-        const wp = res.result.data;
-        const loc = wp.location || {};
-        wp.ratingRounded = Math.round(wp.rating || 0);
-        wp.ratingStars = wp.rating > 0 ? '⭐'.repeat(wp.ratingRounded) : '';
-        this.setData({
-          waypoint: wp,
-          isOwner: true,
-          form: {
-            name: wp.name,
-            category: wp.category,
-            latitude: loc.latitude || (loc.coordinates && loc.coordinates[1]) || null,
-            longitude: loc.longitude || (loc.coordinates && loc.coordinates[0]) || null,
-            address: wp.address || '',
-            notes: wp.notes || '',
-            tags: wp.tags || [],
-            rating: wp.rating || 0,
-            images: wp.images || [],
-          },
-        });
-        wx.setNavigationBarTitle({ title: wp.name || '传送点' });
-      }
+    const db = app.getDb();
+    if (!db) return;
+    db.collection('waypoints').doc(this.data.waypointId).get().then((res) => {
+      const wp = res.data;
+      if (!wp) return;
+      const loc = wp.location || {};
+      wp.ratingRounded = Math.round(wp.rating || 0);
+      wp.ratingStars = wp.rating > 0 ? '⭐'.repeat(wp.ratingRounded) : '';
+      this.setData({
+        waypoint: wp,
+        isOwner: true,
+        form: {
+          name: wp.name, category: wp.category,
+          latitude: loc.latitude || (loc.coordinates && loc.coordinates[1]) || null,
+          longitude: loc.longitude || (loc.coordinates && loc.coordinates[0]) || null,
+          address: wp.address || '', notes: wp.notes || '',
+          tags: wp.tags || [], rating: wp.rating || 0, images: wp.images || [],
+        },
+      });
+      wx.setNavigationBarTitle({ title: wp.name || '传送点' });
     });
   },
 
@@ -180,23 +168,30 @@ Page({
     if (!form.name.trim()) return wx.showToast({ title: '请输入名称', icon: 'none' });
     if (!form.category) return wx.showToast({ title: '请选择分类', icon: 'none' });
 
+    const db = app.getDb();
+    if (!db) return;
     this.setData({ submitting: true });
-    const action = mode === 'add' ? 'addWaypoint' : 'updateWaypoint';
-    const params = { action, ...form };
-    if (mode === 'edit') params.waypointId = waypointId;
 
-    app.callFunction('waypointFunctions', params).then((res) => {
+    const data = {
+      name: form.name, category: form.category,
+      location: form.latitude != null ? db.Geo.Point(form.latitude, form.longitude) : undefined,
+      address: form.address, notes: form.notes, tags: form.tags,
+      rating: Number(form.rating) || 0, images: form.images,
+      update_time: new Date(),
+    };
+
+    const promise = mode === 'add'
+      ? db.collection('waypoints').add({ data: { ...data, create_time: new Date() } })
+      : db.collection('waypoints').doc(waypointId).update({ data });
+
+    promise.then(() => {
       this.setData({ submitting: false });
-      if (res.result && res.result.success) {
-        wx.showToast({ title: mode === 'add' ? '传送点已激活!' : '已更新!', icon: 'success' });
-        if (mode === 'add') { wx.switchTab({ url: '/pages/home/home' }); }
-        else { this.setData({ mode: 'view' }); this.loadDetail(); }
-      } else {
-        wx.showToast({ title: res.result.errMsg || '操作失败', icon: 'none' });
-      }
+      wx.showToast({ title: mode === 'add' ? '传送点已激活!' : '已更新!', icon: 'success' });
+      if (mode === 'add') wx.switchTab({ url: '/pages/home/home' });
+      else { this.setData({ mode: 'view' }); this.loadDetail(); }
     }).catch(() => {
       this.setData({ submitting: false });
-      wx.showToast({ title: '网络错误', icon: 'none' });
+      wx.showToast({ title: '操作失败', icon: 'none' });
     });
   },
 
@@ -207,17 +202,13 @@ Page({
       content: '删除后无法恢复，确定要移除这个传送点吗？',
       confirmColor: '#FF6B6B',
       success: (res) => {
-        if (res.confirm) {
-          app.callFunction('waypointFunctions', {
-            action: 'deleteWaypoint',
-            waypointId: this.data.waypointId,
-          }).then((res) => {
-            if (res.result && res.result.success) {
-              wx.showToast({ title: '已删除', icon: 'success' });
-              wx.switchTab({ url: '/pages/home/home' });
-            }
-          });
-        }
+        if (!res.confirm) return;
+        const db = app.getDb();
+        if (!db) return;
+        db.collection('waypoints').doc(this.data.waypointId).remove().then(() => {
+          wx.showToast({ title: '已删除', icon: 'success' });
+          wx.switchTab({ url: '/pages/home/home' });
+        });
       },
     });
   },
