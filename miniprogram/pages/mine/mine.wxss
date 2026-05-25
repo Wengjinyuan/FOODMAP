@@ -1,5 +1,5 @@
 /* 传送网 — Mine（与首页完全一致的卡片样式） */
-.page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; overflow: hidden; }
+.page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; }
 
 .stats-box { margin: 16rpx 20rpx; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 14rpx; box-shadow: 4rpx 4rpx 0 #4A3A35; padding: 22rpx; display: flex; align-items: center; gap: 24rpx; flex-shrink: 0; }
 .stats-total { flex-shrink: 0; text-align: center; }
@@ -10,7 +10,7 @@
 .stats-count { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; }
 .stats-cat { font-size: 20rpx; color: #9E8A83; display: block; }
 
-.filter-row { display: flex; white-space: nowrap; padding: 4rpx 20rpx 10rpx; flex-shrink: 0; }
+.filter-row { display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding: 4rpx 20rpx 10rpx; flex-shrink: 0; }
 .filter-chip { display: inline-flex; padding: 5rpx 14rpx; margin-right: 8rpx; background: #FFF9E6; color: #9E8A83; border: 2rpx solid #4A3A35; border-radius: 10rpx; font-size: 20rpx; }
 .filter-chip.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 

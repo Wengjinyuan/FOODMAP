@@ -14,13 +14,13 @@
   </view>
 
   <!-- Category Filter -->
-  <scroll-view class="filter-row" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
+  <view class="filter-row">
     <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"
       bindtap="onCategoryFilter" data-category="">全部</view>
     <view class="filter-chip {{activeCategory === cat ? 'active' : ''}}"
       wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat"
       bindtap="onCategoryFilter" data-category="{{cat}}">{{cat}} ({{count}})</view>
-  </scroll-view>
+  </view>
 
   <!-- Waypoint List -->
   <scroll-view class="wp-list" scroll-y enhanced enable-flex enable-back-to-top show-scrollbar="{{false}}">

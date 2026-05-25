@@ -291,7 +291,7 @@ Page({
   onDrawerTouchMove(e) {
     if (!this.data.drawerStartY) return;
     const dy = this.data.drawerStartY - e.touches[0].clientY;
-    const newH = Math.max(120, Math.min(550, this.data.drawerStartH + dy));
+    const newH = Math.max(120, Math.min(1200, this.data.drawerStartH + dy));
     this.setData({ drawerHeight: newH });
   },
   onDrawerTouchEnd() {
