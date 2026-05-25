@@ -5,24 +5,10 @@ const _ = db.command;
 
 const PRESET_CATEGORIES = ["美食", "咖啡", "风景", "根据地", "购物", "娱乐", "其他"];
 
-// 确保集合存在（首次写入自动创建）
-const ensureCollection = async () => {
+// 安全查询：任何数据库错误都返回空数组
+const safeGet = async (query) => {
   try {
-    await db.createCollection("waypoints");
-  } catch (e) {
-    // 已存在则忽略
-  }
-};
-
-// 超时保护
-const withTimeout = (promise, ms = 5000) =>
-  Promise.race([promise, new Promise((_, reject) => setTimeout(() => reject(new Error('db_timeout')), ms))]);
-
-// 安全查询
-const safeGet = async (collection, query) => {
-  try {
-    await ensureCollection();
-    return await withTimeout(query);
+    return await query;
   } catch (e) {
     return { data: [] };
   }
@@ -38,7 +24,7 @@ const getNearbyWaypoints = async (event) => {
     return { success: true, data: result.data };
   } catch (e) {
     console.warn('geoNear failed, fallback:', e.message);
-    const result = await safeGet("waypoints", db.collection("waypoints").skip(skip).limit(limit).get());
+    const result = await safeGet(db.collection("waypoints").skip(skip).limit(limit).get());
     return { success: true, data: result.data };
   }
 };
@@ -50,7 +36,7 @@ const searchWaypoints = async (event) => {
   if (keyword) conditions.push({ name: db.RegExp({ regexp: keyword, options: "i" }) });
   if (category) conditions.push({ category });
   const query = conditions.length > 0 ? _.and(conditions) : {};
-  const result = await safeGet("waypoints", db.collection("waypoints").where(query).skip(skip).limit(limit).get());
+  const result = await safeGet(db.collection("waypoints").where(query).skip(skip).limit(limit).get());
   return { success: true, data: result.data };
 };
 
@@ -130,7 +116,7 @@ const getMyWaypoints = async (event) => {
   const { category = "", orderBy = "create_time", skip = 0, limit = 50 } = event;
   const query = { _openid: wxContext.OPENID };
   if (category) query.category = category;
-  const result = await safeGet("waypoints", db.collection("waypoints").where(query).orderBy(orderBy, "desc").skip(skip).limit(limit).get());
+  const result = await safeGet(db.collection("waypoints").where(query).orderBy(orderBy, "desc").skip(skip).limit(limit).get());
   return { success: true, data: result.data };
 };
 
