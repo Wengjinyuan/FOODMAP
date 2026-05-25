@@ -92,7 +92,7 @@ Page({
     this.setData({ loading: true });
     const { searchKeyword, activeCategory } = this.data;
     const db = app.getDb();
-    if (!db) { this.setData({ loading: false }); return; }
+    if (!db) { this.setData({ loading: false }); return Promise.resolve(); }
 
     let query = db.collection('waypoints');
     if (searchKeyword) {
@@ -102,7 +102,7 @@ Page({
     }
     query = query.orderBy('create_time', 'desc').limit(50);
 
-    query.get().then((res) => {
+    return query.get().then((res) => {
       const waypoints = (res.data || []).map(wp => this.formatWaypoint(wp));
       const markers = this.buildMarkers(waypoints);
       this.setData({ waypoints, markers, loading: false });

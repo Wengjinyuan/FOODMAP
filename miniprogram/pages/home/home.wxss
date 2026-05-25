@@ -1,188 +1,95 @@
-/* ═════════════════════════════════════
-   元气手绘探店风 — Home Page Styles
-   粗描边 + 硬阴影 + 奶油底色 + 暖咖文字
-   ═════════════════════════════════════ */
+/* ═══════════════════════════
+   传送网 — Home Page
+   ═══════════════════════════ */
 
-/* ── Page Shell ── */
-.page {
-  width: 100vw; height: 100vh; overflow: hidden; position: relative;
-  background: #FFFDF7;
-}
-
-/* ── Map ── */
+.page { width: 100vw; height: 100vh; overflow: hidden; position: relative; background: #FFFDF7; }
 .map { width: 100%; height: 100%; }
 
 /* ── Top Bar ── */
 .top-bar {
   position: absolute; top: 80rpx; left: 20rpx; right: 20rpx;
-  height: 72rpx; display: flex; align-items: center; gap: 12rpx; z-index: 10;
+  height: 64rpx; display: flex; align-items: center; z-index: 10;
 }
 .search-box {
-  flex: 1; height: 72rpx;
-  background: rgba(255,255,255,0.95);
-  border: 3rpx solid #4A3A35;
-  border-radius: 18rpx;
-  padding: 0 24rpx;
-  display: flex; align-items: center;
+  flex: 1; height: 64rpx; background: rgba(255,255,255,0.95);
+  border: 3rpx solid #4A3A35; border-radius: 14rpx;
+  padding: 0 20rpx; display: flex; align-items: center;
 }
-.search-input {
-  flex: 1; font-size: 26rpx; color: #4A3A35;
-}
-.theme-btn {
-  width: 72rpx; height: 72rpx;
-  background: rgba(255,255,255,0.95);
-  border: 3rpx solid #4A3A35;
-  border-radius: 14rpx;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 30rpx; flex-shrink: 0;
-}
+.search-input { flex: 1; font-size: 26rpx; color: #4A3A35; }
 
-/* ── FAB ── */
-.fab {
-  position: absolute; bottom: 300rpx; right: 28rpx;
-  width: 100rpx; height: 100rpx;
-  background: #FFD23F;
-  border: 3rpx solid #4A3A35;
-  border-radius: 22rpx;
-  z-index: 10;
-  display: flex; align-items: center; justify-content: center;
-  box-shadow: 3rpx 3rpx 0rpx #4A3A35;
+/* ── History ── */
+.history-drop {
+  position: absolute; top: 150rpx; left: 20rpx; right: 20rpx;
+  background: #FFFFFF; border: 3rpx solid #4A3A35;
+  border-radius: 14rpx; box-shadow: 4rpx 4rpx 0rpx #4A3A35;
+  z-index: 13; padding: 8rpx 0; max-height: 360rpx; overflow-y: auto;
 }
-.fab-icon { font-size: 48rpx; color: #4A3A35; font-weight: 600; }
-.fab:active { transform: scale(0.95); }
+.history-header { display: flex; justify-content: space-between; padding: 8rpx 20rpx 10rpx; font-size: 22rpx; font-weight: 600; color: #4A3A35; }
+.history-clear { color: #FF6B6B; font-size: 22rpx; }
+.history-item { padding: 12rpx 20rpx; font-size: 24rpx; color: #4A3A35; border-bottom: 1rpx solid #F0EBE5; }
+.history-item:active { background: #FFF9E6; }
+
+/* ── FAB (跟随抽屉) ── */
+.fab {
+  position: absolute; right: 24rpx;
+  width: 88rpx; height: 88rpx;
+  background: #FFD23F; border: 3rpx solid #4A3A35;
+  border-radius: 20rpx; box-shadow: 3rpx 3rpx 0rpx #4A3A35;
+  z-index: 10; display: flex; align-items: center; justify-content: center;
+}
+.fab-icon { font-size: 44rpx; color: #4A3A35; font-weight: 600; }
 
 /* ── Callout ── */
 .callout-overlay {
-  position: absolute; top: 0; left: 0; right: 0; bottom: 320rpx;
-  display: flex; align-items: flex-end; justify-content: center;
-  padding-bottom: 40rpx; z-index: 11;
+  position: absolute; top: 0; left: 0; right: 0; bottom: 340rpx;
+  display: flex; align-items: flex-end; justify-content: center; padding-bottom: 30rpx; z-index: 11;
 }
 .callout-card {
-  width: 85%; background: #FFFFFF;
-  border: 3rpx solid #4A3A35;
-  border-radius: 14rpx;
-  box-shadow: 4rpx 4rpx 0rpx #4A3A35;
-  padding: 24rpx; position: relative;
+  width: 80%; background: #FFFFFF; border: 3rpx solid #4A3A35;
+  border-radius: 14rpx; box-shadow: 4rpx 4rpx 0rpx #4A3A35; padding: 20rpx; position: relative;
 }
-.callout-close {
-  position: absolute; top: 14rpx; right: 14rpx;
-  font-size: 26rpx; padding: 6rpx; color: #9E8A83;
-}
-.callout-name {
-  font-size: 30rpx; font-weight: 700; color: #4A3A35; display: block;
-}
-.callout-meta {
-  display: flex; align-items: center; margin-top: 8rpx; gap: 10rpx;
-}
-.callout-cat {
-  font-size: 24rpx; padding: 4rpx 14rpx;
-  color: #4A3A35; background: #FFD23F;
-  border: 2rpx solid #4A3A35;
-  border-radius: 6rpx; font-weight: 700;
-}
-.callout-stars { font-size: 24rpx; }
-.callout-hint {
-  font-size: 22rpx; color: #FF6B6B; margin-top: 12rpx; display: block;
-}
+.callout-close { position: absolute; top: 10rpx; right: 12rpx; font-size: 24rpx; color: #9E8A83; padding: 6rpx; }
+.callout-name { font-size: 28rpx; font-weight: 700; color: #4A3A35; }
+.callout-meta { display: flex; align-items: center; margin-top: 6rpx; gap: 10rpx; }
+.callout-cat { font-size: 22rpx; padding: 3rpx 12rpx; color: #4A3A35; background: #FFD23F; border: 2rpx solid #4A3A35; border-radius: 6rpx; font-weight: 700; }
+.callout-stars { font-size: 22rpx; }
+.callout-hint { font-size: 22rpx; color: #FF6B6B; margin-top: 8rpx; }
 
-/* ── Bottom Drawer ── */
+/* ── Drawer ── */
 .drawer {
   position: absolute; bottom: 0; left: 0; right: 0;
-  background: #FFFDF7;
-  border-top: 3rpx solid #4A3A35;
-  border-left: 3rpx solid #4A3A35;
-  border-right: 3rpx solid #4A3A35;
-  border-radius: 24rpx 24rpx 0 0;
-  z-index: 9; display: flex; flex-direction: column;
+  background: #FFFDF7; border-top: 3rpx solid #4A3A35;
+  border-radius: 24rpx 24rpx 0 0; z-index: 9; display: flex; flex-direction: column;
 }
-.drawer-handle {
-  display: flex; justify-content: center; padding: 14rpx 0 8rpx;
-}
-.drawer-bar {
-  width: 48rpx; height: 6rpx;
-  background: #4A3A35; border-radius: 4rpx;
-}
+.drawer-handle { display: flex; justify-content: center; padding: 10rpx 0 4rpx; flex-shrink: 0; }
+.drawer-bar { width: 40rpx; height: 5rpx; background: #4A3A35; border-radius: 4rpx; }
 
-/* ── Category Chips ── */
-.cat-scroll {
-  display: flex; white-space: nowrap;
-  padding: 4rpx 20rpx 12rpx; height: 60rpx;
-}
+/* ── Category chips (精简) ── */
+.cat-scroll { display: flex; white-space: nowrap; padding: 4rpx 16rpx 8rpx; height: 52rpx; }
 .cat-chip {
-  display: inline-flex; align-items: center;
-  padding: 8rpx 22rpx; margin-right: 10rpx;
-  background: #FFF9E6; color: #9E8A83;
-  border: 2rpx solid #4A3A35; border-radius: 14rpx;
-  font-size: 24rpx; flex-shrink: 0;
+  display: inline-flex; align-items: center; padding: 6rpx 18rpx; margin-right: 8rpx;
+  background: #FFF9E6; color: #9E8A83; border: 2rpx solid #4A3A35;
+  border-radius: 12rpx; font-size: 22rpx; flex-shrink: 0;
 }
-.cat-chip.active {
-  background: #FFD23F; color: #4A3A35;
-  font-weight: 700;
-}
+.cat-chip.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 
-/* ── Waypoint Cards ── */
-.card-scroll { flex: 1; padding: 0 20rpx; }
+/* ── Cards (缩小版) ── */
+.card-scroll { flex: 1; padding: 0 16rpx; }
 .wp-card {
-  display: flex; align-items: center; padding: 16rpx; margin-bottom: 14rpx;
-  background: #FFFFFF;
-  border: 3rpx solid #4A3A35;
-  border-radius: 14rpx;
-  box-shadow: 4rpx 4rpx 0rpx #4A3A35;
+  display: flex; align-items: center; padding: 14rpx 16rpx; margin-bottom: 8rpx;
+  background: #FFFFFF; border: 2rpx solid #4A3A35;
+  border-radius: 12rpx; box-shadow: 3rpx 3rpx 0rpx #4A3A35;
 }
-.wp-card:active {
-  transform: translate(2rpx, 2rpx);
-  box-shadow: 2rpx 2rpx 0rpx #4A3A35;
-}
-.card-thumb {
-  width: 96rpx; height: 96rpx; border-radius: 10rpx; flex-shrink: 0;
-  background: #FFF9E6; border: 2rpx solid #4A3A35;
-  display: flex; align-items: center; justify-content: center; overflow: hidden;
-}
-.thumb-img  { width: 100%; height: 100%; }
-.thumb-emoji { font-size: 40rpx; }
-.card-body { flex: 1; margin-left: 16rpx; min-width: 0; }
-.card-name {
-  font-size: 30rpx; font-weight: 700; color: #4A3A35; display: block;
-}
-.card-row {
-  display: flex; align-items: center; margin-top: 4rpx; gap: 8rpx;
-}
-.card-cat {
-  font-size: 22rpx; padding: 2rpx 10rpx;
-  color: #4A3A35; background: #FFD23F;
-  border: 2rpx solid #4A3A35; border-radius: 6rpx; font-weight: 700;
-}
-.card-star { font-size: 22rpx; }
-.card-addr {
-  font-size: 22rpx; color: #9E8A83; margin-top: 4rpx;
-  overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block;
-}
-.card-arrow { font-size: 24rpx; margin-left: 8rpx; color: #C4B5AF; }
+.card-thumb { width: 72rpx; height: 72rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; }
+.thumb-emoji { font-size: 30rpx; }
+.card-body { flex: 1; margin-left: 12rpx; min-width: 0; }
+.card-name { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-row { display: flex; align-items: center; margin-top: 2rpx; gap: 6rpx; }
+.card-cat { font-size: 20rpx; padding: 2rpx 8rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; }
+.card-star { font-size: 20rpx; }
+.card-addr { font-size: 20rpx; color: #9E8A83; margin-top: 2rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-arrow { color: #C4B5AF; font-size: 20rpx; margin-left: 6rpx; flex-shrink: 0; }
 
-/* ── Empty State ── */
-.empty-state { text-align: center; padding: 60rpx 0; color: #9E8A83; font-size: 26rpx; }
-.empty-hint { display: block; margin-top: 8rpx; font-size: 22rpx; }
-.seed-btn {
-  display: inline-block; margin-top: 24rpx; padding: 14rpx 32rpx;
-  background: #FFD23F; color: #4A3A35; border: 2rpx solid #4A3A35;
-  border-radius: 14rpx; font-size: 26rpx; font-weight: 700; cursor: pointer;
-}
-
-/* ── Search History Dropdown ── */
-.history-drop {
-  position: absolute; top: 158rpx; left: 20rpx; right: 88rpx;
-  background: #FFFFFF; border: 3rpx solid #4A3A35;
-  border-radius: 14rpx; box-shadow: 4rpx 4rpx 0rpx #4A3A35;
-  z-index: 12; padding: 12rpx 0; max-height: 400rpx; overflow-y: auto;
-}
-.history-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8rpx 24rpx 12rpx;
-}
-.history-header text:first-child { font-size: 24rpx; font-weight: 600; color: #4A3A35; }
-.history-clear { font-size: 22rpx; color: #FF6B6B; }
-.history-item {
-  padding: 14rpx 24rpx; font-size: 26rpx; color: #4A3A35;
-  border-bottom: 1rpx solid #F0EBE5;
-}
-.history-item:active { background: #FFF9E6; }
+/* ── Empty ── */
+.empty-state { text-align: center; padding: 40rpx 0; color: #9E8A83; font-size: 24rpx; display: flex; flex-direction: column; align-items: center; gap: 16rpx; }
+.seed-btn { padding: 12rpx 28rpx; background: #FFD23F; color: #4A3A35; border: 2rpx solid #4A3A35; border-radius: 12rpx; font-size: 24rpx; font-weight: 700; }

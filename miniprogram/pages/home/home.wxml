@@ -1,52 +1,31 @@
 <view class="page {{theme}}">
-  <!-- Full-screen map -->
-  <map
-    id="waypointMap"
-    class="map"
-    latitude="{{latitude}}"
-    longitude="{{longitude}}"
-    scale="{{scale}}"
-    markers="{{markers}}"
-    show-location="{{true}}"
-    bindmarkertap="onMarkerTap"
-    bindregionchange="onMapRegionChange"
-  />
+  <!-- 地图 -->
+  <map id="waypointMap" class="map"
+    latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}"
+    markers="{{markers}}" show-location="{{true}}"
+    bindmarkertap="onMarkerTap" bindregionchange="onMapRegionChange" />
 
-  <!-- Top bar: search + theme toggle -->
+  <!-- 顶栏：搜索 + 主题 -->
   <view class="top-bar">
     <view class="search-box">
-      <input class="search-input" placeholder="🔍 搜索美食地点..."
-        value="{{searchKeyword}}"
-        bindfocus="onSearchFocus"
-        bindblur="onSearchBlur"
-        bindinput="onSearchInput"
-        bindconfirm="onSearchConfirm"
-        confirm-type="search"
-      />
-    </view>
-    <view class="theme-btn" bindtap="toggleTheme">
-      <text>🎨</text>
+      <input class="search-input" placeholder="🔍 搜索..."
+        value="{{searchKeyword}}" bindfocus="onSearchFocus" bindblur="onSearchBlur"
+        bindinput="onSearchInput" bindconfirm="onSearchConfirm" confirm-type="search" />
     </view>
   </view>
 
-  <!-- Search history dropdown -->
+  <!-- 搜索历史 -->
   <view class="history-drop" wx:if="{{showHistory && searchHistory.length > 0}}">
-    <view class="history-header">
-      <text>搜索历史</text>
-      <text class="history-clear" bindtap="onClearHistory">清空</text>
-    </view>
-    <view class="history-item" wx:for="{{searchHistory}}" wx:key="*this"
-      bindtap="onHistoryTap" data-keyword="{{item}}">
-      <text>🕐 {{item}}</text>
-    </view>
+    <view class="history-header"><text>搜索历史</text><text class="history-clear" bindtap="onClearHistory">清空</text></view>
+    <view class="history-item" wx:for="{{searchHistory}}" wx:key="*this" bindtap="onHistoryTap" data-keyword="{{item}}">🕐 {{item}}</view>
   </view>
 
-  <!-- Add waypoint FAB -->
-  <view class="fab" bindtap="onAddTap">
+  <!-- FAB — 跟随抽屉高度 -->
+  <view class="fab" style="bottom: {{drawerHeight + 10}}rpx;" bindtap="onAddTap">
     <text class="fab-icon">+</text>
   </view>
 
-  <!-- Marker callout overlay -->
+  <!-- Marker callout -->
   <view class="callout-overlay" wx:if="{{selectedWaypoint}}" bindtap="onCalloutTap">
     <view class="callout-card">
       <view class="callout-close" catchtap="onCalloutClose">✕</view>
@@ -55,43 +34,28 @@
         <text class="callout-cat">{{selectedWaypoint.category}}</text>
         <text class="callout-stars" wx:if="{{selectedWaypoint.ratingStars}}">{{selectedWaypoint.ratingStars}}</text>
       </view>
-      <text class="callout-hint">点击查看详情 ▶</text>
+      <text class="callout-hint">点击查看 ▶</text>
     </view>
   </view>
 
-  <!-- Bottom drawer -->
+  <!-- 底部抽屉 -->
   <view class="drawer" style="height: {{drawerHeight}}rpx;">
-    <!-- 拖拽手柄 - 实时响应 -->
-    <view class="drawer-handle"
-      bindtouchstart="onDrawerTouchStart"
-      bindtouchmove="onDrawerTouchMove"
-      bindtouchend="onDrawerTouchEnd">
+    <view class="drawer-handle" bindtouchstart="onDrawerTouchStart" bindtouchmove="onDrawerTouchMove" bindtouchend="onDrawerTouchEnd">
       <view class="drawer-bar"></view>
     </view>
 
-    <!-- Category filter chips -->
+    <!-- 分类 — 精简行 -->
     <scroll-view class="cat-scroll" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
-      <view class="cat-chip {{activeCategory === '' ? 'active' : ''}}"
-        bindtap="onCategoryTap" data-category="">全部</view>
-      <view class="cat-chip {{activeCategory === item ? 'active' : ''}}"
-        wx:for="{{categories}}" wx:key="*this"
-        bindtap="onCategoryTap" data-category="{{item}}">
-        {{item}}
-      </view>
+      <view class="cat-chip {{activeCategory === '' ? 'active' : ''}}" bindtap="onCategoryTap" data-category="">全部</view>
+      <view class="cat-chip {{activeCategory === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" bindtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
     </scroll-view>
 
-    <!-- Waypoint card list -->
+    <!-- 卡片列表 -->
     <scroll-view class="card-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}"
-      refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}"
-      bindrefresherrefresh="onRefresh">
+      refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
       <block wx:if="{{waypoints.length > 0}}">
-        <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id"
-          bindtap="onCardTap" data-id="{{item._id}}">
-          <view class="card-thumb">
-            <image wx:if="{{item.images && item.images.length > 0}}"
-              src="{{item.images[0]}}" mode="aspectFill" class="thumb-img" />
-            <text wx:else class="thumb-emoji">📍</text>
-          </view>
+        <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id" bindtap="onCardTap" data-id="{{item._id}}">
+          <view class="card-thumb"><text class="thumb-emoji">📍</text></view>
           <view class="card-body">
             <text class="card-name">{{item.name}}</text>
             <view class="card-row">
@@ -104,12 +68,10 @@
         </view>
       </block>
       <view class="empty-state" wx:elif="{{!loading}}">
-        <text>🔍 附近暂无传送点</text>
-        <text class="empty-hint">点击右下角 + 激活第一个传送点吧 ✨</text>
-        <view class="seed-btn" bindtap="onSeedSamples">🌱 一键播种测试数据</view>
+        <text>暂无传送点</text>
+        <view class="seed-btn" bindtap="onSeedSamples">🌱 一键播种</view>
       </view>
-      <!-- 底部留白给 TabBar -->
-      <view style="height: 40rpx;"></view>
+      <view style="height: 20rpx;"></view>
     </scroll-view>
   </view>
 </view>
