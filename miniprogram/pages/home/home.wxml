@@ -84,6 +84,7 @@
         <view class="seed-btn" bindtap="onSeedSamples">🌱 一键播种</view>
       </view>
       <view style="height: 20rpx;"></view>
+      <view style="height: 120rpx;"></view>
     </scroll-view>
   </view>
 </view>

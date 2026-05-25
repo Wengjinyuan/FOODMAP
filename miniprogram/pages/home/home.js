@@ -54,12 +54,8 @@ Page({
   },
 
   onShow() {
-    const style = app.globalData.markerStyle || wx.getStorageSync('markerStyle') || 'game';
-    if (this.data.waypoints.length > 0) {
-      this.setData({ markers: [] }, () => {
-        const markers = this.buildMarkers(this.data.waypoints);
-        this.setData({ markers });
-      });
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setData({ selected: 0 });
     }
     this.loadWaypoints();
   },

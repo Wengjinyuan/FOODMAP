@@ -1,0 +1,10 @@
+<view class="tab-bar">
+  <view class="tab-item {{selected === 0 ? 'active' : ''}}" bindtap="switchTab" data-index="0">
+    <text class="tab-icon">{{selected === 0 ? '📍' : '🗺️'}}</text>
+    <text class="tab-text">地图</text>
+  </view>
+  <view class="tab-item {{selected === 1 ? 'active' : ''}}" bindtap="switchTab" data-index="1">
+    <text class="tab-icon">{{selected === 1 ? '📍' : '👤'}}</text>
+    <text class="tab-text">我的</text>
+  </view>
+</view>
