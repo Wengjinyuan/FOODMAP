@@ -22,7 +22,7 @@ Page({
     const db = app.getDb();
     if (!db) { this.setData({ loading: false }); return; }
 
-    db.collection('waypoints').orderBy('create_time', 'desc').limit(200).get().then((res) => {
+    db.collection('waypoints').orderBy('create_time', 'desc').limit(1000).get().then((res) => {
       const all = res.data || [];
 
       // 统计
