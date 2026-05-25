@@ -75,12 +75,17 @@
           </view>
         </view>
 
-        <!-- Location -->
+        <!-- Address -->
+        <view class="field">
+          <text class="field-label">地址</text>
+          <input class="field-input" placeholder="手动输入地址，如：朝阳区建国路88号" value="{{form.address}}" bindinput="onFormField" data-field="address" />
+        </view>
+        <!-- Map picker -->
         <view class="field">
           <text class="field-label">位置</text>
           <view class="location-pick" bindtap="onChooseLocation">
-            <text wx:if="{{form.address}}">📍 {{form.address}}</text>
-            <text wx:else class="placeholder">点击打开地图选点</text>
+            <text wx:if="{{form.latitude}}">📍 已选点 ({{form.latitude}}, {{form.longitude}})</text>
+            <text wx:else class="placeholder">点击打开地图选点（可选）</text>
           </view>
         </view>
 

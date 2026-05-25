@@ -57,10 +57,10 @@
       <view class="cat-chip {{activeCategory === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" bindtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
     </scroll-view>
 
-    <!-- 间距 + 布局切换 -->
-    <view style="display:flex;justify-content:space-between;align-items:center;padding:4rpx 16rpx 8rpx;flex-shrink:0;">
+    <!-- 布局切换 -->
+    <view class="layout-bar">
       <text style="font-size:20rpx;color:#9E8A83;">共 {{waypoints.length}} 个</text>
-      <text style="font-size:20rpx;color:#4A3A35;background:#FFF9E6;border:1.5rpx solid #4A3A35;border-radius:8rpx;padding:4rpx 14rpx;" bindtap="toggleCardLayout">{{cardLayout === 'single' ? '▦ 双栏' : '☰ 单栏'}}</text>
+      <text class="layout-btn" bindtap="toggleCardLayout">{{cardLayout === 'single' ? '▦ 双栏' : '☰ 单栏'}}</text>
     </view>
     <!-- 卡片列表 -->
     <scroll-view class="card-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}"
@@ -68,22 +68,22 @@
       <!-- 单栏 -->
       <block wx:if="{{waypoints.length > 0 && cardLayout === 'single'}}">
         <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id" bindtap="onCardTap" data-id="{{item._id}}">
-          <view class="card-thumb"><text class="thumb-emoji">📍</text></view>
-          <view class="card-body">
-            <text class="card-name">{{item.name}}</text>
-            <view class="card-row"><text class="card-cat">{{item.category}}</text></view>
-            <text class="card-addr">{{item.address || '暂无地址'}}</text>
+          <view class="thumb">📍</view>
+          <view class="info">
+            <view class="name">{{item.name}}</view>
+            <view class="meta"><text class="cat">{{item.category}}</text></view>
+            <view class="addr">{{item.address || '暂无地址'}}</view>
           </view>
-          <text class="card-arrow">▶</text>
+          <text class="arrow">▶</text>
         </view>
       </block>
-      <!-- 双栏 -->
+      <!-- 双栏 grid -->
       <view class="card-grid" wx:if="{{waypoints.length > 0 && cardLayout === 'double'}}">
-        <view class="wp-card-double" wx:for="{{waypoints}}" wx:key="_id" bindtap="onCardTap" data-id="{{item._id}}">
-          <view class="card-thumb"><text class="thumb-emoji">📍</text></view>
-          <view class="card-body">
-            <text class="card-name">{{item.name}}</text>
-            <view class="card-row"><text class="card-cat">{{item.category}}</text></view>
+        <view class="wp-double" wx:for="{{waypoints}}" wx:key="_id" bindtap="onCardTap" data-id="{{item._id}}">
+          <view class="d-thumb">📍</view>
+          <view class="d-info">
+            <view class="d-name">{{item.name}}</view>
+            <view class="d-meta"><text class="d-cat">{{item.category}}</text></view>
           </view>
         </view>
       </view>
