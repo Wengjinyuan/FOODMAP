@@ -61,7 +61,7 @@
     </scroll-view>
 
     <!-- 卡片列表 — 单列 -->
-    <scroll-view class="card-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}"
+    <scroll-view class="card-scroll" scroll-y enhanced enable-flex enable-back-to-top show-scrollbar="{{false}}"
       refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
       <block wx:if="{{waypoints.length > 0}}">
         <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id" bindtap="onCardTap" data-id="{{item._id}}">
