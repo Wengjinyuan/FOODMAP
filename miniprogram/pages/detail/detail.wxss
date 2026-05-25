@@ -164,13 +164,13 @@
   flex-shrink: 0;
 }
 .cancel-btn {
-  padding: 0 24rpx; height: 88rpx; background: #FFFFFF;
-  color: #4A3A35; border: 3rpx solid #4A3A35;
+  flex: 3; height: 88rpx; background: #FFFFFF;
+  color: #9E8A83; border: 2rpx solid #9E8A83;
   border-radius: 14rpx; font-size: 28rpx;
-  display: flex; align-items: center;
+  display: flex; align-items: center; justify-content: center;
 }
 .submit-btn {
-  flex: 1; height: 88rpx; background: #FFD23F;
+  flex: 7; height: 88rpx; background: #FFD23F;
   color: #4A3A35; border: 3rpx solid #4A3A35;
   border-radius: 14rpx; box-shadow: 3rpx 3rpx 0rpx #4A3A35;
   font-size: 28rpx; font-weight: 700;
