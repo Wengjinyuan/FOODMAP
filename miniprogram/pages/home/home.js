@@ -26,7 +26,6 @@ Page({
     refreshing: false,
     searchHistory: [],
     showHistory: false,
-    cardLayout: 'single', // 'single' | 'double'
   },
 
   onLoad() {
@@ -36,8 +35,6 @@ Page({
     this.loadCategories();
     this.getCurrentLocation();
     this.loadSearchHistory();
-    const savedLayout = wx.getStorageSync('cardLayout');
-    if (savedLayout) this.setData({ cardLayout: savedLayout });
     this.loadWaypoints();
   },
 
@@ -115,8 +112,10 @@ Page({
   },
 
   formatWaypoint(wp) {
+    const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
     return {
       ...wp,
+      categoryEmoji: emojiMap[wp.category] || '📍',
       ratingStars: wp.rating > 0 ? '⭐'.repeat(Math.round(wp.rating)) : '',
       ratingRounded: Math.round(wp.rating),
     };
@@ -224,11 +223,6 @@ Page({
     }, 50);
   },
 
-  toggleCardLayout() {
-    const next = this.data.cardLayout === 'single' ? 'double' : 'single';
-    this.setData({ cardLayout: next });
-    wx.setStorageSync('cardLayout', next);
-  },
   onSearchBlur() {
     setTimeout(() => this.setData({ showHistory: false }), 200);
   },
