@@ -2,7 +2,7 @@
    元气手绘探店风 — Detail Page
    ═════════════════════════════════════ */
 
-.page { min-height: 100vh; background: #FFFDF7; padding-bottom: 140rpx; display: flex; flex-direction: column; }
+.page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; overflow: hidden; }
 
 /* ── Common Nav ── */
 .dnav {
@@ -158,10 +158,10 @@
 
 /* Form actions */
 .form-actions {
-  position: fixed; bottom: 0; left: 0; right: 0;
-  padding: 16rpx 24rpx 40rpx; background: rgba(255,253,247,0.96);
-  display: flex; gap: 12rpx; z-index: 10;
+  padding: 16rpx 24rpx 40rpx; background: #FFFDF7;
+  display: flex; gap: 12rpx;
   border-top: 3rpx solid #4A3A35;
+  flex-shrink: 0;
 }
 .cancel-btn {
   padding: 0 24rpx; height: 88rpx; background: #FFFFFF;
