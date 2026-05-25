@@ -26,6 +26,7 @@ Page({
     refreshing: false,
     searchHistory: [],
     showHistory: false,
+    cardLayout: 'single', // 'single' | 'double'
   },
 
   onLoad() {
@@ -35,6 +36,8 @@ Page({
     this.loadCategories();
     this.getCurrentLocation();
     this.loadSearchHistory();
+    const savedLayout = wx.getStorageSync('cardLayout');
+    if (savedLayout) this.setData({ cardLayout: savedLayout });
     this.loadWaypoints();
   },
 
@@ -214,9 +217,17 @@ Page({
     this.setData({ searchHistory: history.slice(0, 10) });
   },
   onSearchFocus() {
-    // 聚焦时清空上次搜索文字 + 显示历史
-    this.setData({ searchKeyword: '', showHistory: true });
-    this.loadSearchHistory();
+    // 延迟确保 input 组件完成原生聚焦后再清空
+    setTimeout(() => {
+      this.setData({ searchKeyword: '', showHistory: true });
+      this.loadSearchHistory();
+    }, 50);
+  },
+
+  toggleCardLayout() {
+    const next = this.data.cardLayout === 'single' ? 'double' : 'single';
+    this.setData({ cardLayout: next });
+    wx.setStorageSync('cardLayout', next);
   },
   onSearchBlur() {
     setTimeout(() => this.setData({ showHistory: false }), 200);

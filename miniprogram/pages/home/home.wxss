@@ -40,17 +40,23 @@
 
 /* Card scroll area */
 .card-scroll { flex: 1; padding: 0 16rpx 16rpx; }
-/* Spacer between cat row and first card */
-.card-scroll::before { content: ''; display: block; height: 4rpx; }
-.wp-card { display: flex; align-items: center; padding: 14rpx 16rpx; margin-bottom: 8rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 10rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; }
-.card-thumb { width: 68rpx; height: 68rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 1.5rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; }
-.thumb-emoji { font-size: 28rpx; }
-.card-body { flex: 1; margin-left: 12rpx; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-.card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; margin-bottom: 2rpx; }
-.card-row { display: flex; gap: 4rpx; align-items: center; }
+.wp-card { display: flex; align-items: center; padding: 12rpx 14rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 10rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; }
+.card-thumb { width: 64rpx; height: 64rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 1.5rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; }
+.thumb-emoji { font-size: 26rpx; }
+.card-body { flex: 1; margin-left: 10rpx; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-row { display: flex; gap: 4rpx; align-items: center; margin-top: 1rpx; }
 .card-cat { font-size: 18rpx; padding: 1rpx 8rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; }
-.card-addr { font-size: 18rpx; color: #9E8A83; margin-top: 2rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-addr { font-size: 18rpx; color: #9E8A83; margin-top: 1rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .card-arrow { color: #C4B5AF; font-size: 18rpx; margin-left: 2rpx; flex-shrink: 0; }
+
+/* Double column */
+.card-grid { display: flex; flex-wrap: wrap; gap: 8rpx; padding: 0 16rpx 16rpx; }
+.wp-card-double { width: calc(50% - 4rpx); flex-direction: column; align-items: stretch; padding: 12rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 10rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
+.wp-card-double .card-thumb { width: 100%; height: 120rpx; margin-bottom: 8rpx; }
+.wp-card-double .card-body { margin-left: 0; }
+.wp-card-double .card-name { font-size: 24rpx; }
+.wp-card-double .card-arrow { display: none; }
 
 /* Empty */
 .empty-state { text-align: center; padding: 24rpx 0; color: #9E8A83; font-size: 24rpx; display: flex; flex-direction: column; align-items: center; gap: 10rpx; }
