@@ -6,9 +6,9 @@
     enable-zoom="{{true}}" enable-scroll="{{true}}" enable-rotate="{{true}}"
     bindmarkertap="onMarkerTap" bindregionchange="onMapRegionChange" />
 
-  <!-- 搜索栏 — 胶囊形 -->
-  <view class="top-bar">
-    <view class="search-capsule">
+  <!-- 搜索栏 — 动态避开胶囊按钮 -->
+  <view class="top-bar" style="top:{{searchTop}}rpx;right:{{searchRight}}rpx;height:{{searchHeight}}rpx;">
+    <view class="search-capsule" style="height:{{searchHeight}}rpx;">
       <text class="search-icon-left">🔍</text>
       <input class="search-input" placeholder="搜索地点..."
         value="{{searchKeyword}}" bindfocus="onSearchFocus" bindblur="onSearchBlur"

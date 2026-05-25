@@ -2,9 +2,9 @@
 page { background: #FFFDF7; }
 .map { width: 100%; height: 100%; position: absolute; top: 0; left: 0; }
 
-/* Top bar — 胶囊形 */
-.top-bar { position: absolute; top: 80rpx; left: 20rpx; right: 20rpx; height: 68rpx; z-index: 10; display: flex; }
-.search-capsule { flex: 1; height: 68rpx; background: rgba(255,255,255,0.96); border: 2.5rpx solid #4A3A35; border-radius: 34rpx; padding: 0 12rpx 0 20rpx; display: flex; align-items: center; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06); box-sizing: border-box; }
+/* Top bar — 动态避开胶囊 */
+.top-bar { position: absolute; left: 20rpx; z-index: 10; display: flex; }
+.search-capsule { flex: 1; background: rgba(255,255,255,0.96); border: 2.5rpx solid #4A3A35; border-radius: 34rpx; padding: 0 12rpx 0 20rpx; display: flex; align-items: center; box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.06); box-sizing: border-box; }
 .search-icon-left { font-size: 28rpx; margin-right: 10rpx; flex-shrink: 0; }
 .search-input { flex: 1; font-size: 26rpx; color: #4A3A35; height: 100%; }
 .search-eye { font-size: 26rpx; padding: 8rpx 12rpx; flex-shrink: 0; }
