@@ -349,12 +349,5 @@ Page({
     wx.navigateTo({ url: '/pages/detail/detail?mode=add' });
   },
 
-  onMapRegionChange(e) {
-    if (e.type === 'end' && e.detail.centerLocation) {
-      this.setData({
-        latitude: e.detail.centerLocation.latitude,
-        longitude: e.detail.centerLocation.longitude,
-      });
-    }
-  },
+  // 地图自己管理拖动位置，不干预
 });
