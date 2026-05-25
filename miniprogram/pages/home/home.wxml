@@ -6,25 +6,28 @@
     enable-zoom="{{true}}" enable-scroll="{{true}}" enable-rotate="{{true}}"
     bindmarkertap="onMarkerTap" bindregionchange="onMapRegionChange" />
 
-  <!-- 顶栏：搜索 + 主题 -->
+  <!-- 搜索栏 — 胶囊形 -->
   <view class="top-bar">
-    <view class="search-box">
-      <input class="search-input" placeholder="🔍 搜索..."
+    <view class="search-capsule">
+      <text class="search-icon-left">🔍</text>
+      <input class="search-input" placeholder="搜索地点..."
         value="{{searchKeyword}}" bindfocus="onSearchFocus" bindblur="onSearchBlur"
         bindinput="onSearchInput" bindconfirm="onSearchConfirm" confirm-type="search" />
+      <text class="search-eye {{historyHidden ? 'off' : ''}}" bindtap="onToggleHistory" wx:if="{{searchHistory.length > 0}}">{{historyHidden ? '🙈' : '👁️'}}</text>
     </view>
   </view>
 
-  <!-- 搜索历史 -->
-  <view class="history-drop" wx:if="{{showHistory && searchHistory.length > 0}}">
-    <view class="history-header">
-      <text>搜索历史</text>
-      <view style="display:flex;gap:16rpx;align-items:center;">
-        <text class="history-clear" bindtap="onClearHistory">清空</text>
-        <text class="history-close" bindtap="onSearchBlur">✕</text>
-      </view>
+  <!-- 搜索历史 — 横向翻页卡片 -->
+  <view class="history-panel" wx:if="{{showHistory && searchHistory.length > 0 && !historyHidden}}">
+    <view class="history-top">
+      <text class="history-label">最近搜索</text>
+      <text class="history-clear" bindtap="onClearHistory">清空</text>
     </view>
-    <view class="history-item" wx:for="{{searchHistory}}" wx:key="*this" bindtap="onHistoryTap" data-keyword="{{item}}">🕐 {{item}}</view>
+    <scroll-view class="history-cards" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
+      <view class="h-card" wx:for="{{searchHistory}}" wx:key="*this" bindtap="onHistoryTap" data-keyword="{{item}}">
+        <text class="h-card-text">{{item}}</text>
+      </view>
+    </scroll-view>
   </view>
 
   <!-- FAB — 跟随抽屉高度 -->

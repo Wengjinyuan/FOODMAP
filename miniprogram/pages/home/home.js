@@ -26,6 +26,7 @@ Page({
     refreshing: false,
     searchHistory: [],
     showHistory: false,
+    historyHidden: false,
   },
 
   onLoad() {
@@ -248,9 +249,12 @@ Page({
     this.setData({ searchKeyword: kw, showHistory: false });
     this.loadWaypoints();
   },
+  onToggleHistory() {
+    this.setData({ historyHidden: !this.data.historyHidden });
+  },
   onClearHistory() {
     wx.setStorageSync('searchHistory', []);
-    this.setData({ searchHistory: [], showHistory: false });
+    this.setData({ searchHistory: [], showHistory: false, historyHidden: false });
   },
 
   onRefresh() {
