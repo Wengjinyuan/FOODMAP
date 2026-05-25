@@ -25,8 +25,10 @@ Page({
   },
 
   loadStats() {
-    app.callFunction('waypointFunctions', { action: 'getMyStats' }).then((res) => {
-      if (res.result && res.result.success) {
+    const call = app.callFunction('waypointFunctions', { action: 'getMyStats' });
+    const timeout = new Promise((r) => setTimeout(() => r(null), 5000));
+    Promise.race([call, timeout]).then((res) => {
+      if (res && res.result && res.result.success) {
         this.setData({ stats: res.result.data });
       }
     }).catch(() => {});
@@ -34,11 +36,10 @@ Page({
 
   loadWaypoints() {
     this.setData({ loading: true });
-    app.callFunction('waypointFunctions', {
-      action: 'getMyWaypoints',
-      category: this.data.activeCategory,
-    }).then((res) => {
-      if (res.result && res.result.success) {
+    const call = app.callFunction('waypointFunctions', { action: 'getMyWaypoints', category: this.data.activeCategory });
+    const timeout = new Promise((r) => setTimeout(() => r(null), 5000));
+    Promise.race([call, timeout]).then((res) => {
+      if (res && res.result && res.result.success) {
         this.setData({ waypoints: res.result.data, loading: false });
       } else {
         this.setData({ waypoints: [], loading: false });

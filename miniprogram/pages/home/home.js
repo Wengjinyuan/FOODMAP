@@ -102,8 +102,12 @@ Page({
       params.longitude = longitude;
     }
 
-    return app.callFunction('waypointFunctions', params).then((res) => {
-      if (res.result && res.result.success) {
+    // 5 秒超时兜底，超时直接显示空状态
+    const call = app.callFunction('waypointFunctions', params);
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 5000));
+
+    return Promise.race([call, timeout]).then((res) => {
+      if (res && res.result && res.result.success) {
         const waypoints = (res.result.data || []).map(wp => this.formatWaypoint(wp));
         const markers = this.buildMarkers(waypoints);
         this.setData({ waypoints, markers, loading: false });
@@ -112,7 +116,6 @@ Page({
       }
     }).catch(() => {
       this.setData({ waypoints: [], markers: [], loading: false });
-      wx.showToast({ title: '加载失败', icon: 'none' });
     });
   },
 
@@ -125,12 +128,13 @@ Page({
   },
 
   loadCategories() {
-    // 兜底分类：云函数不可用时也能显示
     const fallback = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
     this.setData({ categories: fallback });
-    // 尝试从云函数加载（静默替换）
-    app.callFunction('waypointFunctions', { action: 'getPresetCategories' }).then((res) => {
-      if (res.result && res.result.success && res.result.data.length > 0) {
+    // 静默尝试云函数（5s 兜底）
+    const call = app.callFunction('waypointFunctions', { action: 'getPresetCategories' });
+    const timeout = new Promise((resolve) => setTimeout(() => resolve(null), 5000));
+    Promise.race([call, timeout]).then((res) => {
+      if (res && res.result && res.result.success && res.result.data.length > 0) {
         this.setData({ categories: res.result.data });
       }
     }).catch(() => {});
