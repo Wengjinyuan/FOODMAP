@@ -128,6 +128,9 @@
 .star { font-size: 48rpx; color: #E8D5C8; }
 .star.active { color: #FFD23F; }
 
+/* Sub-field (collapse) */
+.field-sub-title { font-size: 24rpx; color: #9E8A83; padding: 8rpx 0; display: block; }
+
 /* Custom tag */
 .custom-row { display: flex; gap: 10rpx; margin-top: 12rpx; }
 .custom-input {

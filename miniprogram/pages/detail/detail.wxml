@@ -78,11 +78,12 @@
           <view class="chip-grid">
             <view class="chip {{form.category === item ? 'selected' : ''}}"
               wx:for="{{categories}}" wx:key="*this"
-              bindtap="onCategorySelect" data-category="{{item}}">{{item}}</view>
+              catchtap="onCategorySelect" data-category="{{item}}">{{item}}</view>
           </view>
-          <view class="custom-row" style="margin-top:12rpx;">
-            <input class="custom-input" placeholder="或输入自定义分类..." value="{{customCategory}}" bindinput="onCustomCategoryInput" maxlength="10" />
-            <view class="custom-btn" bindtap="onAddCustomCategory">+</view>
+          <!-- 选了"其他"才出现自定义输入 -->
+          <view class="custom-row" wx:if="{{form.category === '其他'}}" style="margin-top:12rpx;">
+            <input class="custom-input" placeholder="输入新分类名称..." value="{{customCategory}}" bindinput="onCustomCategoryInput" maxlength="10" />
+            <view class="custom-btn" catchtap="onAddCustomCategory">+</view>
           </view>
         </view>
 
@@ -116,11 +117,23 @@
           <view class="chip-grid">
             <view class="chip {{form.tags.indexOf(item) > -1 ? 'selected' : ''}}"
               wx:for="{{presetTags}}" wx:key="*this"
-              bindtap="onTagToggle" data-tag="{{item}}">{{item}}</view>
+              catchtap="onTagToggle" data-tag="{{item}}">{{item}}</view>
           </view>
-          <view class="custom-row">
-            <input class="custom-input" placeholder="自定义标签..." value="{{customTag}}" bindinput="onCustomTagInput" maxlength="10" />
-            <view class="custom-btn" bindtap="onAddCustomTag">+</view>
+          <!-- 用户历史标签（折叠展开） -->
+          <view class="field-sub" wx:if="{{userTags.length > 0}}" style="margin-top:12rpx;">
+            <text class="field-sub-title" catchtap="onToggleUserTags">
+              {{showUserTags ? '▾' : '▸'}} 我的标签 ({{userTags.length}})
+            </text>
+            <view class="chip-grid" wx:if="{{showUserTags}}" style="margin-top:8rpx;">
+              <view class="chip {{form.tags.indexOf(item) > -1 ? 'selected' : ''}}"
+                wx:for="{{userTags}}" wx:key="*this"
+                catchtap="onTagToggle" data-tag="{{item}}">{{item}}</view>
+            </view>
+          </view>
+          <!-- 自定义输入 -->
+          <view class="custom-row" style="margin-top:12rpx;">
+            <input class="custom-input" placeholder="输入新标签..." value="{{customTag}}" bindinput="onCustomTagInput" maxlength="10" />
+            <view class="custom-btn" catchtap="onAddCustomTag">+</view>
           </view>
         </view>
 

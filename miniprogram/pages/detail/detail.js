@@ -13,6 +13,8 @@ Page({
     categories: [],
     customCategory: '',
     presetTags: ['好吃', '推荐', '回头客', '环境好', '性价比高', '难找', '深夜档'],
+    userTags: [],
+    showUserTags: false,
     customTag: '',
     submitting: false,
     isOwner: false,
@@ -49,10 +51,15 @@ Page({
     // 从数据库加载用户自定义过的分类
     const db = app.getDb();
     if (!db) return;
-    db.collection('waypoints').field({ category: true }).limit(500).get().then((res) => {
-      const seen = new Set(base);
-      (res.data || []).forEach(w => { if (w.category) seen.add(w.category); });
-      this.setData({ categories: [...seen] });
+    db.collection('waypoints').field({ category: true, tags: true }).limit(500).get().then((res) => {
+      const catSet = new Set(base);
+      const tagSet = new Set();
+      (res.data || []).forEach(w => {
+        if (w.category) catSet.add(w.category);
+        if (w.tags) w.tags.forEach(t => tagSet.add(t));
+      });
+      const userTags = [...tagSet].filter(t => !this.data.presetTags.includes(t));
+      this.setData({ categories: [...catSet], userTags });
     }).catch(() => {});
   },
 
@@ -98,6 +105,9 @@ Page({
     this.setData({ 'form.category': e.currentTarget.dataset.category });
   },
   onCustomCategoryInput(e) { this.setData({ customCategory: e.detail.value }); },
+  onToggleUserTags() {
+    this.setData({ showUserTags: !this.data.showUserTags });
+  },
   onAddCustomCategory() {
     const c = this.data.customCategory.trim();
     if (!c) return;
