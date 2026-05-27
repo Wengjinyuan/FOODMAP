@@ -88,7 +88,7 @@
               catchtap="onCategorySelect" data-category="{{item}}">{{item}}</view>
           </view>
           <!-- 选了"其他"才出现自定义输入 -->
-          <view class="custom-row" wx:if="{{form.categories.indexOf('其他') > -1}}" style="margin-top:12rpx;">
+          <view class="custom-row" wx:if="{{form.categorySelectedMap['其他']}}" style="margin-top:12rpx;">
             <input class="custom-input" placeholder="输入新分类名称..." value="{{customCategory}}" bindinput="onCustomCategoryInput" maxlength="10" />
             <view class="custom-btn" catchtap="onAddCustomCategory">+</view>
           </view>
