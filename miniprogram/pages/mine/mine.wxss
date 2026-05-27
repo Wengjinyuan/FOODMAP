@@ -2,9 +2,10 @@
 .page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; }
 
 .stats-box { margin: 16rpx 20rpx; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 14rpx; box-shadow: 4rpx 4rpx 0 #4A3A35; padding: 22rpx; display: flex; align-items: center; gap: 24rpx; flex-shrink: 0; }
-.stats-total { flex-shrink: 0; text-align: center; }
+.stats-total { flex-shrink: 0; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .stats-num { font-size: 56rpx; font-weight: 800; color: #FFD23F; display: block; line-height: 1; -webkit-text-stroke: 2rpx #4A3A35; }
-.stats-label { font-size: 22rpx; color: #9E8A83; margin-top: 4rpx; display: block; }
+.stats-label { font-size: 22rpx; color: #9E8A83; }
+.gear-btn { font-size: 28rpx; padding: 4rpx 8rpx; }
 .stats-bd { display: flex; flex-wrap: wrap; gap: 14rpx; }
 .stats-item { text-align: center; }
 .stats-count { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; }
