@@ -4,7 +4,7 @@
     latitude="{{latitude}}" longitude="{{longitude}}" scale="{{scale}}"
     markers="{{markers}}" show-location="{{true}}"
     enable-zoom="{{true}}" enable-scroll="{{true}}" enable-rotate="{{true}}"
-    bindmarkertap="onMarkerTap" bindregionchange="onMapRegionChange" />
+    bindmarkertap="onMarkerTap" />
 
   <!-- 搜索栏 — 动态避开胶囊按钮 -->
   <view class="top-bar" style="top:{{searchTop}}rpx;right:{{searchRight}}rpx;height:{{searchHeight}}rpx;">
@@ -30,6 +30,11 @@
     </scroll-view>
   </view>
 
+  <!-- 回到当前位置 — FAB上方 -->
+  <view class="locate-btn" style="bottom: {{drawerHeight + 106}}rpx;" bindtap="onLocateMe">
+    <text class="locate-icon">◎</text>
+  </view>
+
   <!-- FAB — 跟随抽屉高度 -->
   <view class="fab" style="bottom: {{drawerHeight + 10}}rpx;" bindtap="onAddTap">
     <text class="fab-icon">+</text>
@@ -48,9 +53,9 @@
     </view>
   </view>
 
-  <!-- 底部抽屉 -->
-  <view class="drawer" style="height: {{drawerHeight}}rpx;">
-    <view class="drawer-handle" bindtouchstart="onDrawerTouchStart" bindtouchmove="onDrawerTouchMove" bindtouchend="onDrawerTouchEnd">
+  <!-- 底部抽屉 — transform替代height，地图不动 -->
+  <view class="drawer" style="height:1200rpx;transform:translateY({{drawerOffset}}rpx);">
+    <view class="drawer-handle" catchtouchstart="onDrawerTouchStart" catchtouchmove="onDrawerTouchMove" catchtouchend="onDrawerTouchEnd">
       <view class="drawer-bar"></view>
     </view>
 

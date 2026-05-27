@@ -21,7 +21,7 @@
   <view class="filter-row">
     <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"
       bindtap="onCategoryFilter" data-category="">全部</view>
-    <view class="filter-chip {{activeCategory === cat ? 'active' : ''}}"
+    <view class="filter-chip {{activeCategory === item.name ? 'active' : ''}}"
       wx:for="{{stats.categories}}" wx:key="name"
       bindtap="onCategoryFilter" data-category="{{item.name}}">{{item.name}} ({{item.count}})</view>
   </view>

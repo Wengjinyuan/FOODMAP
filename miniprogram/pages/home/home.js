@@ -19,6 +19,7 @@ Page({
 
     // UI state
     drawerHeight: 550,
+    drawerOffset: 650,
     drawerStartY: 0,
     drawerStartH: 0,
     selectedWaypoint: null,
@@ -281,6 +282,14 @@ Page({
     this.setData({ searchHistory: [], showHistory: false, historyHidden: false });
   },
 
+  onLocateMe() {
+    wx.getLocation({ type: 'gcj02', success: (res) => {
+      this.setData({ latitude: res.latitude, longitude: res.longitude, scale: 16 });
+    }, fail: () => {
+      wx.showToast({ title: '获取位置失败', icon: 'none' });
+    }});
+  },
+
   onRefresh() {
     this.setData({ refreshing: true });
     this.loadWaypoints().finally(() => {
@@ -295,7 +304,7 @@ Page({
     this.loadWaypoints();
   },
 
-  // ── Drawer Drag (实时响应) ──
+  // ── Drawer Drag ──
   onDrawerTouchStart(e) {
     this.setData({
       drawerStartY: e.touches[0].clientY,
@@ -306,7 +315,7 @@ Page({
     if (!this.data.drawerStartY) return;
     const dy = this.data.drawerStartY - e.touches[0].clientY;
     const newH = Math.max(120, Math.min(1200, this.data.drawerStartH + dy));
-    this.setData({ drawerHeight: newH });
+    this.setData({ drawerHeight: newH, drawerOffset: 1200 - newH });
   },
   onDrawerTouchEnd() {
     this.setData({ drawerStartY: 0 });

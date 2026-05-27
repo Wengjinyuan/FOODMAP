@@ -22,6 +22,10 @@ page { background: #FFFDF7; }
 .h-dot { width: 10rpx; height: 10rpx; border-radius: 50%; background: #E8D5C8; }
 .h-dot.active { background: #4A3A35; }
 
+/* Locate button */
+.locate-btn { position: absolute; right: 24rpx; width: 80rpx; height: 80rpx; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 18rpx; box-shadow: 3rpx 3rpx 0 #4A3A35; z-index: 10; display: flex; align-items: center; justify-content: center; }
+.locate-icon { font-size: 34rpx; color: #4A3A35; font-weight: 600; }
+
 /* FAB */
 .fab { position: absolute; right: 24rpx; width: 80rpx; height: 80rpx; background: #FFD23F; border: 3rpx solid #4A3A35; border-radius: 18rpx; box-shadow: 3rpx 3rpx 0 #4A3A35; z-index: 10; display: flex; align-items: center; justify-content: center; }
 .fab-icon { font-size: 40rpx; color: #4A3A35; font-weight: 600; }
@@ -36,7 +40,7 @@ page { background: #FFFDF7; }
 .callout-hint { font-size: 20rpx; color: #FF6B6B; margin-top: 6rpx; }
 
 /* Drawer */
-.drawer { position: absolute; bottom: 0; left: 0; right: 0; background: #FFFDF7; border-top: 3rpx solid #4A3A35; border-radius: 24rpx 24rpx 0 0; z-index: 9; display: flex; flex-direction: column; }
+.drawer { position: absolute; bottom: 0; left: 0; right: 0; background: #FFFDF7; border-top: 3rpx solid #4A3A35; border-radius: 24rpx 24rpx 0 0; z-index: 9; display: flex; flex-direction: column; will-change: transform; }
 .drawer-handle { height: 40rpx; display: flex; justify-content: center; align-items: center; flex-shrink: 0; }
 .drawer-bar { width: 40rpx; height: 5rpx; background: #4A3A35; border-radius: 4rpx; }
 
