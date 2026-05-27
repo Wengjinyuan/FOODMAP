@@ -40,6 +40,13 @@
       </view>
     </view>
 
+    <!-- 小地图 -->
+    <view class="detail-map-wrap" wx:if="{{waypoint.location}}">
+      <map class="detail-map" latitude="{{form.latitude}}" longitude="{{form.longitude}}"
+        scale="15" markers="{{detailMapMarkers}}" show-location="{{false}}"
+        enable-zoom="{{false}}" enable-scroll="{{false}}" enable-rotate="{{false}}" />
+    </view>
+
     <!-- Actions -->
     <view class="action-bar">
       <button class="nav-btn" bindtap="onNavigate">⚡ 开始传送</button>
@@ -72,6 +79,10 @@
             <view class="chip {{form.category === item ? 'selected' : ''}}"
               wx:for="{{categories}}" wx:key="*this"
               bindtap="onCategorySelect" data-category="{{item}}">{{item}}</view>
+          </view>
+          <view class="custom-row" style="margin-top:12rpx;">
+            <input class="custom-input" placeholder="或输入自定义分类..." value="{{customCategory}}" bindinput="onCustomCategoryInput" maxlength="10" />
+            <view class="custom-btn" bindtap="onAddCustomCategory">+</view>
           </view>
         </view>
 

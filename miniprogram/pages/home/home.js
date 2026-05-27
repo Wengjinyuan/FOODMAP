@@ -133,8 +133,15 @@ Page({
   },
 
   loadCategories() {
-    // 直接硬编码，不走云函数
-    this.setData({ categories: ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'] });
+    const base = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
+    this.setData({ categories: base });
+    const db = app.getDb();
+    if (!db) return;
+    db.collection('waypoints').field({ category: true }).limit(500).get().then((res) => {
+      const seen = new Set(base);
+      (res.data || []).forEach(w => { if (w.category) seen.add(w.category); });
+      this.setData({ categories: [...seen] });
+    }).catch(() => {});
   },
 
   // ── Markers ──

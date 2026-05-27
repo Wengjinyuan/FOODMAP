@@ -8,5 +8,18 @@
       "Bash(git commit -m ' *)",
       "Read(//c/Users/ASUS/.claude/plugins/cache/claude-plugins-official/superpowers/5.1.0/skills/subagent-driven-development/**)"
     ]
+  },
+  "hooks": {
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node \"e:/美食地图/scripts/preprompt-hook.js\""
+          }
+        ]
+      }
+    ]
   }
 }

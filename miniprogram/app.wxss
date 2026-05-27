@@ -1,12 +1,12 @@
 page {
-  background: #0F0F23;
+  background: #FFFDF7;
   font-family: -apple-system, BlinkMacSystemFont, "Helvetica Neue", "PingFang SC", "Microsoft YaHei", sans-serif;
   font-size: 28rpx;
-  color: #E0E0E0;
+  color: #4A3A35;
   line-height: 1.5;
 }
 button { background: initial; padding: 0; margin: 0; line-height: inherit; }
 button:focus { outline: 0; }
 button::after { border: none; }
-.text-primary { color: #00D4FF; }
-.text-muted { color: #888888; }
+.text-primary { color: #4A3A35; }
+.text-muted { color: #9E8A83; }

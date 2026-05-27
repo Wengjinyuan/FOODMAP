@@ -2,6 +2,7 @@
 [Dd]esktop.ini
 Thumbs.db
 $RECYCLE.BIN/
+**/$RECYCLE.BIN/
 
 # macOS
 .DS_Store
@@ -12,3 +13,18 @@ $RECYCLE.BIN/
 
 # Node.js
 node_modules/
+
+# Screenshots (temporary debug images)
+screenshots/
+
+# API Key - do not commit
+scripts/vision.js
+
+# Cloned external repos
+claude-vision-skill/
+
+# Claude Code local config
+.claude/settings.local.json
+
+# Superpowers brainstorm cache
+.superpowers/
