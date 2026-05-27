@@ -5,15 +5,15 @@
       <text class="stats-num">{{stats.total}}</text>
       <text class="stats-label">传送点</text>
     </view>
-    <view style="flex:1;"></view>
-    <view class="gear-wrap" catchtap="onOpenSettings">
-      <text class="gear-icon">⚙</text>
-    </view>
-    <view class="stats-bd">
+    <scroll-view class="stats-bd" scroll-x enhanced show-scrollbar="{{false}}">
       <view class="stats-item" wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat">
         <text class="stats-count">{{count}}</text>
         <text class="stats-cat">{{cat}}</text>
       </view>
+    </scroll-view>
+    <view style="flex:1;"></view>
+    <view class="gear-wrap" catchtap="onOpenSettings">
+      <text class="gear-icon">⚙</text>
     </view>
   </view>
 

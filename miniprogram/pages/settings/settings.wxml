@@ -20,12 +20,15 @@
     <text class="sbar-btn add" wx:if="{{tab !== 'cards'}}" bindtap="{{tab === 'tags' ? 'addTag' : 'addCategory'}}">＋ 新增</text>
   </view>
 
-  <!-- 卡片列表 -->
+  <!-- 卡片列表 — 同首页样式 -->
   <scroll-view class="slist" wx:if="{{tab === 'cards'}}" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
-    <view class="sitem" wx:for="{{cards}}" wx:key="_id" catchtap="toggleCheck" data-key="{{item._id}}">
+    <view class="wp-card" wx:for="{{cards}}" wx:key="_id" catchtap="toggleCheck" data-key="{{item._id}}">
       <view class="scheck {{checked[item._id] ? 'on' : ''}}">{{checked[item._id] ? '☑' : '☐'}}</view>
-      <text class="sname">{{item.name}}</text>
-      <text class="scat">[{{item.category}}]</text>
+      <view class="card-thumb">📍</view>
+      <view class="card-info">
+        <text class="card-name">{{item.name}}</text>
+        <text class="card-addr">{{item.category}}</text>
+      </view>
     </view>
     <view class="empty-tip" wx:if="{{cards.length===0}}">暂无卡片</view>
   </scroll-view>

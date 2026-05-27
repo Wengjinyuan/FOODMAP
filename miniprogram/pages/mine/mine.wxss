@@ -8,7 +8,8 @@
 .stats-num { font-size: 56rpx; font-weight: 800; color: #FFD23F; display: block; line-height: 1; -webkit-text-stroke: 2rpx #4A3A35; }
 .stats-label { font-size: 22rpx; color: #9E8A83; }
 .gear-btn { font-size: 28rpx; padding: 4rpx 8rpx; }
-.stats-bd { display: flex; flex-wrap: wrap; gap: 14rpx; }
+.stats-bd { display: flex; flex-wrap: nowrap; gap: 14rpx; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 1; min-width: 0; }
+.stats-bd::-webkit-scrollbar { display: none; }
 .stats-item { text-align: center; }
 .stats-count { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; }
 .stats-cat { font-size: 20rpx; color: #9E8A83; display: block; }

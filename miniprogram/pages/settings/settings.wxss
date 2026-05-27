@@ -16,10 +16,11 @@
 .sbar-btn.add { background: #FFD23F; font-weight: 700; }
 
 .slist { flex: 1; padding: 0 20rpx 20rpx; }
-.sitem { display: flex; align-items: center; padding: 16rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; }
-.scheck { width: 44rpx; height: 44rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 24rpx; margin-right: 14rpx; flex-shrink: 0; color: #C4B5AF; }
+.wp-card { display: flex; align-items: center; width: 100%; padding: 14rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
+.scheck { width: 44rpx; height: 44rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 24rpx; margin-right: 12rpx; flex-shrink: 0; color: #C4B5AF; }
 .scheck.on { background: #FFD23F; color: #4A3A35; }
-.sname { flex: 1; font-size: 26rpx; font-weight: 600; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.scat { font-size: 22rpx; color: #9E8A83; margin-left: 8rpx; flex-shrink: 0; }
-.stag { font-size: 24rpx; color: #4A3A35; }
+.card-thumb { width: 64rpx; height: 64rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 28rpx; }
+.card-info { flex: 1; margin-left: 12rpx; min-width: 0; }
+.card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-addr { font-size: 20rpx; color: #9E8A83; margin-top: 2rpx; }
 .empty-tip { text-align: center; padding: 60rpx 0; color: #9E8A83; font-size: 24rpx; }
