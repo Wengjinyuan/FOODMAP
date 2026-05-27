@@ -3,10 +3,11 @@
   <view class="stats-box">
     <view class="stats-total">
       <text class="stats-num">{{stats.total}}</text>
-      <view style="display:flex;align-items:center;gap:6rpx;">
-        <text class="stats-label">传送点</text>
-        <text class="gear-btn" catchtap="onOpenManage">⚙</text>
-      </view>
+      <text class="stats-label">传送点</text>
+    </view>
+    <view style="flex:1;"></view>
+    <view class="gear-wrap" catchtap="onOpenSettings">
+      <text class="gear-icon">⚙</text>
     </view>
     <view class="stats-bd">
       <view class="stats-item" wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat">

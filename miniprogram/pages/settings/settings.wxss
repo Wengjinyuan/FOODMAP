@@ -1,0 +1,25 @@
+.page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; overflow: hidden; }
+
+.snav { display: flex; align-items: center; justify-content: space-between; padding: 0 20rpx 12rpx; flex-shrink: 0; background: #FFFDF7; }
+.snav-back { width: 64rpx; height: 64rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: #4A3A35; }
+.snav-title { font-size: 32rpx; font-weight: 700; color: #4A3A35; }
+
+.stab-row { display: flex; margin: 0 20rpx 12rpx; gap: 0; flex-shrink: 0; }
+.stab { flex: 1; text-align: center; padding: 14rpx 0; font-size: 24rpx; color: #9E8A83; background: #FFF9E6; border: 2rpx solid #4A3A35; }
+.stab:first-child { border-radius: 12rpx 0 0 12rpx; }
+.stab:last-child { border-radius: 0 12rpx 12rpx 0; }
+.stab.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
+
+.sbar { display: flex; gap: 10rpx; padding: 0 20rpx 12rpx; flex-shrink: 0; }
+.sbar-btn { font-size: 22rpx; padding: 8rpx 16rpx; border: 2rpx solid #4A3A35; border-radius: 10rpx; background: #FFF9E6; color: #4A3A35; }
+.sbar-btn.del { color: #FF6B6B; border-color: #FF6B6B; }
+.sbar-btn.add { background: #FFD23F; font-weight: 700; }
+
+.slist { flex: 1; padding: 0 20rpx 20rpx; }
+.sitem { display: flex; align-items: center; padding: 16rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; }
+.scheck { width: 44rpx; height: 44rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 24rpx; margin-right: 14rpx; flex-shrink: 0; color: #C4B5AF; }
+.scheck.on { background: #FFD23F; color: #4A3A35; }
+.sname { flex: 1; font-size: 26rpx; font-weight: 600; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.scat { font-size: 22rpx; color: #9E8A83; margin-left: 8rpx; flex-shrink: 0; }
+.stag { font-size: 24rpx; color: #4A3A35; }
+.empty-tip { text-align: center; padding: 60rpx 0; color: #9E8A83; font-size: 24rpx; }
