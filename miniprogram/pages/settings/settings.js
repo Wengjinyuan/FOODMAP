@@ -10,7 +10,8 @@ Page({
 
   onLoad() {
     const capsule = wx.getMenuButtonBoundingClientRect();
-    const scale = 750 / wx.getSystemInfoSync().windowWidth;
+    const { windowWidth } = wx.getWindowInfo();
+    const scale = 750 / windowWidth;
     this.setData({ navTop: (capsule.bottom + 8) * scale });
     this.loadAll();
   },
@@ -95,19 +96,21 @@ Page({
   },
 
   addItem() {
+    const isTag = this.data.tab === 'tags';
     wx.showModal({
-      title: '新增' + (this.data.tab === 'tags' ? '标签' : '分类'),
+      title: '新增' + (isTag ? '标签' : '分类'),
       editable: true, placeholderText: '输入名称',
       success: (res) => {
         if (!res.content || !res.content.trim()) return;
         const name = res.content.trim();
-        if (this.data.tab === 'tags') {
-          if (this.data.tags.includes(name)) return wx.showToast({ title: '已存在', icon: 'none' });
-          this.setData({ tags: [...this.data.tags, name] });
-        } else {
-          if (this.data.categories.some(c => c.name === name)) return wx.showToast({ title: '已存在', icon: 'none' });
-          this.setData({ categories: [...this.data.categories, { name, count: 0 }] });
-        }
+        const key = isTag ? 'customTags' : 'customCategories';
+        const stored = wx.getStorageSync(key) || [];
+        if (stored.includes(name)) return wx.showToast({ title: '已存在', icon: 'none' });
+        stored.push(name);
+        wx.setStorageSync(key, stored);
+        if (isTag) this.setData({ tags: [...this.data.tags, name] });
+        else this.setData({ categories: [...this.data.categories, { name, count: 0 }] });
+        wx.showToast({ title: '已添加', icon: 'success' });
       },
     });
   },

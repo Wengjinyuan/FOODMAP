@@ -23,7 +23,8 @@ Page({
 
   onLoad(options) {
     const capsule = wx.getMenuButtonBoundingClientRect();
-    const scale = 750 / wx.getSystemInfoSync().windowWidth;
+    const { windowWidth } = wx.getWindowInfo();
+    const scale = 750 / windowWidth;
     this.setData({ navTop: (capsule.bottom + 8) * scale });
 
     const { id, mode } = options;
@@ -48,19 +49,23 @@ Page({
     // 基础兜底
     const base = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
     this.setData({ categories: base });
-    // 从数据库加载用户自定义过的分类
+    // 合并存储的自定义分类
+    const storedCats = wx.getStorageSync('customCategories') || [];
+    const catSet = new Set([...base, ...storedCats]);
+    // 从数据库加载用户分类和标签
     const db = app.getDb();
-    if (!db) return;
+    if (!db) return this.setData({ categories: [...catSet] });
     db.collection('waypoints').field({ category: true, tags: true }).limit(500).get().then((res) => {
-      const catSet = new Set(base);
       const tagSet = new Set();
       (res.data || []).forEach(w => {
         if (w.category) catSet.add(w.category);
         if (w.tags) w.tags.forEach(t => tagSet.add(t));
       });
+      const storedTags = wx.getStorageSync('customTags') || [];
+      storedTags.forEach(t => tagSet.add(t));
       const userTags = [...tagSet].filter(t => !this.data.presetTags.includes(t));
       this.setData({ categories: [...catSet], userTags });
-    }).catch(() => {});
+    }).catch(() => { this.setData({ categories: [...catSet] }); });
   },
 
   loadDetail() {

@@ -4,7 +4,7 @@
 .snav-back { width: 64rpx; height: 64rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; display: flex; align-items: center; justify-content: center; font-size: 24rpx; color: #4A3A35; }
 .snav-title { font-size: 32rpx; font-weight: 700; color: #4A3A35; }
 
-.stab-row { display: flex; margin: 0 20rpx 12rpx; gap: 0; flex-shrink: 0; }
+.stab-row { display: flex; margin: 0 20rpx 12rpx; flex-shrink: 0; }
 .stab { flex: 1; text-align: center; padding: 14rpx 0; font-size: 24rpx; color: #9E8A83; background: #FFF9E6; border: 2rpx solid #4A3A35; }
 .stab:first-child { border-radius: 12rpx 0 0 12rpx; }
 .stab:last-child { border-radius: 0 12rpx 12rpx 0; }
@@ -16,19 +16,20 @@
 .sbar-btn.del { color: #FF6B6B; border-color: #FF6B6B; }
 .sbar-btn.add { background: #FFD23F; font-weight: 700; }
 
-.slist { flex: 1; padding: 0 20rpx 20rpx; }
-.wp-card { display: flex; align-items: center; width: 100%; padding: 12rpx 14rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
-.scheck { width: 40rpx; height: 40rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 22rpx; margin-right: 10rpx; flex-shrink: 0; color: #C4B5AF; }
+/* ── 完全复制主页卡片样式 ── */
+.slist { flex: 1; height: 0; min-height: 0; padding: 4rpx 20rpx 20rpx; width: 100%; box-sizing: border-box; }
+.wp-card { display: flex; align-items: center; width: 100%; padding: 16rpx; margin-bottom: 8rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
+.scheck { width: 40rpx; height: 40rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 22rpx; margin-right: 12rpx; flex-shrink: 0; color: #C4B5AF; }
 .scheck.on { background: #FFD23F; color: #4A3A35; }
-.card-thumb { width: 56rpx; height: 56rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 24rpx; }
-.card-info { flex: 1; margin-left: 10rpx; min-width: 0; }
-.card-name { font-size: 24rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-addr { font-size: 20rpx; color: #9E8A83; }
+.card-thumb-s { width: 72rpx; height: 72rpx; border-radius: 10rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 32rpx; }
+.card-info-s { flex: 1; margin-left: 14rpx; min-width: 0; }
+.card-name-s { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-cat-s { font-size: 20rpx; color: #9E8A83; margin-top: 4rpx; }
 
-/* Tags/Categories — 横排 grid */
-.stag-row { display: flex; flex-wrap: wrap; gap: 10rpx; }
+/* Tags/Categories 横排 */
+.stag-row { display: flex; flex-wrap: wrap; gap: 10rpx; padding: 4rpx 0; }
 .stag-item { }
-.stag-chip { display: flex; align-items: center; gap: 8rpx; padding: 12rpx 18rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; font-size: 24rpx; color: #4A3A35; }
+.stag-chip { display: flex; align-items: center; gap: 8rpx; padding: 14rpx 20rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; font-size: 24rpx; color: #4A3A35; }
 .stag-item.on .stag-chip { background: #FFD23F; font-weight: 700; }
 .stag-edit { font-size: 20rpx; padding: 2rpx 8rpx; }
 

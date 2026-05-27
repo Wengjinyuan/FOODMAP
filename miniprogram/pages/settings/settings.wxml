@@ -22,10 +22,10 @@
   <scroll-view class="slist" wx:if="{{tab === 'cards'}}" scroll-y enhanced show-scrollbar="{{false}}">
     <view class="wp-card" wx:for="{{filteredCards}}" wx:key="_id" catchtap="toggleCheck" data-key="{{item._id}}">
       <view class="scheck {{checked[item._id] ? 'on' : ''}}">{{checked[item._id] ? '☑' : '☐'}}</view>
-      <view class="card-thumb">📍</view>
-      <view class="card-info">
-        <text class="card-name">{{item.name}}</text>
-        <text class="card-addr">{{item.category}}</text>
+      <view class="card-thumb-s">📍</view>
+      <view class="card-info-s">
+        <text class="card-name-s">{{item.name}}</text>
+        <text class="card-cat-s">{{item.category}}</text>
       </view>
     </view>
     <view class="empty-tip" wx:if="{{cards.length===0}}">暂无卡片</view>

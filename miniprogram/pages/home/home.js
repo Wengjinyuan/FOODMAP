@@ -33,8 +33,8 @@ Page({
     const theme = app.globalData.theme || wx.getStorageSync('theme') || 'cute';
     // 获取微信胶囊按钮位置，搜索栏避开它
     const capsule = wx.getMenuButtonBoundingClientRect();
-    const sys = wx.getSystemInfoSync();
-    const scale = 750 / sys.windowWidth; // px → rpx
+    const { windowWidth } = wx.getWindowInfo();
+    const scale = 750 / windowWidth; // px → rpx
     const gap = 12; // 搜索栏和胶囊之间间距(px)
     const searchRight = (sys.windowWidth - capsule.left + gap) * scale;
     const searchTop = capsule.top * scale;
