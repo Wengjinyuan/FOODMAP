@@ -85,7 +85,8 @@ Page({
         const _ = db.command;
         if (this.data.tab === 'cards') {
           Promise.all(checkedKeys.map(id => db.collection('waypoints').doc(id).remove()))
-            .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
+            .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); })
+            .catch(() => { wx.hideLoading(); wx.showToast({ title: '删除失败，请检查权限', icon: 'none' }); });
         } else if (this.data.tab === 'tags') {
           // 默认标签最少保留3个
           const remainingDefaults = DEFAULT_TAGS.filter(t => !checkedKeys.includes(t));

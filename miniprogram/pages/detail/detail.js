@@ -247,16 +247,27 @@ Page({
     });
   },
 
-  // Delete
+  // Delete (走云函数绕过安全规则)
   onDelete() {
     wx.showModal({
       title: '确认删除', content: '删除后无法恢复', confirmColor: '#FF6B6B',
       success: (res) => {
         if (!res.confirm) return;
-        const db = app.getDb(); if (!db) return;
-        db.collection('waypoints').doc(this.data.waypointId).remove().then(() => {
-          wx.showToast({ title: '已删除', icon: 'success' });
-          wx.switchTab({ url: '/pages/home/home' });
+        wx.showLoading({ title: '删除中...' });
+        wx.cloud.callFunction({
+          name: 'waypointFunctions',
+          data: { action: 'deleteWaypoint', waypointId: this.data.waypointId }
+        }).then(({ result }) => {
+          wx.hideLoading();
+          if (result.success) {
+            wx.showToast({ title: '已删除', icon: 'success' });
+            wx.switchTab({ url: '/pages/home/home' });
+          } else {
+            wx.showToast({ title: result.errMsg || '删除失败', icon: 'none' });
+          }
+        }).catch(() => {
+          wx.hideLoading();
+          wx.showToast({ title: '删除失败', icon: 'none' });
         });
       },
     });

@@ -99,15 +99,38 @@ const updateWaypoint = async (event) => {
   return { success: true };
 };
 
+const ADMIN_OPENID = 'oAX1I3Q98EjJh5d8lZ0r61of245k';
+
 // ── 删除传送点 ──
 const deleteWaypoint = async (event) => {
   const wxContext = cloud.getWXContext();
   const { waypointId } = event;
   const doc = await db.collection("waypoints").doc(waypointId).get();
   if (!doc.data) return { success: false, errMsg: "传送点不存在" };
-  if (doc.data._openid !== wxContext.OPENID) return { success: false, errMsg: "无权删除" };
+  const docOwner = doc.data._openid || '(无)';
+  const userId = wxContext.OPENID;
+  if (docOwner !== userId && userId !== ADMIN_OPENID) {
+    return { success: false, errMsg: `无权删除 文档归属:${docOwner} 你的ID:${userId}` };
+  }
   await db.collection("waypoints").doc(waypointId).remove();
   return { success: true };
+};
+
+// ── 批量删除传送点 ──
+const batchDeleteWaypoints = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const { ids } = event;
+  let deleted = 0;
+  for (const id of ids) {
+    try {
+      const doc = await db.collection("waypoints").doc(id).get();
+      if (!doc.data) continue;
+      if (doc.data._openid !== wxContext.OPENID && wxContext.OPENID !== ADMIN_OPENID) continue;
+      await db.collection("waypoints").doc(id).remove();
+      deleted++;
+    } catch (e) { /* skip single failure */ }
+  }
+  return { success: true, data: { deleted } };
 };
 
 // ── 我的传送点 ──
@@ -177,6 +200,7 @@ exports.main = async (event, context) => {
       case "addWaypoint": return await addWaypoint(event);
       case "updateWaypoint": return await updateWaypoint(event);
       case "deleteWaypoint": return await deleteWaypoint(event);
+      case "batchDeleteWaypoints": return await batchDeleteWaypoints(event);
       case "getMyWaypoints": return await getMyWaypoints(event);
       case "getMyStats": return await getMyStats();
       case "getPresetCategories": return await getPresetCategories();
