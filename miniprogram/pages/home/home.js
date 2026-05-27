@@ -36,8 +36,8 @@ Page({
     const { windowWidth } = wx.getWindowInfo();
     const scale = 750 / windowWidth; // px → rpx
     const gap = 12; // 搜索栏和胶囊之间间距(px)
-    const searchRight = (sys.windowWidth - capsule.left + gap) * scale;
-    const searchTop = capsule.top * scale;
+    const searchRight = (windowWidth - capsule.left + gap) * scale;
+    const searchTop = capsule.top * scale + 6;
     const searchHeight = capsule.height * scale;
 
     this.setData({
@@ -57,6 +57,7 @@ Page({
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
       this.getTabBar().setData({ selected: 0 });
     }
+    this.loadCategories();
     this.loadWaypoints();
   },
 
@@ -136,12 +137,12 @@ Page({
     const base = ['美食', '咖啡', '风景', '根据地', '购物', '娱乐', '其他'];
     const stored = wx.getStorageSync('customCategories') || [];
     const seen = new Set([...base, ...stored]);
-    this.setData({ categories: [...seen] });
+    this.setData({ categories: [...seen].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) });
     const db = app.getDb();
     if (!db) return;
     db.collection('waypoints').field({ category: true }).limit(500).get().then((res) => {
       (res.data || []).forEach(w => { if (w.category) seen.add(w.category); });
-      this.setData({ categories: [...seen] });
+      this.setData({ categories: [...seen].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) });
     }).catch(() => {});
   },
 
@@ -246,9 +247,14 @@ Page({
     setTimeout(() => this.setData({ showHistory: false }), 200);
   },
   onSearchInput(e) {
-    this.setData({ searchKeyword: e.detail.value, showHistory: false });
+    const v = e.detail.value;
+    this.setData({ searchKeyword: v, showHistory: false });
     if (this._searchTimer) clearTimeout(this._searchTimer);
-    this._searchTimer = setTimeout(() => { this.loadWaypoints(); }, 300);
+    if (!v || !v.trim()) {
+      this.loadWaypoints();
+    } else {
+      this._searchTimer = setTimeout(() => { this.loadWaypoints(); }, 300);
+    }
   },
   onSearchConfirm() {
     if (this._searchTimer) clearTimeout(this._searchTimer);

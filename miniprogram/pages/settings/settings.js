@@ -1,4 +1,6 @@
 const app = getApp();
+const BASE_CATS = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
+const DEFAULT_TAGS = ['好吃', '推荐', '回头客', '环境好', '性价比高', '难找', '深夜档'];
 
 Page({
   data: {
@@ -22,26 +24,27 @@ Page({
     const db = app.getDb();
     if (!db) return;
     db.collection('waypoints').limit(1000).get().then((res) => {
+      const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
+      (res.data || []).forEach(wp => { wp.categoryEmoji = emojiMap[wp.category] || '📍'; });
       const cards = res.data || [];
       const tagSet = new Set();
       const catMap = new Map();
-      const baseCats = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
       const storedCats = wx.getStorageSync('customCategories') || [];
       const storedTags = wx.getStorageSync('customTags') || [];
-      [...baseCats, ...storedCats].forEach(c => catMap.set(c, 0));
-      storedTags.forEach(t => tagSet.add(t));
+      [...BASE_CATS, ...storedCats].forEach(c => catMap.set(c, 0));
+      [...DEFAULT_TAGS, ...storedTags].forEach(t => tagSet.add(t));
       cards.forEach(w => {
         (w.tags||[]).forEach(t => tagSet.add(t));
         const cat = w.category || '其他';
         catMap.set(cat, (catMap.get(cat)||0) + 1);
       });
-      const categories = [...catMap.entries()].map(([name, count]) => ({ name, count }));
+      const categories = [...catMap.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => (a.name === '其他' ? 1 : b.name === '其他' ? -1 : 0));
       this.setData({ cards, categories, tags: [...tagSet], checked: {}, search: '' });
       this.applyFilter();
     });
   },
 
-  switchTab(e) { this.setData({ tab: e.currentTarget.dataset.tab, checked: {}, search: '' }); },
+  switchTab(e) { this.setData({ tab: e.currentTarget.dataset.tab, checked: {}, search: '' }, () => this.applyFilter()); },
 
   toggleCheck(e) {
     const key = e.currentTarget.dataset.key;
@@ -81,6 +84,12 @@ Page({
           Promise.all(checkedKeys.map(id => db.collection('waypoints').doc(id).remove()))
             .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
         } else if (this.data.tab === 'tags') {
+          // 默认标签最少保留3个
+          const remainingDefaults = DEFAULT_TAGS.filter(t => !checkedKeys.includes(t));
+          if (remainingDefaults.length < 3) { wx.hideLoading(); return wx.showToast({ title: '默认标签至少保留3个', icon: 'none' }); }
+          // 同步清除存储的自定义标签
+          const storedTags = (wx.getStorageSync('customTags') || []).filter(t => !checkedKeys.includes(t));
+          wx.setStorageSync('customTags', storedTags);
           db.collection('waypoints').where({ tags: _.in(checkedKeys) }).get().then((res) => {
             const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
               data: { tags: (wp.tags||[]).filter(t => !checkedKeys.includes(t)) }
@@ -88,16 +97,12 @@ Page({
             return Promise.all(tasks);
           }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
         } else {
-          const remaining = this.data.categories.filter(c => !checkedKeys.includes(c.name));
-          if (remaining.length < 1) { wx.hideLoading(); return wx.showToast({ title: '至少保留1个分类', icon: 'none' }); }
+          // 默认分类最少保留3个
+          const remainingDefaults = BASE_CATS.filter(c => !checkedKeys.includes(c));
+          if (remainingDefaults.length < 3) { wx.hideLoading(); return wx.showToast({ title: '默认分类至少保留3个', icon: 'none' }); }
           // 同步清除存储的自定义分类
           const stored = (wx.getStorageSync('customCategories') || []).filter(c => !checkedKeys.includes(c));
           wx.setStorageSync('customCategories', stored);
-          // 同理清除标签存储
-          if (this.data.tab === 'tags') {
-            const storedTags = (wx.getStorageSync('customTags') || []).filter(t => !checkedKeys.includes(t));
-            wx.setStorageSync('customTags', storedTags);
-          }
           db.collection('waypoints').where({ category: _.in(checkedKeys) }).get().then((res) => {
             const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: '其他' } }));
             return Promise.all(tasks);
@@ -120,8 +125,10 @@ Page({
         if (stored.includes(name)) return wx.showToast({ title: '已存在', icon: 'none' });
         stored.push(name);
         wx.setStorageSync(key, stored);
-        if (isTag) this.setData({ tags: [...this.data.tags, name] });
-        else this.setData({ categories: [...this.data.categories, { name, count: 0 }] });
+        const update = isTag
+          ? { tags: [...this.data.tags, name] }
+          : { categories: [...this.data.categories, { name, count: 0 }] };
+        this.setData(update, () => { this.applyFilter(); });
         wx.showToast({ title: '已添加', icon: 'success' });
       },
     });
@@ -144,13 +151,27 @@ Page({
               data: { tags: (wp.tags||[]).map(t => t === old ? nn : t) }
             }));
             return Promise.all(tasks);
-          }).then(() => { this.loadAll(); });
+          }).then(() => {
+            // 同步更新 storage
+            const tagStored = (wx.getStorageSync('customTags') || []);
+            const tagIdx = tagStored.indexOf(old);
+            if (tagIdx > -1) tagStored[tagIdx] = nn; else tagStored.push(nn);
+            wx.setStorageSync('customTags', tagStored);
+            this.loadAll();
+          });
         } else {
           if (!db) return;
           db.collection('waypoints').where({ category: old }).get().then((res2) => {
             const tasks = (res2.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: nn } }));
             return Promise.all(tasks);
-          }).then(() => { this.loadAll(); });
+          }).then(() => {
+            // 同步更新 storage
+            const catStored = (wx.getStorageSync('customCategories') || []);
+            const catIdx = catStored.indexOf(old);
+            if (catIdx > -1) catStored[catIdx] = nn; else catStored.push(nn);
+            wx.setStorageSync('customCategories', catStored);
+            this.loadAll();
+          });
         }
       },
     });

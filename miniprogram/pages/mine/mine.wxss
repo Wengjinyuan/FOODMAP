@@ -1,15 +1,14 @@
 /* 传送网 — Mine（与首页完全一致的卡片样式） */
 .page { height: 100vh; background: #FFFDF7; display: flex; flex-direction: column; }
 
-.stats-box { margin: 16rpx 20rpx; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 14rpx; box-shadow: 4rpx 4rpx 0 #4A3A35; padding: 22rpx; display: flex; align-items: center; gap: 24rpx; flex-shrink: 0; }
+.stats-box { margin: 16rpx 20rpx; background: #FFF; border: 3rpx solid #4A3A35; border-radius: 14rpx; box-shadow: 4rpx 4rpx 0 #4A3A35; padding: 22rpx; display: flex; align-items: center; gap: 16rpx; flex-shrink: 0; }
 .stats-total { flex-shrink: 0; text-align: center; display: flex; flex-direction: column; align-items: center; }
 .gear-wrap { width: 72rpx; height: 72rpx; background: #FFF9E6; border: 2rpx solid #4A3A35; border-radius: 14rpx; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
 .gear-icon { font-size: 36rpx; }
 .stats-num { font-size: 56rpx; font-weight: 800; color: #FFD23F; display: block; line-height: 1; -webkit-text-stroke: 2rpx #4A3A35; }
 .stats-label { font-size: 22rpx; color: #9E8A83; }
 .gear-btn { font-size: 28rpx; padding: 4rpx 8rpx; }
-.stats-bd { display: flex; flex-wrap: nowrap; gap: 14rpx; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 1; min-width: 0; }
-.stats-bd::-webkit-scrollbar { display: none; }
+.stats-bd { display: flex; flex-wrap: wrap; gap: 14rpx; flex-shrink: 1; min-width: 0; padding-top: 10rpx; }
 .stats-item { text-align: center; padding: 4rpx 12rpx; }
 .stats-count { font-size: 32rpx; font-weight: 700; color: #4A3A35; display: block; line-height: 1.2; }
 .stats-cat { font-size: 24rpx; color: #9E8A83; display: block; margin-top: 2rpx; }
@@ -21,14 +20,15 @@
 
 /* ── 和首页完全一致的卡片（复制 home.wxss）── */
 .wp-list { flex: 1; height: 0; min-height: 0; padding: 4rpx 20rpx 140rpx; width: 100%; box-sizing: border-box; }
-.wp-card { display: flex; align-items: center; width: 100%; padding: 16rpx; margin-bottom: 8rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
-.card-thumb { width: 88rpx; height: 88rpx; border-radius: 10rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 36rpx; position: relative; }
+.wp-card { display: flex; align-items: center; width: 100%; padding: 12rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
+.card-thumb { width: 96rpx; height: 96rpx; border-radius: 12rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 36rpx; position: relative; overflow: hidden; }
+.thumb-img { width: 100%; height: 100%; border-radius: 10rpx; }
 .card-pin { position: absolute; bottom: -2rpx; right: -2rpx; font-size: 20rpx; }
-.card-info { flex: 1; margin-left: 16rpx; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
-.card-name { font-size: 28rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-row { display: flex; align-items: center; gap: 6rpx; margin-top: 6rpx; }
+.card-info { flex: 1; margin-left: 14rpx; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
+.card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-row { display: flex; align-items: center; gap: 8rpx; margin-top: 4rpx; }
 .card-cat { font-size: 20rpx; padding: 2rpx 10rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; flex-shrink: 0; }
-.card-addr { font-size: 20rpx; color: #9E8A83; margin-top: 6rpx; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-arrow { color: #C4B5AF; font-size: 22rpx; margin-left: 6rpx; flex-shrink: 0; }
+.card-addr { font-size: 22rpx; color: #9E8A83; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.card-arrow { color: #C4B5AF; font-size: 20rpx; margin-left: 6rpx; flex-shrink: 0; }
 
 .empty { text-align: center; padding: 60rpx 0; color: #9E8A83; font-size: 24rpx; }

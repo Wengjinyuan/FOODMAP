@@ -54,7 +54,7 @@ Page({
     const catSet = new Set([...base, ...storedCats]);
     // 从数据库加载用户分类和标签
     const db = app.getDb();
-    if (!db) return this.setData({ categories: [...catSet] });
+    if (!db) return this.setData({ categories: [...catSet].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) });
     db.collection('waypoints').field({ category: true, tags: true }).limit(500).get().then((res) => {
       const tagSet = new Set();
       (res.data || []).forEach(w => {
@@ -64,8 +64,8 @@ Page({
       const storedTags = wx.getStorageSync('customTags') || [];
       storedTags.forEach(t => tagSet.add(t));
       const userTags = [...tagSet].filter(t => !this.data.presetTags.includes(t));
-      this.setData({ categories: [...catSet], userTags });
-    }).catch(() => { this.setData({ categories: [...catSet] }); });
+      this.setData({ categories: [...catSet].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)), userTags });
+    }).catch(() => { this.setData({ categories: [...catSet].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) }); });
   },
 
   loadDetail() {

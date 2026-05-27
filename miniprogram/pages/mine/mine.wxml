@@ -5,12 +5,12 @@
       <text class="stats-num">{{stats.total}}</text>
       <text class="stats-label">传送点</text>
     </view>
-    <scroll-view class="stats-bd" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
-      <view class="stats-item" wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat">
-        <text class="stats-count">{{count}}</text>
-        <text class="stats-cat">{{cat}}</text>
+    <view class="stats-bd">
+      <view class="stats-item" wx:for="{{stats.categories}}" wx:key="name">
+        <text class="stats-count">{{item.count}}</text>
+        <text class="stats-cat">{{item.name}}</text>
       </view>
-    </scroll-view>
+    </view>
     <view style="flex:1;"></view>
     <view class="gear-wrap" catchtap="onOpenSettings">
       <text class="gear-icon">⚙</text>
@@ -22,8 +22,8 @@
     <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"
       bindtap="onCategoryFilter" data-category="">全部</view>
     <view class="filter-chip {{activeCategory === cat ? 'active' : ''}}"
-      wx:for="{{stats.categories}}" wx:for-index="cat" wx:for-item="count" wx:key="cat"
-      bindtap="onCategoryFilter" data-category="{{cat}}">{{cat}} ({{count}})</view>
+      wx:for="{{stats.categories}}" wx:key="name"
+      bindtap="onCategoryFilter" data-category="{{item.name}}">{{item.name}} ({{item.count}})</view>
   </view>
 
   <!-- Waypoint List -->
@@ -31,15 +31,16 @@
     <block wx:if="{{waypoints.length > 0}}">
       <view class="wp-card" wx:for="{{waypoints}}" wx:key="_id" bindtap="onWaypointTap" data-id="{{item._id}}">
         <view class="card-thumb">
-          <text>📍</text>
+          <image wx:if="{{item.images && item.images.length > 0}}" src="{{item.images[0]}}" mode="aspectFill" class="thumb-img" />
+          <text wx:else>{{item.categoryEmoji || '📍'}}</text>
           <text class="card-pin">📌</text>
         </view>
         <view class="card-info">
           <text class="card-name">{{item.name}}</text>
           <view class="card-row">
             <text class="card-cat">{{item.category}}</text>
+            <text class="card-addr">{{item.address || item.notes || ''}}</text>
           </view>
-          <text class="card-addr">{{item.address || '暂无地址'}}</text>
         </view>
         <text class="card-arrow">▶</text>
       </view>

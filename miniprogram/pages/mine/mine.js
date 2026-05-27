@@ -2,7 +2,7 @@ const app = getApp();
 
 Page({
   data: {
-    stats: { total: 0, categories: {} },
+    stats: { total: 0, categories: [] },
     allWaypoints: [],       // 全部数据，用于统计
     waypoints: [],           // 当前筛选后的列表
     activeCategory: '',
@@ -23,11 +23,22 @@ Page({
     if (!db) { this.setData({ loading: false }); return; }
 
     db.collection('waypoints').orderBy('create_time', 'desc').limit(1000).get().then((res) => {
+      const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
+      (res.data || []).forEach(wp => { wp.categoryEmoji = emojiMap[wp.category] || '📍'; });
       const all = res.data || [];
 
-      // 统计
+      // 统计：基础分类 + 自定义分类全部纳入（count=0 也显示），其他永远在最后
+      const baseCats = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
+      const storedCats = wx.getStorageSync('customCategories') || [];
       const catCount = {};
+      [...baseCats, ...storedCats].forEach(c => { catCount[c] = 0; });
       all.forEach(wp => { catCount[wp.category] = (catCount[wp.category] || 0) + 1; });
+      const catList = Object.entries(catCount).map(([name, count]) => ({ name, count }));
+      catList.sort((a, b) => {
+        if (a.name === '其他') return 1;
+        if (b.name === '其他') return -1;
+        return 0;
+      });
 
       // 筛选
       const cat = this.data.activeCategory;
@@ -36,7 +47,7 @@ Page({
       this.setData({
         allWaypoints: all,
         waypoints: filtered,
-        stats: { total: all.length, categories: catCount },
+        stats: { total: all.length, categories: catList },
         loading: false,
       });
     }).catch(() => {
