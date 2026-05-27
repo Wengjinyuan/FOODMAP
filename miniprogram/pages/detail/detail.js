@@ -242,6 +242,18 @@ Page({
     wx.previewImage({ urls: this.data.waypoint.images, current: src });
   },
 
+  // Mini map tap → ask then navigate
+  onMapNavigate() {
+    wx.showModal({
+      title: '开始传送？',
+      content: '将打开地图导航到 ' + (this.data.waypoint.name || '此位置'),
+      confirmText: '⚡ 传送',
+      success: (res) => {
+        if (res.confirm) this.onNavigate();
+      },
+    });
+  },
+
   // Navigate
   onNavigate() {
     const wp = this.data.waypoint;

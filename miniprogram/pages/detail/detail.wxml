@@ -45,11 +45,12 @@
       <image class="gallery-img" wx:for="{{waypoint.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" catchtap="onPreviewImage" data-src="{{item}}" />
     </view>
 
-    <!-- 小地图 -->
-    <view class="detail-map-wrap" wx:if="{{waypoint.location}}">
+    <!-- 小地图 — 点击询问是否跳转导航 -->
+    <view class="detail-map-wrap" wx:if="{{waypoint.location}}" catchtap="onMapNavigate">
       <map class="detail-map" latitude="{{form.latitude}}" longitude="{{form.longitude}}"
         scale="15" markers="{{detailMapMarkers}}" show-location="{{false}}"
         enable-zoom="{{false}}" enable-scroll="{{false}}" enable-rotate="{{false}}" />
+      <view class="map-tap-hint">📍 点击地图开始导航</view>
     </view>
 
     <!-- Actions -->

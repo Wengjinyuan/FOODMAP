@@ -57,8 +57,9 @@
 .tag-del-chip { font-size: 22rpx; padding: 4rpx 14rpx; background: #FFF0F0; color: #FF6B6B; border: 1.5rpx solid #FF6B6B; border-radius: 8rpx; }
 
 /* ── View Mode: Mini Map ── */
-.detail-map-wrap { margin: 16rpx 24rpx; border: 3rpx solid #4A3A35; border-radius: 14rpx; overflow: hidden; height: 320rpx; }
+.detail-map-wrap { margin: 16rpx 24rpx; border: 3rpx solid #4A3A35; border-radius: 14rpx; overflow: hidden; height: 320rpx; position: relative; }
 .detail-map { width: 100%; height: 100%; }
+.map-tap-hint { position: absolute; bottom: 12rpx; left: 50%; transform: translateX(-50%); background: rgba(74,58,53,0.85); color: #FFFFFF; font-size: 22rpx; padding: 8rpx 20rpx; border-radius: 20rpx; pointer-events: none; }
 
 /* ── View Mode: Actions ── */
 .action-bar { display: flex; margin: 24rpx; gap: 16rpx; }
