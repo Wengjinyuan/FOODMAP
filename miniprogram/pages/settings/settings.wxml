@@ -1,28 +1,26 @@
 <view class="page">
-  <!-- 顶栏 -->
   <view class="snav" style="padding-top:{{navTop}}rpx;">
     <view class="snav-back" bindtap="onBack">◀</view>
     <text class="snav-title">设置</text>
     <view style="width:64rpx;"></view>
   </view>
 
-  <!-- Tab 切换 -->
   <view class="stab-row">
     <view class="stab {{tab==='cards'?'active':''}}" bindtap="switchTab" data-tab="cards">卡片 ({{cards.length}})</view>
     <view class="stab {{tab==='tags'?'active':''}}" bindtap="switchTab" data-tab="tags">标签 ({{tags.length}})</view>
     <view class="stab {{tab==='categories'?'active':''}}" bindtap="switchTab" data-tab="categories">分类 ({{categories.length}})</view>
   </view>
 
-  <!-- 全选 + 添加 -->
   <view class="sbar">
-    <text class="sbar-btn" bindtap="toggleAll">☑ 全选/反选</text>
-    <text class="sbar-btn del" bindtap="batchDelete">🗑️ 删除选中</text>
-    <text class="sbar-btn add" wx:if="{{tab !== 'cards'}}" bindtap="{{tab === 'tags' ? 'addTag' : 'addCategory'}}">＋ 新增</text>
+    <input class="sb-search" placeholder="搜索..." value="{{search}}" bindinput="onSearch" />
+    <text class="sbar-btn" bindtap="toggleAll">☑</text>
+    <text class="sbar-btn del" bindtap="batchDelete">🗑️</text>
+    <text class="sbar-btn add" wx:if="{{tab !== 'cards'}}" bindtap="addItem">＋</text>
   </view>
 
-  <!-- 卡片列表 — 同首页样式 -->
-  <scroll-view class="slist" wx:if="{{tab === 'cards'}}" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
-    <view class="wp-card" wx:for="{{cards}}" wx:key="_id" catchtap="toggleCheck" data-key="{{item._id}}">
+  <!-- Cards -->
+  <scroll-view class="slist" wx:if="{{tab === 'cards'}}" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="wp-card" wx:for="{{filteredCards}}" wx:key="_id" catchtap="toggleCheck" data-key="{{item._id}}">
       <view class="scheck {{checked[item._id] ? 'on' : ''}}">{{checked[item._id] ? '☑' : '☐'}}</view>
       <view class="card-thumb">📍</view>
       <view class="card-info">
@@ -33,20 +31,30 @@
     <view class="empty-tip" wx:if="{{cards.length===0}}">暂无卡片</view>
   </scroll-view>
 
-  <!-- 标签列表 -->
-  <scroll-view class="slist" wx:if="{{tab === 'tags'}}" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
-    <view class="sitem" wx:for="{{tags}}" wx:key="*this" catchtap="toggleCheck" data-key="{{item}}">
-      <view class="scheck {{checked[item] ? 'on' : ''}}">{{checked[item] ? '☑' : '☐'}}</view>
-      <text class="stag">🏷️ {{item}}</text>
+  <!-- Tags -->
+  <scroll-view class="slist" wx:if="{{tab === 'tags'}}" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="stag-row">
+      <view class="stag-item {{checked[item] ? 'on' : ''}}" wx:for="{{filteredTags}}" wx:key="*this"
+        catchtap="toggleCheck" data-key="{{item}}">
+        <view class="stag-chip">
+          <text>🏷️ {{item}}</text>
+          <text class="stag-edit" catchtap="renameItem" data-name="{{item}}">✏️</text>
+        </view>
+      </view>
     </view>
-    <view class="empty-tip" wx:if="{{tags.length===0}}">暂无自定义标签，在添加页中创建</view>
+    <view class="empty-tip" wx:if="{{tags.length===0}}">暂无自定义标签</view>
   </scroll-view>
 
-  <!-- 分类列表 -->
-  <scroll-view class="slist" wx:if="{{tab === 'categories'}}" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
-    <view class="sitem" wx:for="{{categories}}" wx:key="*this" catchtap="toggleCheck" data-key="{{item}}">
-      <view class="scheck {{checked[item] ? 'on' : ''}}">{{checked[item] ? '☑' : '☐'}}</view>
-      <text class="scat">📂 {{item}}</text>
+  <!-- Categories -->
+  <scroll-view class="slist" wx:if="{{tab === 'categories'}}" scroll-y enhanced show-scrollbar="{{false}}">
+    <view class="stag-row">
+      <view class="stag-item {{checked[item.name] ? 'on' : ''}}" wx:for="{{filteredCategories}}" wx:key="name"
+        catchtap="toggleCheck" data-key="{{item.name}}">
+        <view class="stag-chip">
+          <text>📂 {{item.name}} ({{item.count}})</text>
+          <text class="stag-edit" catchtap="renameItem" data-name="{{item.name}}">✏️</text>
+        </view>
+      </view>
     </view>
     <view class="empty-tip" wx:if="{{categories.length===0}}">暂无分类</view>
   </scroll-view>

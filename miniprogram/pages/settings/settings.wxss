@@ -10,17 +10,26 @@
 .stab:last-child { border-radius: 0 12rpx 12rpx 0; }
 .stab.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 
-.sbar { display: flex; gap: 10rpx; padding: 0 20rpx 12rpx; flex-shrink: 0; }
-.sbar-btn { font-size: 22rpx; padding: 8rpx 16rpx; border: 2rpx solid #4A3A35; border-radius: 10rpx; background: #FFF9E6; color: #4A3A35; }
+.sbar { display: flex; gap: 8rpx; padding: 0 20rpx 10rpx; flex-shrink: 0; align-items: center; }
+.sb-search { flex: 1; height: 56rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; padding: 0 16rpx; font-size: 24rpx; color: #4A3A35; }
+.sbar-btn { font-size: 22rpx; padding: 8rpx 14rpx; border: 2rpx solid #4A3A35; border-radius: 10rpx; background: #FFF9E6; color: #4A3A35; flex-shrink: 0; }
 .sbar-btn.del { color: #FF6B6B; border-color: #FF6B6B; }
 .sbar-btn.add { background: #FFD23F; font-weight: 700; }
 
 .slist { flex: 1; padding: 0 20rpx 20rpx; }
-.wp-card { display: flex; align-items: center; width: 100%; padding: 14rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
-.scheck { width: 44rpx; height: 44rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 24rpx; margin-right: 12rpx; flex-shrink: 0; color: #C4B5AF; }
+.wp-card { display: flex; align-items: center; width: 100%; padding: 12rpx 14rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
+.scheck { width: 40rpx; height: 40rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 22rpx; margin-right: 10rpx; flex-shrink: 0; color: #C4B5AF; }
 .scheck.on { background: #FFD23F; color: #4A3A35; }
-.card-thumb { width: 64rpx; height: 64rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 28rpx; }
-.card-info { flex: 1; margin-left: 12rpx; min-width: 0; }
-.card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-addr { font-size: 20rpx; color: #9E8A83; margin-top: 2rpx; }
+.card-thumb { width: 56rpx; height: 56rpx; border-radius: 8rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 24rpx; }
+.card-info { flex: 1; margin-left: 10rpx; min-width: 0; }
+.card-name { font-size: 24rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.card-addr { font-size: 20rpx; color: #9E8A83; }
+
+/* Tags/Categories — 横排 grid */
+.stag-row { display: flex; flex-wrap: wrap; gap: 10rpx; }
+.stag-item { }
+.stag-chip { display: flex; align-items: center; gap: 8rpx; padding: 12rpx 18rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; font-size: 24rpx; color: #4A3A35; }
+.stag-item.on .stag-chip { background: #FFD23F; font-weight: 700; }
+.stag-edit { font-size: 20rpx; padding: 2rpx 8rpx; }
+
 .empty-tip { text-align: center; padding: 60rpx 0; color: #9E8A83; font-size: 24rpx; }

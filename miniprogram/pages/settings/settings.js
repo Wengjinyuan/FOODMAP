@@ -2,9 +2,10 @@ const app = getApp();
 
 Page({
   data: {
-    tab: 'cards',  // cards | tags | categories
-    cards: [], tags: [], categories: [],
+    tab: 'cards',
+    cards: [], tags: [], categories: [],   // categories: [{name, count}]
     checked: {},
+    search: '',
   },
 
   onLoad() {
@@ -13,6 +14,7 @@ Page({
     this.setData({ navTop: (capsule.bottom + 8) * scale });
     this.loadAll();
   },
+
   onBack() { wx.navigateBack(); },
 
   loadAll() {
@@ -21,21 +23,21 @@ Page({
     db.collection('waypoints').limit(1000).get().then((res) => {
       const cards = res.data || [];
       const tagSet = new Set();
-      const catSet = new Set(['美食','咖啡','风景','根据地','购物','娱乐','其他']);
-      cards.forEach(w => { (w.tags||[]).forEach(t=>tagSet.add(t)); if(w.category) catSet.add(w.category); });
-      this.setData({
-        cards,
-        tags: [...tagSet],
-        categories: [...catSet],
-        checked: {},
+      const catMap = new Map();
+      const baseCats = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
+      baseCats.forEach(c => catMap.set(c, 0));
+      cards.forEach(w => {
+        (w.tags||[]).forEach(t => tagSet.add(t));
+        const cat = w.category || '其他';
+        catMap.set(cat, (catMap.get(cat)||0) + 1);
       });
+      const categories = [...catMap.entries()].map(([name, count]) => ({ name, count }));
+      this.setData({ cards, categories, tags: [...tagSet], checked: {} });
     });
   },
 
-  // Tab switch
-  switchTab(e) { this.setData({ tab: e.currentTarget.dataset.tab, checked: {} }); },
+  switchTab(e) { this.setData({ tab: e.currentTarget.dataset.tab, checked: {}, search: '' }); },
 
-  // Checkbox toggle
   toggleCheck(e) {
     const key = e.currentTarget.dataset.key;
     const checked = { ...this.data.checked };
@@ -45,96 +47,135 @@ Page({
 
   toggleAll() {
     const list = this.data.tab === 'cards' ? this.data.cards :
-                 this.data.tab === 'tags' ? this.data.tags :
-                 this.data.categories;
+                 this.data.tab === 'tags' ? this.data.tags : this.data.categories;
     const allChecked = list.every(item => {
-      const key = this.data.tab === 'cards' ? item._id : item;
+      const key = this.data.tab === 'cards' ? item._id : this.data.tab === 'categories' ? item.name : item;
       return this.data.checked[key];
     });
     const checked = { ...this.data.checked };
     list.forEach(item => {
-      const key = this.data.tab === 'cards' ? item._id : item;
+      const key = this.data.tab === 'cards' ? item._id : this.data.tab === 'categories' ? item.name : item;
       checked[key] = !allChecked;
     });
     this.setData({ checked });
   },
 
-  // Batch delete
   batchDelete() {
     const db = app.getDb();
     if (!db) return;
     const checkedKeys = Object.entries(this.data.checked).filter(([,v])=>v).map(([k])=>k);
     if (checkedKeys.length === 0) return wx.showToast({ title: '请先勾选', icon: 'none' });
-
     wx.showModal({
-      title: '确认删除',
-      content: '将删除 ' + checkedKeys.length + ' 项，不可恢复',
+      title: '确认删除 ' + checkedKeys.length + ' 项？', content: '不可恢复',
       confirmColor: '#FF6B6B',
       success: (res) => {
         if (!res.confirm) return;
         wx.showLoading({ title: '删除中...' });
+        const _ = db.command;
         if (this.data.tab === 'cards') {
-          const tasks = checkedKeys.map(id => db.collection('waypoints').doc(id).remove());
-          Promise.all(tasks).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
+          Promise.all(checkedKeys.map(id => db.collection('waypoints').doc(id).remove()))
+            .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
         } else if (this.data.tab === 'tags') {
-          this.batchDeleteTags(checkedKeys, db);
+          db.collection('waypoints').where({ tags: _.in(checkedKeys) }).get().then((res) => {
+            const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
+              data: { tags: (wp.tags||[]).filter(t => !checkedKeys.includes(t)) }
+            }));
+            return Promise.all(tasks);
+          }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
         } else {
-          this.batchDeleteCategories(checkedKeys, db);
+          const remaining = this.data.categories.filter(c => !checkedKeys.includes(c.name));
+          if (remaining.length < 1) { wx.hideLoading(); return wx.showToast({ title: '至少保留1个分类', icon: 'none' }); }
+          db.collection('waypoints').where({ category: _.in(checkedKeys) }).get().then((res) => {
+            const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: '其他' } }));
+            return Promise.all(tasks);
+          }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
         }
       },
     });
   },
 
-  batchDeleteTags(tags, db) {
-    const _ = db.command;
-    db.collection('waypoints').where({ tags: _.in(tags) }).get().then((res) => {
-      const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
-        data: { tags: (wp.tags||[]).filter(t => !tags.includes(t)) }
-      }));
-      return Promise.all(tasks);
-    }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
-  },
-
-  batchDeleteCategories(cats, db) {
-    const _ = db.command;
-    // Keep at least '其他'
-    const remaining = this.data.categories.filter(c => !cats.includes(c));
-    if (remaining.length < 1) { wx.hideLoading(); return wx.showToast({ title: '至少保留1个分类', icon: 'none' }); }
-    db.collection('waypoints').where({ category: _.in(cats) }).get().then((res) => {
-      const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
-        data: { category: '其他' }
-      }));
-      return Promise.all(tasks);
-    }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
-  },
-
-  // Add tag
-  addTag() {
+  addItem() {
     wx.showModal({
-      title: '添加标签',
-      editable: true,
-      placeholderText: '新标签名称',
+      title: '新增' + (this.data.tab === 'tags' ? '标签' : '分类'),
+      editable: true, placeholderText: '输入名称',
       success: (res) => {
         if (!res.content || !res.content.trim()) return;
-        const tag = res.content.trim();
-        if (this.data.tags.includes(tag)) return wx.showToast({ title: '已存在', icon: 'none' });
-        this.setData({ tags: [...this.data.tags, tag] });
+        const name = res.content.trim();
+        if (this.data.tab === 'tags') {
+          if (this.data.tags.includes(name)) return wx.showToast({ title: '已存在', icon: 'none' });
+          this.setData({ tags: [...this.data.tags, name] });
+        } else {
+          if (this.data.categories.some(c => c.name === name)) return wx.showToast({ title: '已存在', icon: 'none' });
+          this.setData({ categories: [...this.data.categories, { name, count: 0 }] });
+        }
       },
     });
   },
 
-  // Add category
-  addCategory() {
+  renameItem(e) {
+    const old = e.currentTarget.dataset.name;
     wx.showModal({
-      title: '添加分类',
-      editable: true,
-      placeholderText: '新分类名称',
+      title: '重命名',
+      editable: true, placeholderText: '新名称', content: old,
       success: (res) => {
-        if (!res.content || !res.content.trim()) return;
-        const cat = res.content.trim();
-        if (this.data.categories.includes(cat)) return wx.showToast({ title: '已存在', icon: 'none' });
-        this.setData({ categories: [...this.data.categories, cat] });
+        if (!res.content || !res.content.trim() || res.content.trim() === old) return;
+        const nn = res.content.trim();
+        const db = app.getDb();
+        if (this.data.tab === 'tags') {
+          if (!db) return;
+          const _ = db.command;
+          db.collection('waypoints').where({ tags: _.in([old]) }).get().then((res2) => {
+            const tasks = (res2.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
+              data: { tags: (wp.tags||[]).map(t => t === old ? nn : t) }
+            }));
+            return Promise.all(tasks);
+          }).then(() => { this.loadAll(); });
+        } else {
+          if (!db) return;
+          db.collection('waypoints').where({ category: old }).get().then((res2) => {
+            const tasks = (res2.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: nn } }));
+            return Promise.all(tasks);
+          }).then(() => { this.loadAll(); });
+        }
       },
+    });
+  },
+
+  onSearch(e) {
+    const search = e.detail.value || '';
+    this.setData({ search });
+    this.applyFilter();
+  },
+
+  applyFilter() {
+    const { tab, cards, tags, categories, search } = this.data;
+    const s = (search || '').trim().toLowerCase();
+    let filteredCards = cards, filteredTags = tags, filteredCategories = categories;
+    if (s) {
+      filteredCards = cards.filter(c => c.name.toLowerCase().includes(s) || (c.category||'').toLowerCase().includes(s));
+      filteredTags = tags.filter(t => t.toLowerCase().includes(s));
+      filteredCategories = categories.filter(c => c.name.toLowerCase().includes(s));
+    }
+    this.setData({ filteredCards, filteredTags, filteredCategories });
+  },
+
+  loadAll() {
+    const db = app.getDb();
+    if (!db) return;
+    db.collection('waypoints').limit(1000).get().then((res) => {
+      const cards = res.data || [];
+      const tagSet = new Set();
+      const catMap = new Map();
+      const baseCats = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
+      baseCats.forEach(c => catMap.set(c, 0));
+      cards.forEach(w => {
+        (w.tags||[]).forEach(t => tagSet.add(t));
+        const cat = w.category || '其他';
+        catMap.set(cat, (catMap.get(cat)||0) + 1);
+      });
+      const categories = [...catMap.entries()].map(([name, count]) => ({ name, count }));
+      this.setData({ cards, categories, tags: [...tagSet], checked: {}, search: '' });
+      this.applyFilter();
     });
   },
 });
