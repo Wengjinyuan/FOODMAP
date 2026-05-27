@@ -7,7 +7,7 @@ Page({
     waypointId: null,
     waypoint: {},
     form: {
-      name: '', category: '', latitude: null, longitude: null,
+      name: '', categories: [], categorySelectedMap: {}, latitude: null, longitude: null,
       address: '', notes: '', tags: [], rating: 0, images: [],
     },
     categories: [],
@@ -55,10 +55,11 @@ Page({
     // 从数据库加载用户分类和标签
     const db = app.getDb();
     if (!db) return this.setData({ categories: [...catSet].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) });
-    db.collection('waypoints').field({ category: true, tags: true }).limit(500).get().then((res) => {
+    db.collection('waypoints').field({ categories: true, category: true, tags: true }).limit(500).get().then((res) => {
       const tagSet = new Set();
       (res.data || []).forEach(w => {
-        if (w.category) catSet.add(w.category);
+        const cats = w.categories || (w.category ? [w.category] : []);
+        cats.forEach(c => catSet.add(c));
         if (w.tags) w.tags.forEach(t => tagSet.add(t));
       });
       const storedTags = wx.getStorageSync('customTags') || [];
@@ -79,13 +80,15 @@ Page({
       const lng = loc.longitude || (loc.coordinates && loc.coordinates[0]) || 0;
       wp.ratingRounded = Math.round(wp.rating || 0);
       wp.ratingStars = wp.rating > 0 ? '⭐'.repeat(wp.ratingRounded) : '';
+      const cats = wp.categories || (wp.category ? [wp.category] : []);
+      const cmap = {}; cats.forEach(c => cmap[c] = true);
       this.setData({
         waypoint: wp, isOwner: true,
         detailMapMarkers: [{ id: 1, latitude: lat, longitude: lng, iconPath: '', width: 1, height: 1,
           label: { content: wp.name, color: '#4A3A35', fontSize: 14, bgColor: '#FFFDF7', borderRadius: 8, padding: 6, display: 'ALWAYS' }
         }],
         form: {
-          name: wp.name, category: wp.category,
+          name: wp.name, categories: cats, categorySelectedMap: cmap,
           latitude: lat || null, longitude: lng || null,
           address: wp.address || '', notes: wp.notes || '',
           tags: wp.tags || [], rating: wp.rating || 0, images: wp.images || [],
@@ -105,9 +108,14 @@ Page({
   // ── Form ──
   onFormField(e) { this.setData({ ['form.' + e.currentTarget.dataset.field]: e.detail.value }); },
 
-  // Category chip select
+  // Category chip toggle（多选）
   onCategorySelect(e) {
-    this.setData({ 'form.category': e.currentTarget.dataset.category });
+    const cat = e.currentTarget.dataset.category;
+    const cats = [...this.data.form.categories];
+    const idx = cats.indexOf(cat);
+    if (idx > -1) cats.splice(idx, 1); else cats.push(cat);
+    const map = {}; cats.forEach(c => map[c] = true);
+    this.setData({ 'form.categories': cats, 'form.categorySelectedMap': map });
   },
   onCustomCategoryInput(e) { this.setData({ customCategory: e.detail.value }); },
   onToggleUserTags() {
@@ -116,10 +124,16 @@ Page({
   onAddCustomCategory() {
     const c = this.data.customCategory.trim();
     if (!c) return;
-    this.setData({ 'form.category': c, customCategory: '' });
+    const cats = [...this.data.form.categories];
+    if (!cats.includes(c)) cats.push(c);
+    const map = {}; cats.forEach(x => map[x] = true);
+    this.setData({ 'form.categories': cats, 'form.categorySelectedMap': map, customCategory: '' });
     if (!this.data.categories.includes(c)) {
       this.setData({ categories: [...this.data.categories, c] });
     }
+    // 同步到 storage，跨页面可用
+    const stored = wx.getStorageSync('customCategories') || [];
+    if (!stored.includes(c)) { stored.push(c); wx.setStorageSync('customCategories', stored); }
   },
 
   // Category manage
@@ -131,7 +145,8 @@ Page({
       success: (res) => {
         const removed = cats.splice(res.tapIndex, 1);
         this.setData({ categories: cats });
-        if (this.data.form.category === removed[0]) this.setData({ 'form.category': '' });
+        const cats = this.data.form.categories.filter(c => c !== removed[0]);
+        this.setData({ 'form.categories': cats });
       },
     });
   },
@@ -201,12 +216,12 @@ Page({
     const { form, submitting, mode, waypointId } = this.data;
     if (submitting) return;
     if (!form.name.trim()) return wx.showToast({ title: '请输入名称', icon: 'none' });
-    if (!form.category) return wx.showToast({ title: '请选择分类', icon: 'none' });
+    if (!form.categories || form.categories.length === 0) return wx.showToast({ title: '请至少选一个分类', icon: 'none' });
     const db = app.getDb();
     if (!db) return;
     this.setData({ submitting: true });
     const data = {
-      name: form.name, category: form.category,
+      name: form.name, categories: form.categories,
       location: form.latitude != null ? db.Geo.Point(form.longitude, form.latitude) : undefined,
       address: form.address, notes: form.notes, tags: form.tags,
       rating: Number(form.rating) || 0, images: form.images,
@@ -216,6 +231,12 @@ Page({
       ? db.collection('waypoints').add({ data: { ...data, create_time: new Date() } })
       : db.collection('waypoints').doc(waypointId).update({ data });
     promise.then(() => {
+      // 同步新分类到 storage，其他页面立即可用
+      const BASE = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
+      const stored = wx.getStorageSync('customCategories') || [];
+      let chg = false;
+      form.categories.forEach(c => { if (!BASE.includes(c) && !stored.includes(c)) { stored.push(c); chg = true; } });
+      if (chg) wx.setStorageSync('customCategories', stored);
       this.setData({ submitting: false });
       wx.showToast({ title: mode === 'add' ? '传送点已激活!' : '已更新!', icon: 'success' });
       if (mode === 'add') wx.switchTab({ url: '/pages/home/home' });

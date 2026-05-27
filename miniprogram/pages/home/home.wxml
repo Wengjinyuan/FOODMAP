@@ -46,7 +46,7 @@
       <view class="callout-close" catchtap="onCalloutClose">✕</view>
       <text class="callout-name">{{selectedWaypoint.name}}</text>
       <view class="callout-meta">
-        <text class="callout-cat">{{selectedWaypoint.category}}</text>
+        <text class="callout-cat">{{selectedWaypoint.categories[0]}}</text>
         <text class="callout-stars" wx:if="{{selectedWaypoint.ratingStars}}">{{selectedWaypoint.ratingStars}}</text>
       </view>
       <text class="callout-hint">点击查看 ▶</text>
@@ -60,10 +60,10 @@
     </view>
 
     <!-- 分类 — 精简行 -->
-    <scroll-view class="cat-scroll" scroll-x enhanced enable-flex show-scrollbar="{{false}}">
-      <view class="cat-chip {{activeCategory === '' ? 'active' : ''}}" bindtap="onCategoryTap" data-category="">全部</view>
-      <view class="cat-chip {{activeCategory === item ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" bindtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
-    </scroll-view>
+    <view class="cat-scroll">
+      <view class="cat-chip {{activeCategories.length === 0 ? 'active' : ''}}" catchtap="onCategoryTap" data-category="">全部</view>
+      <view class="cat-chip {{activeCategoryMap[item] ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" catchtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
+    </view>
 
     <!-- 卡片列表 — 单列 -->
     <scroll-view class="card-scroll" scroll-y enhanced enable-flex enable-back-to-top show-scrollbar="{{false}}"
@@ -78,7 +78,7 @@
           <view class="card-info">
             <text class="card-name">{{item.name}}</text>
             <view class="card-row">
-              <text class="card-cat">{{item.category}}</text>
+              <text class="card-cat" wx:for="{{item.categories || [item.category || '其他']}}" wx:key="*this" wx:for-item="c">{{c}}</text>
               <text class="card-addr">{{item.address || item.notes || ''}}</text>
             </view>
           </view>

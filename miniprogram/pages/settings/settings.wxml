@@ -29,7 +29,7 @@
       <view class="card-info-s">
         <text class="card-name-s">{{item.name}}</text>
         <view class="card-row-s">
-          <text class="card-cat-s">{{item.category}}</text>
+          <text class="card-cat-s" wx:for="{{item.categories || [item.category || '其他']}}" wx:key="*this" wx:for-item="c">{{c}}</text>
           <text class="card-addr-s">{{item.address || item.notes || ''}}</text>
         </view>
       </view>

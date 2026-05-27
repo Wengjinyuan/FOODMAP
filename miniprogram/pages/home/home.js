@@ -15,7 +15,8 @@ Page({
     waypoints: [],
     categories: [],
     searchKeyword: '',
-    activeCategory: '',
+    activeCategories: [],
+    activeCategoryMap: {},
 
     // UI state
     drawerHeight: 550,
@@ -103,15 +104,16 @@ Page({
   // ── Data Loading ──
   loadWaypoints() {
     this.setData({ loading: true });
-    const { searchKeyword, activeCategory } = this.data;
+    const { searchKeyword, activeCategories } = this.data;
     const db = app.getDb();
     if (!db) { this.setData({ loading: false }); return Promise.resolve(); }
+    const _ = db.command;
 
     let query = db.collection('waypoints');
     if (searchKeyword) {
       query = query.where({ name: db.RegExp({ regexp: searchKeyword, options: 'i' }) });
-    } else if (activeCategory) {
-      query = query.where({ category: activeCategory });
+    } else if (activeCategories.length > 0) {
+      query = query.where(_.or([{ categories: _.in(activeCategories) }, { category: _.in(activeCategories) }]));
     }
     query = query.orderBy('create_time', 'desc').limit(50);
 
@@ -126,9 +128,11 @@ Page({
 
   formatWaypoint(wp) {
     const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
+    const cats = wp.categories || (wp.category ? [wp.category] : ['其他']);
     return {
       ...wp,
-      categoryEmoji: emojiMap[wp.category] || '📍',
+      categories: cats,
+      categoryEmoji: emojiMap[cats[0]] || '📍',
       ratingStars: wp.rating > 0 ? '⭐'.repeat(Math.round(wp.rating)) : '',
       ratingRounded: Math.round(wp.rating),
     };
@@ -141,8 +145,11 @@ Page({
     this.setData({ categories: [...seen].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) });
     const db = app.getDb();
     if (!db) return;
-    db.collection('waypoints').field({ category: true }).limit(500).get().then((res) => {
-      (res.data || []).forEach(w => { if (w.category) seen.add(w.category); });
+    db.collection('waypoints').field({ categories: true, category: true }).limit(500).get().then((res) => {
+      (res.data || []).forEach(w => {
+        const cats = w.categories || (w.category ? [w.category] : []);
+        cats.forEach(c => { if (c) seen.add(c); });
+      });
       this.setData({ categories: [...seen].sort((a, b) => (a === '其他' ? 1 : b === '其他' ? -1 : 0)) });
     }).catch(() => {});
   },
@@ -167,7 +174,7 @@ Page({
       const loc = wp.location || {};
       const lat = loc.latitude || (loc.coordinates && loc.coordinates[1]) || 0;
       const lng = loc.longitude || (loc.coordinates && loc.coordinates[0]) || 0;
-      const color = colors[wp.category] || '#6B7280';
+      const color = colors[wp.categories[0]] || '#6B7280';
       const markerId = idOffset + index;
 
       // Numbered style
@@ -197,7 +204,7 @@ Page({
           latitude: lat, longitude: lng,
           iconPath: '', width: 1, height: 1,
           label: {
-            content: emojis[wp.category] || '📍',
+            content: emojis[wp.categories[0]] || '📍',
             color: color, fontSize: 22,
             bgColor: 'transparent', borderRadius: 0, padding: 4,
             display: 'ALWAYS', textAlign: 'center'
@@ -299,9 +306,12 @@ Page({
 
   onCategoryTap(e) {
     const cat = e.currentTarget.dataset.category;
-    const activeCategory = this.data.activeCategory === cat ? '' : cat;
-    this.setData({ activeCategory });
-    this.loadWaypoints();
+    let active = [...this.data.activeCategories];
+    if (!cat) { active = []; }
+    else { const i = active.indexOf(cat); i > -1 ? active.splice(i, 1) : active.push(cat); }
+    const map = {};
+    active.forEach(c => map[c] = true);
+    this.setData({ activeCategories: active, activeCategoryMap: map }, () => this.loadWaypoints());
   },
 
   // ── Drawer Drag ──
@@ -355,12 +365,12 @@ Page({
     wx.showLoading({ title: '播种中...' });
 
     const samples = [
-      { name: '张记烧烤大排档', category: '美食', location: db.Geo.Point(116.4720, 39.9150), address: '朝阳区建国路88号', notes: '必点烤串和冰啤酒，周五晚上人超多', tags: ['好吃', '回头客', '深夜档'], rating: 4.5 },
-      { name: '星巴克(望京店)', category: '咖啡', location: db.Geo.Point(116.4800, 40.0020), address: '望京街10号', notes: '二楼靠窗位置最舒服', tags: ['环境好', '外卖可'], rating: 4.2 },
-      { name: '西山观景台', category: '风景', location: db.Geo.Point(116.1900, 39.9950), address: '海淀区香山路', notes: '秋天红叶季最美，建议工作日去人少', tags: ['风景好', '推荐'], rating: 4.8 },
-      { name: '秘密基地', category: '根据地', location: db.Geo.Point(116.3890, 39.9420), address: '西城区鼓楼大街55号', notes: '藏在胡同深处的小院，有猫', tags: ['老字号', '难找'], rating: 5.0 },
-      { name: '朝阳大悦城', category: '购物', location: db.Geo.Point(116.5170, 39.9210), address: '朝阳区朝阳北路101号', notes: 'B1美食广场选择超多', tags: ['品牌全', '好逛'], rating: 4.0 },
-      { name: '深夜食堂', category: '美食', location: db.Geo.Point(116.4300, 39.9400), address: '东城区东直门内大街', notes: '凌晨两点还在营业的拉面馆', tags: ['深夜档', '好吃'], rating: 4.3 },
+      { name: '张记烧烤大排档', categories: ['美食'], location: db.Geo.Point(116.4720, 39.9150), address: '朝阳区建国路88号', notes: '必点烤串和冰啤酒，周五晚上人超多', tags: ['好吃', '回头客', '深夜档'], rating: 4.5 },
+      { name: '星巴克(望京店)', categories: ['咖啡'], location: db.Geo.Point(116.4800, 40.0020), address: '望京街10号', notes: '二楼靠窗位置最舒服', tags: ['环境好', '外卖可'], rating: 4.2 },
+      { name: '西山观景台', categories: ['风景'], location: db.Geo.Point(116.1900, 39.9950), address: '海淀区香山路', notes: '秋天红叶季最美，建议工作日去人少', tags: ['风景好', '推荐'], rating: 4.8 },
+      { name: '秘密基地', categories: ['根据地'], location: db.Geo.Point(116.3890, 39.9420), address: '西城区鼓楼大街55号', notes: '藏在胡同深处的小院，有猫', tags: ['老字号', '难找'], rating: 5.0 },
+      { name: '朝阳大悦城', categories: ['购物'], location: db.Geo.Point(116.5170, 39.9210), address: '朝阳区朝阳北路101号', notes: 'B1美食广场选择超多', tags: ['品牌全', '好逛'], rating: 4.0 },
+      { name: '深夜食堂', categories: ['美食', '深夜档'], location: db.Geo.Point(116.4300, 39.9400), address: '东城区东直门内大街', notes: '凌晨两点还在营业的拉面馆', tags: ['深夜档', '好吃'], rating: 4.3 },
     ];
 
     const now = new Date();

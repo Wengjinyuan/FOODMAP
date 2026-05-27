@@ -25,7 +25,11 @@ Page({
     if (!db) return;
     db.collection('waypoints').limit(1000).get().then((res) => {
       const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
-      (res.data || []).forEach(wp => { wp.categoryEmoji = emojiMap[wp.category] || '📍'; });
+      (res.data || []).forEach(wp => {
+        const c0 = (wp.categories && wp.categories[0]) || wp.category || '其他';
+        wp.categoryEmoji = emojiMap[c0] || '📍';
+        wp.categories = wp.categories || (wp.category ? [wp.category] : ['其他']);
+      });
       const cards = res.data || [];
       const tagSet = new Set();
       const catMap = new Map();
@@ -35,8 +39,7 @@ Page({
       [...DEFAULT_TAGS, ...storedTags].forEach(t => tagSet.add(t));
       cards.forEach(w => {
         (w.tags||[]).forEach(t => tagSet.add(t));
-        const cat = w.category || '其他';
-        catMap.set(cat, (catMap.get(cat)||0) + 1);
+        (w.categories||[]).forEach(c => catMap.set(c, (catMap.get(c)||0) + 1));
       });
       const categories = [...catMap.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => (a.name === '其他' ? 1 : b.name === '其他' ? -1 : 0));
       this.setData({ cards, categories, tags: [...tagSet], checked: {}, search: '' });
@@ -103,8 +106,11 @@ Page({
           // 同步清除存储的自定义分类
           const stored = (wx.getStorageSync('customCategories') || []).filter(c => !checkedKeys.includes(c));
           wx.setStorageSync('customCategories', stored);
-          db.collection('waypoints').where({ category: _.in(checkedKeys) }).get().then((res) => {
-            const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: '其他' } }));
+          db.collection('waypoints').where(_.or([{ categories: _.in(checkedKeys) }, { category: _.in(checkedKeys) }])).get().then((res) => {
+            const tasks = (res.data||[]).map(wp => {
+              const newCats = (wp.categories || (wp.category ? [wp.category] : [])).filter(c => !checkedKeys.includes(c));
+              return db.collection('waypoints').doc(wp._id).update({ data: { categories: newCats.length > 0 ? newCats : ['其他'] } });
+            });
             return Promise.all(tasks);
           }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
         }
@@ -161,8 +167,11 @@ Page({
           });
         } else {
           if (!db) return;
-          db.collection('waypoints').where({ category: old }).get().then((res2) => {
-            const tasks = (res2.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: nn } }));
+          db.collection('waypoints').where(_.or([{ categories: _.in([old]) }, { category: old }])).get().then((res2) => {
+            const tasks = (res2.data||[]).map(wp => {
+              const newCats = (wp.categories || (wp.category ? [wp.category] : [])).map(c => c === old ? nn : c);
+              return db.collection('waypoints').doc(wp._id).update({ data: { categories: newCats } });
+            });
             return Promise.all(tasks);
           }).then(() => {
             // 同步更新 storage
@@ -188,7 +197,7 @@ Page({
     const s = (search || '').trim().toLowerCase();
     let filteredCards = cards, filteredTags = tags, filteredCategories = categories;
     if (s) {
-      filteredCards = cards.filter(c => c.name.toLowerCase().includes(s) || (c.category||'').toLowerCase().includes(s));
+      filteredCards = cards.filter(c => c.name.toLowerCase().includes(s) || (c.categories||[]).some(cat => cat.toLowerCase().includes(s)) || (c.category||'').toLowerCase().includes(s));
       filteredTags = tags.filter(t => t.toLowerCase().includes(s));
       filteredCategories = categories.filter(c => c.name.toLowerCase().includes(s));
     }

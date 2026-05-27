@@ -19,11 +19,11 @@
 
   <!-- Category Filter -->
   <view class="filter-row">
-    <view class="filter-chip {{activeCategory === '' ? 'active' : ''}}"
-      bindtap="onCategoryFilter" data-category="">全部</view>
-    <view class="filter-chip {{activeCategory === item.name ? 'active' : ''}}"
+    <view class="filter-chip {{activeCategories.length === 0 ? 'active' : ''}}"
+      catchtap="onCategoryFilter" data-category="">全部</view>
+    <view class="filter-chip {{activeCategoryMap[item.name] ? 'active' : ''}}"
       wx:for="{{stats.categories}}" wx:key="name"
-      bindtap="onCategoryFilter" data-category="{{item.name}}">{{item.name}} ({{item.count}})</view>
+      catchtap="onCategoryFilter" data-category="{{item.name}}">{{item.name}} ({{item.count}})</view>
   </view>
 
   <!-- Waypoint List -->
@@ -38,7 +38,7 @@
         <view class="card-info">
           <text class="card-name">{{item.name}}</text>
           <view class="card-row">
-            <text class="card-cat">{{item.category}}</text>
+            <text class="card-cat" wx:for="{{item.categories || [item.category || '其他']}}" wx:key="*this" wx:for-item="c">{{c}}</text>
             <text class="card-addr">{{item.address || item.notes || ''}}</text>
           </view>
         </view>

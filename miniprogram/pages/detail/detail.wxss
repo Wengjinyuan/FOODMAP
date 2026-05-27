@@ -175,29 +175,29 @@
 
 /* Form actions */
 .form-actions {
-  padding: 16rpx 24rpx 40rpx; background: #FFFDF7;
-  display: flex; gap: 12rpx;
+  padding: 14rpx 24rpx 36rpx; background: #FFFDF7;
+  display: flex; gap: 12rpx; align-items: center;
   border-top: 3rpx solid #4A3A35;
   flex-shrink: 0;
 }
 .cancel-btn {
-  flex: 3; height: 88rpx; background: #FFFFFF;
+  flex: 2; height: 76rpx; background: #FFFFFF;
   color: #9E8A83; border: 2rpx solid #9E8A83;
-  border-radius: 14rpx; font-size: 28rpx;
+  border-radius: 14rpx; font-size: 26rpx;
   display: flex; align-items: center; justify-content: center;
 }
 .submit-btn {
-  flex: 7; height: 88rpx; background: #FFD23F;
+  flex: 6; height: 76rpx; background: #FFD23F;
   color: #4A3A35; border: 3rpx solid #4A3A35;
   border-radius: 14rpx; box-shadow: 3rpx 3rpx 0rpx #4A3A35;
-  font-size: 28rpx; font-weight: 700;
+  font-size: 26rpx; font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
 .submit-btn[disabled] { opacity: 0.5; }
 .submit-btn:active { transform: translate(2rpx, 2rpx); box-shadow: 1rpx 1rpx 0rpx #4A3A35; }
 .del-btn {
-  width: 88rpx; height: 88rpx; background: #FFFFFF;
-  color: #FF6B6B; border: 3rpx solid #FF6B6B;
-  border-radius: 14rpx; font-size: 32rpx;
+  flex: 0.8; height: 76rpx; background: #FFFFFF;
+  color: #FF6B6B; border: 2rpx solid #FF6B6B;
+  border-radius: 14rpx; font-size: 24rpx;
   display: flex; align-items: center; justify-content: center;
 }

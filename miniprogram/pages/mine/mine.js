@@ -5,7 +5,8 @@ Page({
     stats: { total: 0, categories: [] },
     allWaypoints: [],       // 全部数据，用于统计
     waypoints: [],           // 当前筛选后的列表
-    activeCategory: '',
+    activeCategories: [],
+    activeCategoryMap: {},
     loading: true,
   },
 
@@ -24,7 +25,11 @@ Page({
 
     db.collection('waypoints').orderBy('create_time', 'desc').limit(1000).get().then((res) => {
       const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
-      (res.data || []).forEach(wp => { wp.categoryEmoji = emojiMap[wp.category] || '📍'; });
+      (res.data || []).forEach(wp => {
+        const c0 = (wp.categories && wp.categories[0]) || wp.category || '其他';
+        wp.categoryEmoji = emojiMap[c0] || '📍';
+        wp.categories = wp.categories || (wp.category ? [wp.category] : ['其他']);
+      });
       const all = res.data || [];
 
       // 统计：基础分类 + 自定义分类全部纳入（count=0 也显示），其他永远在最后
@@ -32,7 +37,7 @@ Page({
       const storedCats = wx.getStorageSync('customCategories') || [];
       const catCount = {};
       [...baseCats, ...storedCats].forEach(c => { catCount[c] = 0; });
-      all.forEach(wp => { catCount[wp.category] = (catCount[wp.category] || 0) + 1; });
+      all.forEach(wp => { (wp.categories||[]).forEach(c => { catCount[c] = (catCount[c] || 0) + 1; }); });
       const catList = Object.entries(catCount).map(([name, count]) => ({ name, count }));
       catList.sort((a, b) => {
         if (a.name === '其他') return 1;
@@ -40,9 +45,9 @@ Page({
         return 0;
       });
 
-      // 筛选
-      const cat = this.data.activeCategory;
-      const filtered = cat ? all.filter(w => w.category === cat) : all;
+      // 筛选（多选）
+      const active = this.data.activeCategories;
+      const filtered = active.length > 0 ? all.filter(w => (w.categories||[]).some(c => active.includes(c))) : all;
 
       this.setData({
         allWaypoints: all,
@@ -57,11 +62,17 @@ Page({
 
   onCategoryFilter(e) {
     const cat = e.currentTarget.dataset.category;
-    const activeCategory = this.data.activeCategory === cat ? '' : cat;
-    const filtered = activeCategory
-      ? this.data.allWaypoints.filter(w => w.category === activeCategory)
-      : this.data.allWaypoints;
-    this.setData({ activeCategory, waypoints: filtered });
+    let active = [...this.data.activeCategories];
+    if (!cat) { active = []; }
+    else { const i = active.indexOf(cat); i > -1 ? active.splice(i, 1) : active.push(cat); }
+    const map = {};
+    active.forEach(c => map[c] = true);
+    this.setData({ activeCategories: active, activeCategoryMap: map }, () => {
+      const filtered = active.length > 0
+        ? this.data.allWaypoints.filter(w => (w.categories||[]).some(c => active.includes(c)))
+        : this.data.allWaypoints;
+      this.setData({ waypoints: filtered });
+    });
   },
 
   onWaypointTap(e) {

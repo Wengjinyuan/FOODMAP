@@ -26,7 +26,7 @@
 .card-pin { position: absolute; bottom: -2rpx; right: -2rpx; font-size: 20rpx; }
 .card-info { flex: 1; margin-left: 14rpx; min-width: 0; display: flex; flex-direction: column; justify-content: center; }
 .card-name { font-size: 26rpx; font-weight: 700; color: #4A3A35; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.card-row { display: flex; align-items: center; gap: 8rpx; margin-top: 4rpx; }
+.card-row { display: flex; align-items: center; gap: 8rpx; margin-top: 4rpx; overflow: hidden; }
 .card-cat { font-size: 20rpx; padding: 2rpx 10rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; flex-shrink: 0; }
 .card-addr { font-size: 22rpx; color: #9E8A83; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .card-arrow { color: #C4B5AF; font-size: 20rpx; margin-left: 6rpx; flex-shrink: 0; }

@@ -19,7 +19,7 @@
     <view class="detail-header {{waypoint.images && waypoint.images.length > 0 ? '' : 'no-image'}}">
       <text class="detail-name">{{waypoint.name}}</text>
       <view class="detail-meta">
-        <text class="detail-cat">{{waypoint.category}}</text>
+        <text class="detail-cat" wx:for="{{waypoint.categories || [waypoint.category]}}" wx:key="*this">{{item}}</text>
         <text class="detail-stars" wx:if="{{waypoint.rating > 0}}">{{waypoint.ratingStars}}</text>
       </view>
     </view>
@@ -46,11 +46,12 @@
     </view>
 
     <!-- 小地图 — 点击询问是否跳转导航 -->
-    <view class="detail-map-wrap" wx:if="{{waypoint.location}}" catchtap="onMapNavigate">
+    <view class="detail-map-wrap" wx:if="{{waypoint.location}}">
       <map class="detail-map" latitude="{{form.latitude}}" longitude="{{form.longitude}}"
         scale="15" markers="{{detailMapMarkers}}" show-location="{{false}}"
-        enable-zoom="{{false}}" enable-scroll="{{false}}" enable-rotate="{{false}}" />
-      <view class="map-tap-hint">📍 点击地图开始导航</view>
+        enable-zoom="{{false}}" enable-scroll="{{false}}" enable-rotate="{{false}}"
+        bindtap="onMapNavigate" />
+      <view class="map-tap-hint">📍 点我开始传送</view>
     </view>
 
     <!-- Actions -->
@@ -82,18 +83,14 @@
         <view class="field required">
           <text class="field-label">分类</text>
           <view class="chip-grid">
-            <view class="chip {{form.category === item ? 'selected' : ''}}"
+            <view class="chip {{form.categorySelectedMap[item] ? 'selected' : ''}}"
               wx:for="{{categories}}" wx:key="*this"
               catchtap="onCategorySelect" data-category="{{item}}">{{item}}</view>
           </view>
           <!-- 选了"其他"才出现自定义输入 -->
-          <view class="custom-row" wx:if="{{form.category === '其他'}}" style="margin-top:12rpx;">
+          <view class="custom-row" wx:if="{{form.categories.indexOf('其他') > -1}}" style="margin-top:12rpx;">
             <input class="custom-input" placeholder="输入新分类名称..." value="{{customCategory}}" bindinput="onCustomCategoryInput" maxlength="10" />
             <view class="custom-btn" catchtap="onAddCustomCategory">+</view>
-          </view>
-          <!-- 删除分类（默认分类最少剩1个） -->
-          <view class="manage-row" style="margin-top:12rpx;">
-            <text class="manage-btn" catchtap="onManageCategories">🗑️ 管理分类</text>
           </view>
         </view>
 
