@@ -47,6 +47,15 @@
 .info-label { width: 120rpx; font-size: 26rpx; color: #9E8A83; flex-shrink: 0; }
 .info-value { flex: 1; font-size: 26rpx; color: #4A3A35; line-height: 1.5; }
 
+/* ── View Mode: Image Gallery ── */
+.detail-gallery { display: flex; flex-wrap: wrap; gap: 8rpx; margin: 16rpx 24rpx; }
+.gallery-img { width: calc(33.33% - 6rpx); height: 160rpx; border-radius: 10rpx; border: 2rpx solid #4A3A35; }
+
+/* Manage buttons */
+.manage-row { display: flex; flex-wrap: wrap; gap: 8rpx; }
+.manage-btn { font-size: 22rpx; color: #FF6B6B; padding: 6rpx 14rpx; border: 1.5rpx dashed #FF6B6B; border-radius: 8rpx; }
+.tag-del-chip { font-size: 22rpx; padding: 4rpx 14rpx; background: #FFF0F0; color: #FF6B6B; border: 1.5rpx solid #FF6B6B; border-radius: 8rpx; }
+
 /* ── View Mode: Mini Map ── */
 .detail-map-wrap { margin: 16rpx 24rpx; border: 3rpx solid #4A3A35; border-radius: 14rpx; overflow: hidden; height: 320rpx; }
 .detail-map { width: 100%; height: 100%; }

@@ -10,7 +10,8 @@
 .stats-count { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; }
 .stats-cat { font-size: 20rpx; color: #9E8A83; display: block; }
 
-.filter-row { display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding: 4rpx 20rpx 10rpx; flex-shrink: 0; }
+.filter-row { display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding: 4rpx 20rpx 10rpx; flex-shrink: 0; scrollbar-width: none; -ms-overflow-style: none; }
+.filter-row::-webkit-scrollbar { display: none; }
 .filter-chip { display: inline-flex; padding: 5rpx 14rpx; margin-right: 8rpx; background: #FFF9E6; color: #9E8A83; border: 2rpx solid #4A3A35; border-radius: 10rpx; font-size: 20rpx; }
 .filter-chip.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 

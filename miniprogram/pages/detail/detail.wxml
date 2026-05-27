@@ -40,6 +40,11 @@
       </view>
     </view>
 
+    <!-- 图片画廊（在详情中展示） -->
+    <view class="detail-gallery" wx:if="{{waypoint.images && waypoint.images.length > 0}}">
+      <image class="gallery-img" wx:for="{{waypoint.images}}" wx:key="*this" src="{{item}}" mode="aspectFill" catchtap="onPreviewImage" data-src="{{item}}" />
+    </view>
+
     <!-- 小地图 -->
     <view class="detail-map-wrap" wx:if="{{waypoint.location}}">
       <map class="detail-map" latitude="{{form.latitude}}" longitude="{{form.longitude}}"
@@ -63,7 +68,7 @@
       <view style="width:64rpx;"></view>
     </view>
     <!-- 可滚动表单区，高度避开顶栏和底栏 -->
-    <scroll-view class="form-scroll" scroll-y enhanced enable-flex show-scrollbar="{{false}}">
+    <scroll-view class="form-scroll" scroll-y show-scrollbar="{{false}}">
       <view class="form-section">
 
         <!-- Name -->
@@ -84,6 +89,10 @@
           <view class="custom-row" wx:if="{{form.category === '其他'}}" style="margin-top:12rpx;">
             <input class="custom-input" placeholder="输入新分类名称..." value="{{customCategory}}" bindinput="onCustomCategoryInput" maxlength="10" />
             <view class="custom-btn" catchtap="onAddCustomCategory">+</view>
+          </view>
+          <!-- 删除分类（默认分类最少剩1个） -->
+          <view class="manage-row" style="margin-top:12rpx;">
+            <text class="manage-btn" catchtap="onManageCategories">🗑️ 管理分类</text>
           </view>
         </view>
 
@@ -134,6 +143,10 @@
           <view class="custom-row" style="margin-top:12rpx;">
             <input class="custom-input" placeholder="输入新标签..." value="{{customTag}}" bindinput="onCustomTagInput" maxlength="10" />
             <view class="custom-btn" catchtap="onAddCustomTag">+</view>
+          </view>
+          <!-- 删除已选标签 -->
+          <view class="manage-row" wx:if="{{form.tags.length > 0}}" style="margin-top:12rpx;">
+            <text class="tag-del-chip" wx:for="{{form.tags}}" wx:key="*this" catchtap="onRemoveTag" data-tag="{{item}}">{{item}} ✕</text>
           </view>
         </view>
 

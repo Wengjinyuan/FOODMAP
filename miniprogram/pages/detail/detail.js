@@ -117,7 +117,26 @@ Page({
     }
   },
 
+  // Category manage
+  onManageCategories() {
+    const cats = [...this.data.categories];
+    if (cats.length <= 1) return wx.showToast({ title: '至少保留1个分类', icon: 'none' });
+    wx.showActionSheet({
+      itemList: cats,
+      success: (res) => {
+        const removed = cats.splice(res.tapIndex, 1);
+        this.setData({ categories: cats });
+        if (this.data.form.category === removed[0]) this.setData({ 'form.category': '' });
+      },
+    });
+  },
+
   // Tags
+  onRemoveTag(e) {
+    const tag = e.currentTarget.dataset.tag;
+    const tags = this.data.form.tags.filter(t => t !== tag);
+    this.setData({ 'form.tags': tags });
+  },
   onTagToggle(e) {
     const tag = e.currentTarget.dataset.tag;
     const tags = [...this.data.form.tags];
@@ -215,6 +234,12 @@ Page({
         });
       },
     });
+  },
+
+  // Image preview
+  onPreviewImage(e) {
+    const src = e.currentTarget.dataset.src;
+    wx.previewImage({ urls: this.data.waypoint.images, current: src });
   },
 
   // Navigate
