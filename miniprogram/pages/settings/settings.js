@@ -26,14 +26,18 @@ Page({
       const tagSet = new Set();
       const catMap = new Map();
       const baseCats = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
-      baseCats.forEach(c => catMap.set(c, 0));
+      const storedCats = wx.getStorageSync('customCategories') || [];
+      const storedTags = wx.getStorageSync('customTags') || [];
+      [...baseCats, ...storedCats].forEach(c => catMap.set(c, 0));
+      storedTags.forEach(t => tagSet.add(t));
       cards.forEach(w => {
         (w.tags||[]).forEach(t => tagSet.add(t));
         const cat = w.category || '其他';
         catMap.set(cat, (catMap.get(cat)||0) + 1);
       });
       const categories = [...catMap.entries()].map(([name, count]) => ({ name, count }));
-      this.setData({ cards, categories, tags: [...tagSet], checked: {} });
+      this.setData({ cards, categories, tags: [...tagSet], checked: {}, search: '' });
+      this.applyFilter();
     });
   },
 
@@ -86,6 +90,14 @@ Page({
         } else {
           const remaining = this.data.categories.filter(c => !checkedKeys.includes(c.name));
           if (remaining.length < 1) { wx.hideLoading(); return wx.showToast({ title: '至少保留1个分类', icon: 'none' }); }
+          // 同步清除存储的自定义分类
+          const stored = (wx.getStorageSync('customCategories') || []).filter(c => !checkedKeys.includes(c));
+          wx.setStorageSync('customCategories', stored);
+          // 同理清除标签存储
+          if (this.data.tab === 'tags') {
+            const storedTags = (wx.getStorageSync('customTags') || []).filter(t => !checkedKeys.includes(t));
+            wx.setStorageSync('customTags', storedTags);
+          }
           db.collection('waypoints').where({ category: _.in(checkedKeys) }).get().then((res) => {
             const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({ data: { category: '其他' } }));
             return Promise.all(tasks);
@@ -162,23 +174,4 @@ Page({
     this.setData({ filteredCards, filteredTags, filteredCategories });
   },
 
-  loadAll() {
-    const db = app.getDb();
-    if (!db) return;
-    db.collection('waypoints').limit(1000).get().then((res) => {
-      const cards = res.data || [];
-      const tagSet = new Set();
-      const catMap = new Map();
-      const baseCats = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
-      baseCats.forEach(c => catMap.set(c, 0));
-      cards.forEach(w => {
-        (w.tags||[]).forEach(t => tagSet.add(t));
-        const cat = w.category || '其他';
-        catMap.set(cat, (catMap.get(cat)||0) + 1);
-      });
-      const categories = [...catMap.entries()].map(([name, count]) => ({ name, count }));
-      this.setData({ cards, categories, tags: [...tagSet], checked: {}, search: '' });
-      this.applyFilter();
-    });
-  },
 });

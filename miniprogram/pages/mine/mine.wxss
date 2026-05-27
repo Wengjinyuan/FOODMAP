@@ -10,9 +10,9 @@
 .gear-btn { font-size: 28rpx; padding: 4rpx 8rpx; }
 .stats-bd { display: flex; flex-wrap: nowrap; gap: 14rpx; overflow-x: auto; white-space: nowrap; scrollbar-width: none; flex-shrink: 1; min-width: 0; }
 .stats-bd::-webkit-scrollbar { display: none; }
-.stats-item { text-align: center; }
-.stats-count { font-size: 28rpx; font-weight: 700; color: #4A3A35; display: block; }
-.stats-cat { font-size: 20rpx; color: #9E8A83; display: block; }
+.stats-item { text-align: center; padding: 4rpx 12rpx; }
+.stats-count { font-size: 32rpx; font-weight: 700; color: #4A3A35; display: block; line-height: 1.2; }
+.stats-cat { font-size: 24rpx; color: #9E8A83; display: block; margin-top: 2rpx; }
 
 .filter-row { display: flex; flex-wrap: nowrap; overflow-x: auto; white-space: nowrap; padding: 4rpx 20rpx 10rpx; flex-shrink: 0; scrollbar-width: none; -ms-overflow-style: none; }
 .filter-row::-webkit-scrollbar { display: none; }
