@@ -82,38 +82,29 @@ Page({
       success: (res) => {
         if (!res.confirm) return;
         wx.showLoading({ title: '删除中...' });
-        const _ = db.command;
         if (this.data.tab === 'cards') {
-          Promise.all(checkedKeys.map(id => db.collection('waypoints').doc(id).remove()))
-            .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); })
-            .catch(() => { wx.hideLoading(); wx.showToast({ title: '删除失败，请检查权限', icon: 'none' }); });
+          wx.cloud.callFunction({ name: 'waypointFunctions', data: { action: 'batchDeleteWaypoints', ids: checkedKeys } })
+            .then(({ result }) => {
+              wx.hideLoading();
+              wx.showToast({ title: '已删除 ' + (result.data ? result.data.deleted : 0) + ' 项', icon: 'success' });
+              this.loadAll();
+            }).catch(() => { wx.hideLoading(); wx.showToast({ title: '删除失败', icon: 'none' }); });
         } else if (this.data.tab === 'tags') {
-          // 默认标签最少保留3个
           const remainingDefaults = DEFAULT_TAGS.filter(t => !checkedKeys.includes(t));
           if (remainingDefaults.length < 3) { wx.hideLoading(); return wx.showToast({ title: '默认标签至少保留3个', icon: 'none' }); }
-          // 同步清除存储的自定义标签
           const storedTags = (wx.getStorageSync('customTags') || []).filter(t => !checkedKeys.includes(t));
           wx.setStorageSync('customTags', storedTags);
-          db.collection('waypoints').where({ tags: _.in(checkedKeys) }).get().then((res) => {
-            const tasks = (res.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
-              data: { tags: (wp.tags||[]).filter(t => !checkedKeys.includes(t)) }
-            }));
-            return Promise.all(tasks);
-          }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
+          wx.cloud.callFunction({ name: 'waypointFunctions', data: { action: 'batchRemoveTags', tags: checkedKeys } })
+            .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); })
+            .catch(() => { wx.hideLoading(); wx.showToast({ title: '删除失败', icon: 'none' }); });
         } else {
-          // 默认分类最少保留3个
           const remainingDefaults = BASE_CATS.filter(c => !checkedKeys.includes(c));
           if (remainingDefaults.length < 3) { wx.hideLoading(); return wx.showToast({ title: '默认分类至少保留3个', icon: 'none' }); }
-          // 同步清除存储的自定义分类
           const stored = (wx.getStorageSync('customCategories') || []).filter(c => !checkedKeys.includes(c));
           wx.setStorageSync('customCategories', stored);
-          db.collection('waypoints').where(_.or([{ categories: _.in(checkedKeys) }, { category: _.in(checkedKeys) }])).get().then((res) => {
-            const tasks = (res.data||[]).map(wp => {
-              const newCats = (wp.categories || (wp.category ? [wp.category] : [])).filter(c => !checkedKeys.includes(c));
-              return db.collection('waypoints').doc(wp._id).update({ data: { categories: newCats.length > 0 ? newCats : ['其他'] } });
-            });
-            return Promise.all(tasks);
-          }).then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); });
+          wx.cloud.callFunction({ name: 'waypointFunctions', data: { action: 'batchRemoveCategories', categories: checkedKeys } })
+            .then(() => { wx.hideLoading(); wx.showToast({ title: '已删除', icon: 'success' }); this.loadAll(); })
+            .catch(() => { wx.hideLoading(); wx.showToast({ title: '删除失败', icon: 'none' }); });
         }
       },
     });
@@ -149,39 +140,24 @@ Page({
       success: (res) => {
         if (!res.content || !res.content.trim() || res.content.trim() === old) return;
         const nn = res.content.trim();
-        const db = app.getDb();
         if (this.data.tab === 'tags') {
-          if (!db) return;
-          const _ = db.command;
-          db.collection('waypoints').where({ tags: _.in([old]) }).get().then((res2) => {
-            const tasks = (res2.data||[]).map(wp => db.collection('waypoints').doc(wp._id).update({
-              data: { tags: (wp.tags||[]).map(t => t === old ? nn : t) }
-            }));
-            return Promise.all(tasks);
-          }).then(() => {
-            // 同步更新 storage
-            const tagStored = (wx.getStorageSync('customTags') || []);
-            const tagIdx = tagStored.indexOf(old);
-            if (tagIdx > -1) tagStored[tagIdx] = nn; else tagStored.push(nn);
-            wx.setStorageSync('customTags', tagStored);
-            this.loadAll();
-          });
+          wx.cloud.callFunction({ name: 'waypointFunctions', data: { action: 'batchRenameTag', oldName: old, newName: nn } })
+            .then(() => {
+              const tagStored = (wx.getStorageSync('customTags') || []);
+              const tagIdx = tagStored.indexOf(old);
+              if (tagIdx > -1) tagStored[tagIdx] = nn; else tagStored.push(nn);
+              wx.setStorageSync('customTags', tagStored);
+              this.loadAll();
+            }).catch(() => { wx.showToast({ title: '重命名失败', icon: 'none' }); });
         } else {
-          if (!db) return;
-          db.collection('waypoints').where(_.or([{ categories: _.in([old]) }, { category: old }])).get().then((res2) => {
-            const tasks = (res2.data||[]).map(wp => {
-              const newCats = (wp.categories || (wp.category ? [wp.category] : [])).map(c => c === old ? nn : c);
-              return db.collection('waypoints').doc(wp._id).update({ data: { categories: newCats } });
-            });
-            return Promise.all(tasks);
-          }).then(() => {
-            // 同步更新 storage
-            const catStored = (wx.getStorageSync('customCategories') || []);
-            const catIdx = catStored.indexOf(old);
-            if (catIdx > -1) catStored[catIdx] = nn; else catStored.push(nn);
-            wx.setStorageSync('customCategories', catStored);
-            this.loadAll();
-          });
+          wx.cloud.callFunction({ name: 'waypointFunctions', data: { action: 'batchRenameCategory', oldName: old, newName: nn } })
+            .then(() => {
+              const catStored = (wx.getStorageSync('customCategories') || []);
+              const catIdx = catStored.indexOf(old);
+              if (catIdx > -1) catStored[catIdx] = nn; else catStored.push(nn);
+              wx.setStorageSync('customCategories', catStored);
+              this.loadAll();
+            }).catch(() => { wx.showToast({ title: '重命名失败', icon: 'none' }); });
         }
       },
     });

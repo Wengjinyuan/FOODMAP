@@ -55,17 +55,20 @@
 
   <!-- 底部抽屉 — transform替代height，地图不动 -->
   <view class="drawer" style="height:1200rpx;transform:translateY({{drawerOffset}}rpx);">
-    <view class="drawer-handle" catchtouchstart="onDrawerTouchStart" catchtouchmove="onDrawerTouchMove" catchtouchend="onDrawerTouchEnd">
-      <view class="drawer-bar"></view>
+    <!-- 拖拽区：手柄+分类外包，catchmove防泄漏到map，bindstart让chip能收tap -->
+    <view class="drawer-drag-zone" bindtouchstart="onDrawerTouchStart" catchtouchmove="onDrawerTouchMove" bindtouchend="onDrawerTouchEnd">
+      <view class="drawer-handle">
+        <view class="drawer-bar"></view>
+      </view>
+
+      <!-- 分类 -->
+      <view class="cat-scroll">
+        <view class="cat-chip {{activeCategories.length === 0 ? 'active' : ''}}" catchtap="onCategoryTap" data-category="">全部</view>
+        <view class="cat-chip {{activeCategoryMap[item] ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" catchtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
+      </view>
     </view>
 
-    <!-- 分类 — 精简行 -->
-    <view class="cat-scroll">
-      <view class="cat-chip {{activeCategories.length === 0 ? 'active' : ''}}" catchtap="onCategoryTap" data-category="">全部</view>
-      <view class="cat-chip {{activeCategoryMap[item] ? 'active' : ''}}" wx:for="{{categories}}" wx:key="*this" catchtap="onCategoryTap" data-category="{{item}}">{{item}}</view>
-    </view>
-
-    <!-- 卡片列表 — 单列 -->
+    <!-- 卡片列表 — 拖拽区外，不受影响 -->
     <scroll-view class="card-scroll" scroll-y enhanced enable-flex enable-back-to-top show-scrollbar="{{false}}"
       refresher-enabled="{{true}}" refresher-triggered="{{refreshing}}" bindrefresherrefresh="onRefresh">
       <block wx:if="{{waypoints.length > 0}}">

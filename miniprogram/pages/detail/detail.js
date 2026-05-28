@@ -8,7 +8,7 @@ Page({
     waypoint: {},
     form: {
       name: '', categories: [], categorySelectedMap: {}, latitude: null, longitude: null,
-      address: '', notes: '', tags: [], rating: 0, images: [],
+      address: '', notes: '', tags: [], tagSelectedMap: {}, rating: 0, images: [],
     },
     categories: [],
     customCategory: '',
@@ -82,6 +82,8 @@ Page({
       wp.ratingStars = wp.rating > 0 ? '⭐'.repeat(wp.ratingRounded) : '';
       const cats = wp.categories || (wp.category ? [wp.category] : []);
       const cmap = {}; cats.forEach(c => cmap[c] = true);
+      const tags = wp.tags || [];
+      const tmap = {}; tags.forEach(t => tmap[t] = true);
       this.setData({
         waypoint: wp, isOwner: true,
         detailMapMarkers: [{ id: 1, latitude: lat, longitude: lng, iconPath: '', width: 1, height: 1,
@@ -91,7 +93,7 @@ Page({
           name: wp.name, categories: cats, categorySelectedMap: cmap,
           latitude: lat || null, longitude: lng || null,
           address: wp.address || '', notes: wp.notes || '',
-          tags: wp.tags || [], rating: wp.rating || 0, images: wp.images || [],
+          tags: tags, tagSelectedMap: tmap, rating: wp.rating || 0, images: wp.images || [],
         },
       });
       wx.setNavigationBarTitle({ title: wp.name || '传送点' });
@@ -151,11 +153,13 @@ Page({
     });
   },
 
+  _buildTagMap(tags) { const m = {}; (tags||[]).forEach(t => m[t]=true); return m; },
+
   // Tags
   onRemoveTag(e) {
     const tag = e.currentTarget.dataset.tag;
     const tags = this.data.form.tags.filter(t => t !== tag);
-    this.setData({ 'form.tags': tags });
+    this.setData({ 'form.tags': tags, 'form.tagSelectedMap': this._buildTagMap(tags) });
   },
   onTagToggle(e) {
     const tag = e.currentTarget.dataset.tag;
@@ -163,14 +167,15 @@ Page({
     const idx = tags.indexOf(tag);
     if (idx > -1) tags.splice(idx, 1);
     else { if (tags.length >= 5) return wx.showToast({ title: '最多5个标签', icon: 'none' }); tags.push(tag); }
-    this.setData({ 'form.tags': tags });
+    this.setData({ 'form.tags': tags, 'form.tagSelectedMap': this._buildTagMap(tags) });
   },
   onCustomTagInput(e) { this.setData({ customTag: e.detail.value }); },
   onAddCustomTag() {
     const t = this.data.customTag.trim();
     if (!t || this.data.form.tags.includes(t)) return;
     if (this.data.form.tags.length >= 5) return wx.showToast({ title: '最多5个标签', icon: 'none' });
-    this.setData({ 'form.tags': [...this.data.form.tags, t], customTag: '' });
+    const tags = [...this.data.form.tags, t];
+    this.setData({ 'form.tags': tags, 'form.tagSelectedMap': this._buildTagMap(tags), customTag: '' });
   },
 
   // Location
@@ -211,27 +216,26 @@ Page({
   // Rating
   onRatingTap(e) { this.setData({ 'form.rating': Number(e.currentTarget.dataset.rating) }); },
 
-  // Submit
+  // Submit (走云函数绕过安全规则)
   onSubmit() {
     const { form, submitting, mode, waypointId } = this.data;
     if (submitting) return;
     if (!form.name.trim()) return wx.showToast({ title: '请输入名称', icon: 'none' });
     if (!form.categories || form.categories.length === 0) return wx.showToast({ title: '请至少选一个分类', icon: 'none' });
-    const db = app.getDb();
-    if (!db) return;
     this.setData({ submitting: true });
-    const data = {
-      name: form.name, categories: form.categories,
-      location: form.latitude != null ? db.Geo.Point(form.longitude, form.latitude) : undefined,
+
+    const action = mode === 'add' ? 'addWaypoint' : 'updateWaypoint';
+    const payload = {
+      action, name: form.name, categories: form.categories,
+      latitude: form.latitude, longitude: form.longitude,
       address: form.address, notes: form.notes, tags: form.tags,
       rating: Number(form.rating) || 0, images: form.images,
-      update_time: new Date(),
     };
-    const promise = mode === 'add'
-      ? db.collection('waypoints').add({ data: { ...data, create_time: new Date() } })
-      : db.collection('waypoints').doc(waypointId).update({ data });
-    promise.then(() => {
-      // 同步新分类到 storage，其他页面立即可用
+    if (mode !== 'add') payload.waypointId = waypointId;
+
+    wx.cloud.callFunction({ name: 'waypointFunctions', data: payload }).then(({ result }) => {
+      if (!result.success) { this.setData({ submitting: false }); return wx.showToast({ title: result.errMsg || '操作失败', icon: 'none' }); }
+      // 同步新分类到 storage
       const BASE = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
       const stored = wx.getStorageSync('customCategories') || [];
       let chg = false;

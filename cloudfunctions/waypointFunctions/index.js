@@ -53,42 +53,41 @@ const getWaypointDetail = async (event) => {
 // ── 新增传送点 ──
 const addWaypoint = async (event) => {
   const wxContext = cloud.getWXContext();
-  const { name, category, latitude, longitude, address, images, notes, tags, rating } = event;
-  if (!name || !category || latitude == null || longitude == null) {
-    return { success: false, errMsg: "名称、分类和位置为必填项" };
+  const { name, categories, latitude, longitude, address, images, notes, tags, rating } = event;
+  if (!name || !categories || categories.length === 0) {
+    return { success: false, errMsg: "名称和分类为必填项" };
   }
   const now = new Date();
-  const res = await db.collection("waypoints").add({
-    data: {
-      name,
-      category,
-      location: db.Geo.Point(latitude, longitude),
-      address: address || "",
-      images: images || [],
-      notes: notes || "",
-      tags: tags || [],
-      rating: Number(rating) || 0,
-      _openid: wxContext.OPENID,
-      create_time: now,
-      update_time: now,
-    },
-  });
+  const docData = {
+    name, categories,
+    address: address || "",
+    images: images || [],
+    notes: notes || "",
+    tags: tags || [],
+    rating: Number(rating) || 0,
+    visibility: 'private',
+    _openid: wxContext.OPENID,
+    create_time: now,
+    update_time: now,
+  };
+  if (latitude != null && longitude != null) docData.location = db.Geo.Point(longitude, latitude);
+  const res = await db.collection("waypoints").add({ data: docData });
   return { success: true, data: { _id: res._id } };
 };
 
 // ── 更新传送点 ──
 const updateWaypoint = async (event) => {
   const wxContext = cloud.getWXContext();
-  const { waypointId, name, category, latitude, longitude, address, images, notes, tags, rating } = event;
+  const { waypointId, name, categories, latitude, longitude, address, images, notes, tags, rating } = event;
 
   const doc = await db.collection("waypoints").doc(waypointId).get();
   if (!doc.data) return { success: false, errMsg: "传送点不存在" };
-  if (doc.data._openid !== wxContext.OPENID) return { success: false, errMsg: "无权修改" };
+  if (doc.data._openid !== wxContext.OPENID && wxContext.OPENID !== ADMIN_OPENID) return { success: false, errMsg: "无权修改" };
 
   const updateData = { update_time: new Date() };
   if (name !== undefined) updateData.name = name;
-  if (category !== undefined) updateData.category = category;
-  if (latitude != null && longitude != null) updateData.location = db.Geo.Point(latitude, longitude);
+  if (categories !== undefined) updateData.categories = categories;
+  if (latitude != null && longitude != null) updateData.location = db.Geo.Point(longitude, latitude);
   if (address !== undefined) updateData.address = address;
   if (images !== undefined) updateData.images = images;
   if (notes !== undefined) updateData.notes = notes;
@@ -188,6 +187,61 @@ const seedSamples = async () => {
   }
 };
 
+// ── 批量移除标签 ──
+const batchRemoveTags = async (event) => {
+  const wxContext = cloud.getWXContext();
+  const { tags: tagsToRemove } = event;
+  const all = await db.collection("waypoints").where({ tags: _.in(tagsToRemove) }).get();
+  const tasks = (all.data || []).map(wp => {
+    const newTags = (wp.tags || []).filter(t => !tagsToRemove.includes(t));
+    return db.collection("waypoints").doc(wp._id).update({ data: { tags: newTags } });
+  });
+  await Promise.all(tasks);
+  return { success: true, data: { count: tasks.length } };
+};
+
+// ── 批量重命名标签 ──
+const batchRenameTag = async (event) => {
+  const { oldName, newName } = event;
+  const all = await db.collection("waypoints").where({ tags: _.in([oldName]) }).get();
+  const tasks = (all.data || []).map(wp => {
+    const newTags = (wp.tags || []).map(t => t === oldName ? newName : t);
+    return db.collection("waypoints").doc(wp._id).update({ data: { tags: newTags } });
+  });
+  await Promise.all(tasks);
+  return { success: true, data: { count: tasks.length } };
+};
+
+// ── 批量移除分类（从 categories 数组中移除，删光则设 ['其他']）──
+const batchRemoveCategories = async (event) => {
+  const { categories: catsToRemove } = event;
+  const all = await db.collection("waypoints").where(_.or([
+    { categories: _.in(catsToRemove) }, { category: _.in(catsToRemove) }
+  ])).get();
+  const tasks = (all.data || []).map(wp => {
+    const curCats = wp.categories || (wp.category ? [wp.category] : []);
+    const newCats = curCats.filter(c => !catsToRemove.includes(c));
+    return db.collection("waypoints").doc(wp._id).update({ data: { categories: newCats.length > 0 ? newCats : ['其他'] } });
+  });
+  await Promise.all(tasks);
+  return { success: true, data: { count: tasks.length } };
+};
+
+// ── 批量重命名分类 ──
+const batchRenameCategory = async (event) => {
+  const { oldName, newName } = event;
+  const all = await db.collection("waypoints").where(_.or([
+    { categories: _.in([oldName]) }, { category: oldName }
+  ])).get();
+  const tasks = (all.data || []).map(wp => {
+    const curCats = wp.categories || (wp.category ? [wp.category] : []);
+    const newCats = curCats.map(c => c === oldName ? newName : c);
+    return db.collection("waypoints").doc(wp._id).update({ data: { categories: newCats } });
+  });
+  await Promise.all(tasks);
+  return { success: true, data: { count: tasks.length } };
+};
+
 // ── 主入口 ──
 exports.main = async (event, context) => {
   const { action } = event;
@@ -205,6 +259,10 @@ exports.main = async (event, context) => {
       case "getMyStats": return await getMyStats();
       case "getPresetCategories": return await getPresetCategories();
       case "seedSamples": return await seedSamples();
+      case "batchRemoveTags": return await batchRemoveTags(event);
+      case "batchRenameTag": return await batchRenameTag(event);
+      case "batchRemoveCategories": return await batchRemoveCategories(event);
+      case "batchRenameCategory": return await batchRenameCategory(event);
       default: return { success: false, errMsg: "未知操作: " + action };
     }
   } catch (e) {

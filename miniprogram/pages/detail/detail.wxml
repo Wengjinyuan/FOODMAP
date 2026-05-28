@@ -122,7 +122,7 @@
         <view class="field">
           <text class="field-label">标签</text>
           <view class="chip-grid">
-            <view class="chip {{form.tags.indexOf(item) > -1 ? 'selected' : ''}}"
+            <view class="chip {{form.tagSelectedMap[item] ? 'selected' : ''}}"
               wx:for="{{presetTags}}" wx:key="*this"
               catchtap="onTagToggle" data-tag="{{item}}">{{item}}</view>
           </view>
@@ -132,7 +132,7 @@
               {{showUserTags ? '▾' : '▸'}} 我的标签 ({{userTags.length}})
             </text>
             <view class="chip-grid" wx:if="{{showUserTags}}" style="margin-top:8rpx;">
-              <view class="chip {{form.tags.indexOf(item) > -1 ? 'selected' : ''}}"
+              <view class="chip {{form.tagSelectedMap[item] ? 'selected' : ''}}"
                 wx:for="{{userTags}}" wx:key="*this"
                 catchtap="onTagToggle" data-tag="{{item}}">{{item}}</view>
             </view>

@@ -291,7 +291,16 @@ Page({
 
   onLocateMe() {
     wx.getLocation({ type: 'gcj02', success: (res) => {
-      this.setData({ latitude: res.latitude, longitude: res.longitude, scale: 16 });
+      const { drawerHeight, scale } = this.data;
+      const { windowHeight, windowWidth } = wx.getWindowInfo();
+      // 地图全屏渲染但下半截被抽屉遮住，把中心往北偏移让定位点落在可见区域中心
+      const drawerPx = drawerHeight * windowWidth / 750;
+      const visibleCenterPx = (windowHeight - drawerPx) / 2;  // 可见区域中心Y
+      const screenCenterPx = windowHeight / 2;                 // 全屏中心Y
+      const offsetPx = screenCenterPx - visibleCenterPx;       // 需要往上偏的像素
+      const scaleVal = scale || 15;
+      const degPerPx = 360 / (256 * Math.pow(2, scaleVal));
+      this.setData({ latitude: res.latitude - offsetPx * degPerPx, longitude: res.longitude });
     }, fail: () => {
       wx.showToast({ title: '获取位置失败', icon: 'none' });
     }});
@@ -314,21 +323,22 @@ Page({
     this.setData({ activeCategories: active, activeCategoryMap: map }, () => this.loadWaypoints());
   },
 
-  // ── Drawer Drag ──
+  // ── Drawer Drag（6px死区 → 区分点击和拖拽）──
   onDrawerTouchStart(e) {
-    this.setData({
-      drawerStartY: e.touches[0].clientY,
-      drawerStartH: this.data.drawerHeight,
-    });
+    this._dragSY = e.touches[0].clientY;
+    this._dragSH = this.data.drawerHeight;
+    this._dragOn = false;
   },
   onDrawerTouchMove(e) {
-    if (!this.data.drawerStartY) return;
-    const dy = this.data.drawerStartY - e.touches[0].clientY;
-    const newH = Math.max(120, Math.min(1200, this.data.drawerStartH + dy));
+    if (this._dragSY == null) return;
+    if (!this._dragOn && Math.abs(e.touches[0].clientY - this._dragSY) < 6) return;
+    this._dragOn = true;
+    const newH = Math.max(120, Math.min(1200, this._dragSH + (this._dragSY - e.touches[0].clientY)));
     this.setData({ drawerHeight: newH, drawerOffset: 1200 - newH });
   },
   onDrawerTouchEnd() {
-    this.setData({ drawerStartY: 0 });
+    this._dragSY = null;
+    this._dragOn = false;
   },
 
   onMarkerTap(e) {
@@ -360,28 +370,12 @@ Page({
   },
 
   onSeedSamples() {
-    const db = app.getDb();
-    if (!db) return;
     wx.showLoading({ title: '播种中...' });
-
-    const samples = [
-      { name: '张记烧烤大排档', categories: ['美食'], location: db.Geo.Point(116.4720, 39.9150), address: '朝阳区建国路88号', notes: '必点烤串和冰啤酒，周五晚上人超多', tags: ['好吃', '回头客', '深夜档'], rating: 4.5 },
-      { name: '星巴克(望京店)', categories: ['咖啡'], location: db.Geo.Point(116.4800, 40.0020), address: '望京街10号', notes: '二楼靠窗位置最舒服', tags: ['环境好', '外卖可'], rating: 4.2 },
-      { name: '西山观景台', categories: ['风景'], location: db.Geo.Point(116.1900, 39.9950), address: '海淀区香山路', notes: '秋天红叶季最美，建议工作日去人少', tags: ['风景好', '推荐'], rating: 4.8 },
-      { name: '秘密基地', categories: ['根据地'], location: db.Geo.Point(116.3890, 39.9420), address: '西城区鼓楼大街55号', notes: '藏在胡同深处的小院，有猫', tags: ['老字号', '难找'], rating: 5.0 },
-      { name: '朝阳大悦城', categories: ['购物'], location: db.Geo.Point(116.5170, 39.9210), address: '朝阳区朝阳北路101号', notes: 'B1美食广场选择超多', tags: ['品牌全', '好逛'], rating: 4.0 },
-      { name: '深夜食堂', categories: ['美食', '深夜档'], location: db.Geo.Point(116.4300, 39.9400), address: '东城区东直门内大街', notes: '凌晨两点还在营业的拉面馆', tags: ['深夜档', '好吃'], rating: 4.3 },
-    ];
-
-    const now = new Date();
-    const tasks = samples.map(s => db.collection('waypoints').add({
-      data: { ...s, images: [], create_time: now, update_time: now }
-    }));
-
-    Promise.all(tasks).then(() => {
-      wx.hideLoading();
-      wx.showToast({ title: '已播种 ' + samples.length + ' 个传送点！', icon: 'success' });
-      this.loadWaypoints();
+    wx.cloud.callFunction({ name: 'waypointFunctions', data: { action: 'seedSamples' } })
+      .then(() => {
+        wx.hideLoading();
+        wx.showToast({ title: '已播种 6 个传送点！', icon: 'success' });
+        this.loadWaypoints();
     }).catch((e) => {
       wx.hideLoading();
       wx.showModal({
