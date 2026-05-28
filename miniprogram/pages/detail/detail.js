@@ -70,11 +70,12 @@ Page({
   },
 
   loadDetail() {
-    const db = app.getDb();
-    if (!db) return;
-    db.collection('waypoints').doc(this.data.waypointId).get().then((res) => {
-      const wp = res.data;
-      if (!wp) return;
+    wx.cloud.callFunction({
+      name: 'waypointFunctions',
+      data: { action: 'getWaypointDetail', waypointId: this.data.waypointId }
+    }).then(({ result }) => {
+      if (!result.success || !result.data) return;
+      const wp = result.data;
       const loc = wp.location || {};
       const lat = loc.latitude || (loc.coordinates && loc.coordinates[1]) || 0;
       const lng = loc.longitude || (loc.coordinates && loc.coordinates[0]) || 0;
@@ -84,8 +85,9 @@ Page({
       const cmap = {}; cats.forEach(c => cmap[c] = true);
       const tags = wp.tags || [];
       const tmap = {}; tags.forEach(t => tmap[t] = true);
+      const canManage = wp.canManage === true || wp.isAdmin === true || wp.isOwner === true;
       this.setData({
-        waypoint: wp, isOwner: true,
+        waypoint: wp, isOwner: canManage,
         detailMapMarkers: [{ id: 1, latitude: lat, longitude: lng, iconPath: '', width: 1, height: 1,
           label: { content: wp.name, color: '#4A3A35', fontSize: 14, bgColor: '#FFFDF7', borderRadius: 8, padding: 6, display: 'ALWAYS' }
         }],
@@ -94,6 +96,7 @@ Page({
           latitude: lat || null, longitude: lng || null,
           address: wp.address || '', notes: wp.notes || '',
           tags: tags, tagSelectedMap: tmap, rating: wp.rating || 0, images: wp.images || [],
+          visibility: wp.visibility || 'private',
         },
       });
       wx.setNavigationBarTitle({ title: wp.name || '传送点' });
@@ -101,7 +104,10 @@ Page({
   },
 
   onBackToHome() { wx.switchTab({ url: '/pages/home/home' }); },
-  onEdit() { this.setData({ mode: 'edit' }); },
+  onEdit() {
+    if (!this.data.isOwner) return wx.showToast({ title: '只能编辑自己的传送点', icon: 'none' });
+    this.setData({ mode: 'edit' });
+  },
   onCancel() {
     if (this.data.mode === 'add') wx.navigateBack();
     else { this.setData({ mode: 'view' }); this.loadDetail(); }
@@ -230,6 +236,7 @@ Page({
       latitude: form.latitude, longitude: form.longitude,
       address: form.address, notes: form.notes, tags: form.tags,
       rating: Number(form.rating) || 0, images: form.images,
+      visibility: form.visibility || 'private',
     };
     if (mode !== 'add') payload.waypointId = waypointId;
 
@@ -241,6 +248,7 @@ Page({
       let chg = false;
       form.categories.forEach(c => { if (!BASE.includes(c) && !stored.includes(c)) { stored.push(c); chg = true; } });
       if (chg) wx.setStorageSync('customCategories', stored);
+      wx.setStorageSync('squareNeedsRefreshAt', Date.now());
       this.setData({ submitting: false });
       wx.showToast({ title: mode === 'add' ? '传送点已激活!' : '已更新!', icon: 'success' });
       if (mode === 'add') wx.switchTab({ url: '/pages/home/home' });
@@ -253,6 +261,7 @@ Page({
 
   // Delete (走云函数绕过安全规则)
   onDelete() {
+    if (!this.data.isOwner) return wx.showToast({ title: '只能删除自己的传送点', icon: 'none' });
     wx.showModal({
       title: '确认删除', content: '删除后无法恢复', confirmColor: '#FF6B6B',
       success: (res) => {
@@ -275,6 +284,26 @@ Page({
         });
       },
     });
+  },
+
+  onToggleVisibility() {
+    const vis = this.data.form.visibility === 'public' ? 'private' : 'public';
+    this.setData({ 'form.visibility': vis });
+  },
+
+  onTogglePublish() {
+    if (!this.data.isOwner) return wx.showToast({ title: '只能操作自己的传送点', icon: 'none' });
+    const wp = this.data.waypoint;
+    const newVis = wp.visibility === 'public' ? 'private' : 'public';
+    wx.showLoading({ title: newVis === 'public' ? '发布中...' : '取消发布...' });
+    wx.cloud.callFunction({
+      name: 'waypointFunctions',
+      data: { action: 'togglePublish', waypointId: wp._id, visibility: newVis }
+    }).then(({ result }) => {
+      wx.hideLoading();
+      if (result.success) { wx.setStorageSync('squareNeedsRefreshAt', Date.now()); wx.showToast({ title: newVis === 'public' ? '已发布' : '已取消', icon: 'success' }); this.loadDetail(); }
+      else { wx.showToast({ title: result.errMsg || '操作失败', icon: 'none' }); }
+    }).catch(() => { wx.hideLoading(); wx.showToast({ title: '操作失败', icon: 'none' }); });
   },
 
   // Image preview

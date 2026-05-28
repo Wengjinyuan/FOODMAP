@@ -57,7 +57,8 @@
     <!-- Actions -->
     <view class="action-bar">
       <button class="nav-btn" bindtap="onNavigate">⚡ 开始传送</button>
-      <button class="edit-btn" bindtap="onEdit">✏️ 编辑</button>
+      <button wx:if="{{isOwner}}" class="edit-btn" bindtap="onEdit">✏️ 编辑</button>
+      <view wx:else style="flex:1;"></view>
     </view>
   </block>
 
@@ -115,6 +116,17 @@
             <text class="star {{index < form.rating ? 'active' : ''}}"
               wx:for="{{[1,2,3,4,5]}}" wx:key="*this"
               bindtap="onRatingTap" data-rating="{{item}}">★</text>
+          </view>
+        </view>
+
+        <!-- Publish toggle -->
+        <view class="field">
+          <text class="field-label">🌐 发布到广场</text>
+          <view class="toggle-row">
+            <text class="toggle-label">{{form.visibility === 'public' ? '已开启 — 所有人可见' : '已关闭 — 仅自己可见'}}</text>
+            <view class="toggle-switch {{form.visibility === 'public' ? 'on' : ''}}" catchtap="onToggleVisibility">
+              <view class="toggle-knob"></view>
+            </view>
           </view>
         </view>
 

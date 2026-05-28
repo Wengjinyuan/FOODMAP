@@ -1,5 +1,6 @@
 {
   "pages": [
+    "pages/square/square",
     "pages/home/home",
     "pages/detail/detail",
     "pages/mine/mine",
@@ -20,6 +21,7 @@
     "borderStyle": "white",
     "list": [
       { "pagePath": "pages/home/home", "text": "地图" },
+      { "pagePath": "pages/square/square", "text": "广场" },
       { "pagePath": "pages/mine/mine", "text": "我的" }
     ]
   },

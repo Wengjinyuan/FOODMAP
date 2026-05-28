@@ -1,0 +1,6 @@
+[mcp_servers.mineru-mcp]
+command = "npx"
+args = [
+    "-y",
+    "mineru-mcp",
+]

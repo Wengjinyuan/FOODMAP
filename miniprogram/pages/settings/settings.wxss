@@ -17,7 +17,7 @@
 .sbar-btn.add { background: #FFD23F; font-weight: 700; }
 
 /* ── 完全复制主页卡片样式 ── */
-.slist { flex: 1; height: 0; min-height: 0; padding: 4rpx 20rpx 20rpx; width: 100%; box-sizing: border-box; }
+.slist { flex: 1; height: 0; min-height: 0; padding: 4rpx 20rpx 120rpx; width: 100%; box-sizing: border-box; }
 .wp-card { display: flex; align-items: center; width: 100%; padding: 12rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
 .scheck { width: 40rpx; height: 40rpx; border-radius: 8rpx; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 22rpx; margin-right: 12rpx; flex-shrink: 0; color: #C4B5AF; }
 .scheck.on { background: #FFD23F; color: #4A3A35; }
@@ -28,6 +28,8 @@
 .card-row-s { display: flex; align-items: center; gap: 8rpx; margin-top: 4rpx; overflow: hidden; }
 .card-cat-s { font-size: 18rpx; padding: 2rpx 10rpx; color: #4A3A35; background: #FFD23F; border: 1.5rpx solid #4A3A35; border-radius: 4rpx; font-weight: 700; flex-shrink: 0; }
 .card-addr-s { font-size: 20rpx; color: #9E8A83; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+.publish-pill { margin-left: 10rpx; padding: 8rpx 12rpx; min-width: 72rpx; text-align: center; border: 2rpx solid #4A3A35; border-radius: 8rpx; background: #F4EFE3; color: #6B5B55; font-size: 20rpx; font-weight: 700; flex-shrink: 0; box-sizing: border-box; }
+.publish-pill.public { background: #DDF7E8; color: #16834B; }
 
 /* Tags/Categories 横排 */
 .stag-row { display: flex; flex-wrap: wrap; gap: 10rpx; padding: 4rpx 0; }

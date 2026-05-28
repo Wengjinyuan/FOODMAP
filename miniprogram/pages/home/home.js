@@ -105,20 +105,12 @@ Page({
   loadWaypoints() {
     this.setData({ loading: true });
     const { searchKeyword, activeCategories } = this.data;
-    const db = app.getDb();
-    if (!db) { this.setData({ loading: false }); return Promise.resolve(); }
-    const _ = db.command;
-
-    let query = db.collection('waypoints');
-    if (searchKeyword) {
-      query = query.where({ name: db.RegExp({ regexp: searchKeyword, options: 'i' }) });
-    } else if (activeCategories.length > 0) {
-      query = query.where(_.or([{ categories: _.in(activeCategories) }, { category: _.in(activeCategories) }]));
-    }
-    query = query.orderBy('create_time', 'desc').limit(50);
-
-    return query.get().then((res) => {
-      const waypoints = (res.data || []).map(wp => this.formatWaypoint(wp));
+    wx.cloud.callFunction({
+      name: 'waypointFunctions',
+      data: { action: 'getMyWaypoints', keyword: searchKeyword || '', categories: activeCategories }
+    }).then(({ result }) => {
+      if (!result.success) { this.setData({ waypoints: [], markers: [], loading: false }); return; }
+      const waypoints = (result.data || []).map(wp => this.formatWaypoint(wp));
       const markers = this.buildMarkers(waypoints);
       this.setData({ waypoints, markers, loading: false });
     }).catch(() => {

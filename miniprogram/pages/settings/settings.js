@@ -1,4 +1,3 @@
-const app = getApp();
 const BASE_CATS = ['美食','咖啡','风景','根据地','购物','娱乐','其他'];
 const DEFAULT_TAGS = ['好吃', '推荐', '回头客', '环境好', '性价比高', '难找', '深夜档'];
 
@@ -21,28 +20,38 @@ Page({
   onBack() { wx.navigateBack(); },
 
   loadAll() {
-    const db = app.getDb();
-    if (!db) return;
-    db.collection('waypoints').limit(1000).get().then((res) => {
+    // 先用 storage 兜底（即使 DB 挂了也有基础数据）
+    const storedCats = wx.getStorageSync('customCategories') || [];
+    const storedTags = wx.getStorageSync('customTags') || [];
+    const catMap = new Map();
+    const tagSet = new Set();
+    [...BASE_CATS, ...storedCats].forEach(c => catMap.set(c, 0));
+    [...DEFAULT_TAGS, ...storedTags].forEach(t => tagSet.add(t));
+
+    wx.cloud.callFunction({
+      name: 'waypointFunctions',
+      data: { action: 'getManageWaypoints', limit: 500 },
+    }).then(({ result }) => {
+      if (!result.success) throw new Error(result.errMsg || 'load failed');
       const emojiMap = { '美食':'🍜','咖啡':'☕','风景':'🏔️','根据地':'🏠','购物':'🛍️','娱乐':'🎮','其他':'📍' };
-      (res.data || []).forEach(wp => {
+      (result.data || []).forEach(wp => {
         const c0 = (wp.categories && wp.categories[0]) || wp.category || '其他';
         wp.categoryEmoji = emojiMap[c0] || '📍';
         wp.categories = wp.categories || (wp.category ? [wp.category] : ['其他']);
+        wp.visibility = wp.visibility === 'public' ? 'public' : 'private';
       });
-      const cards = res.data || [];
-      const tagSet = new Set();
-      const catMap = new Map();
-      const storedCats = wx.getStorageSync('customCategories') || [];
-      const storedTags = wx.getStorageSync('customTags') || [];
-      [...BASE_CATS, ...storedCats].forEach(c => catMap.set(c, 0));
-      [...DEFAULT_TAGS, ...storedTags].forEach(t => tagSet.add(t));
+      const cards = result.data || [];
       cards.forEach(w => {
         (w.tags||[]).forEach(t => tagSet.add(t));
         (w.categories||[]).forEach(c => catMap.set(c, (catMap.get(c)||0) + 1));
       });
-      const categories = [...catMap.entries()].map(([name, count]) => ({ name, count })).sort((a, b) => (a.name === '其他' ? 1 : b.name === '其他' ? -1 : 0));
+      const categories = [...catMap.entries()].map(([n, c]) => ({ name: n, count: c })).sort((a, b) => (a.name === '其他' ? 1 : b.name === '其他' ? -1 : 0));
       this.setData({ cards, categories, tags: [...tagSet], checked: {}, search: '' });
+      this.applyFilter();
+    }).catch(() => {
+      // DB 挂了用 storage 兜底
+      const cats = [...catMap.entries()].map(([n, c]) => ({ name: n, count: c })).sort((a, b) => (a.name === '其他' ? 1 : b.name === '其他' ? -1 : 0));
+      this.setData({ cards: [], categories: cats, tags: [...tagSet] });
       this.applyFilter();
     });
   },
@@ -71,9 +80,35 @@ Page({
     this.setData({ checked });
   },
 
+  updateCardVisibility(id, visibility) {
+    const cards = this.data.cards.map((card) => (
+      card._id === id ? { ...card, visibility } : card
+    ));
+    this.setData({ cards }, () => this.applyFilter());
+  },
+
+  togglePublish(e) {
+    const id = e.currentTarget.dataset.id;
+    const current = e.currentTarget.dataset.visibility;
+    const visibility = current === 'public' ? 'private' : 'public';
+    wx.showLoading({ title: visibility === 'public' ? '公开中...' : '设为私密...' });
+    wx.cloud.callFunction({
+      name: 'waypointFunctions',
+      data: { action: 'togglePublish', waypointId: id, visibility },
+    }).then(({ result }) => {
+      wx.hideLoading();
+      if (!result.success) return wx.showToast({ title: result.errMsg || '操作失败', icon: 'none' });
+      const savedVisibility = (result.data && result.data.visibility) || visibility;
+      this.updateCardVisibility(id, savedVisibility);
+      wx.setStorageSync('squareNeedsRefreshAt', Date.now());
+      wx.showToast({ title: savedVisibility === 'public' ? '已公开' : '已私密', icon: 'success' });
+    }).catch(() => {
+      wx.hideLoading();
+      wx.showToast({ title: '操作失败', icon: 'none' });
+    });
+  },
+
   batchDelete() {
-    const db = app.getDb();
-    if (!db) return;
     const checkedKeys = Object.entries(this.data.checked).filter(([,v])=>v).map(([k])=>k);
     if (checkedKeys.length === 0) return wx.showToast({ title: '请先勾选', icon: 'none' });
     wx.showModal({

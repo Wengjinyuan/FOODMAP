@@ -19,7 +19,7 @@
   </view>
 
   <!-- Cards -->
-  <scroll-view class="slist" wx:if="{{tab === 'cards'}}" scroll-y enhanced show-scrollbar="{{false}}">
+  <scroll-view class="slist" wx:if="{{tab === 'cards'}}" scroll-y show-scrollbar="{{false}}">
     <view class="wp-card" wx:for="{{filteredCards}}" wx:key="_id" catchtap="toggleCheck" data-key="{{item._id}}">
       <view class="scheck {{checked[item._id] ? 'on' : ''}}">{{checked[item._id] ? '☑' : '☐'}}</view>
       <view class="card-thumb-s">
@@ -33,12 +33,18 @@
           <text class="card-addr-s">{{item.address || item.notes || ''}}</text>
         </view>
       </view>
+      <view class="publish-pill {{item.visibility === 'public' ? 'public' : ''}}"
+        catchtap="togglePublish"
+        data-id="{{item._id}}"
+        data-visibility="{{item.visibility || 'private'}}">
+        {{item.visibility === 'public' ? '公开' : '私密'}}
+      </view>
     </view>
     <view class="empty-tip" wx:if="{{cards.length===0}}">暂无卡片</view>
   </scroll-view>
 
   <!-- Tags -->
-  <scroll-view class="slist" wx:if="{{tab === 'tags'}}" scroll-y enhanced show-scrollbar="{{false}}">
+  <scroll-view class="slist" wx:if="{{tab === 'tags'}}" scroll-y show-scrollbar="{{false}}">
     <view class="stag-row">
       <view class="stag-item {{checked[item] ? 'on' : ''}}" wx:for="{{filteredTags}}" wx:key="*this"
         catchtap="toggleCheck" data-key="{{item}}">
@@ -52,7 +58,7 @@
   </scroll-view>
 
   <!-- Categories -->
-  <scroll-view class="slist" wx:if="{{tab === 'categories'}}" scroll-y enhanced show-scrollbar="{{false}}">
+  <scroll-view class="slist" wx:if="{{tab === 'categories'}}" scroll-y show-scrollbar="{{false}}">
     <view class="stag-row">
       <view class="stag-item {{checked[item.name] ? 'on' : ''}}" wx:for="{{filteredCategories}}" wx:key="name"
         catchtap="toggleCheck" data-key="{{item.name}}">

@@ -52,7 +52,7 @@ page { background: #FFFDF7; height: 100vh; overflow: hidden; }
 .cat-chip.active { background: #FFD23F; color: #4A3A35; font-weight: 700; }
 
 /* ── SINGLE COLUMN CARD ── */
-.card-scroll { padding: 4rpx 16rpx 16rpx; width: 100%; box-sizing: border-box; }
+.card-scroll { height: 1100rpx; padding: 4rpx 16rpx 16rpx; width: 100%; box-sizing: border-box; }
 .wp-card { display: flex; align-items: center; width: 100%; padding: 12rpx; margin-bottom: 6rpx; background: #FFF; border: 2rpx solid #4A3A35; border-radius: 12rpx; box-shadow: 2rpx 2rpx 0 #4A3A35; box-sizing: border-box; }
 .card-thumb { width: 96rpx; height: 96rpx; border-radius: 12rpx; flex-shrink: 0; background: #FFF9E6; border: 2rpx solid #4A3A35; display: flex; align-items: center; justify-content: center; font-size: 36rpx; position: relative; overflow: hidden; }
 .thumb-img { width: 100%; height: 100%; border-radius: 10rpx; }
